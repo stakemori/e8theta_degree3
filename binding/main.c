@@ -41,12 +41,12 @@ int num_of_vectors[100] = {1, 240, 2160, 6720, 17520, 30240, 60480, 82560, 14040
                            200202240, 224259840, 207446400, 251657280, 219041760,
                            254864880, 241997760};
 
-int cached_vectors[max_diag_nm + 1][max_diag_size][8];
+int cached_vectors[MAX_NORM + 1][MAX_NM_OF_VECTORS][8];
 
 int main() {
-  int cached_idx[max_diag_nm + 1] = {0};
+  int cached_idx[MAX_NORM + 1] = {0};
 
-  double m = sqrt(2 * max_diag_nm);
+  double m = sqrt(2 * MAX_NORM);
   int _s0_end = ceil(2 * m + 1);
   for (int s0 = floor(-2*m); s0 < _s0_end; s0++)
     {
@@ -71,7 +71,7 @@ int main() {
                                 {
                                   int v[8] = {s0, s1, s2, s3, s4, s5, s6, s7};
                                   int _nm = norm(v)/2;
-                                  if (_nm < max_diag_nm + 1)
+                                  if (_nm < MAX_NORM + 1)
                                     {
                                       int idx = ++cached_idx[_nm];
                                       for (int i = 0; i < 8; i++)
@@ -88,7 +88,7 @@ int main() {
         }
     }
   int bl = 1;
-  for (int i = 0; i < max_diag_nm + 1; i++)
+  for (int i = 0; i < MAX_NORM + 1; i++)
     {
       bl = bl && cached_idx[i] == num_of_vectors[i];
     }
