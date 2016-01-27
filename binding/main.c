@@ -51,47 +51,49 @@ void _cache_vectors()
 
   double m = sqrt(2 * MAX_NORM);
   int _s0_end = ceil(2 * m + 1);
-  for (int s0 = floor(-2*m); s0 < _s0_end; s0++) {
-    double ds0 = s0;
-    int beg = floor(-m - ds0/2);
-    int end = ceil(m - ds0/2 + 1);
-    for (int s1 = beg; s1 < end; s1++)
-      {
-        for (int s2 = beg; s2 < end; s2++)
-          {
-            for (int s3 = beg; s3 < end; s3++)
-              {
-                for (int s4 = beg; s4 < end; s4++)
-                  {
-                    for (int s5 = beg; s5 < end; s5++)
-                      {
-                        for (int s6 = beg; s6 < end; s6++)
-                          {
-                            double _centr = (2 * (s1 + s2 + s3 + s4 + s5 + s6) + ds0)/4;
-                            int _end = ceil(m/2 - _centr + 1);
-                            for (int s7 = floor(-m/2 - _centr); s7 < _end; s7++)
-                              {
-                                int v[8] = {s0, s1, s2, s3, s4, s5, s6, s7};
-                                int _nm = norm(v)/2;
-                                if (_nm < MAX_NORM + 1)
-                                  {
-                                    int idx = ++cached_idx[_nm];
-                                    for (int i = 0; i < 8; i++)
-                                      {
-                                        cached_vectors[_nm][idx][i] = v[i];
-                                      }
-                                  }
-                              }
-                          }
-                      }
-                  }
-              }
-          }
-      }
-  }
+  for (int s0 = floor(-2*m); s0 < _s0_end; s0++)
+    {
+      double ds0 = s0;
+      int beg = floor(-m - ds0/2);
+      int end = ceil(m - ds0/2 + 1);
+      for (int s1 = beg; s1 < end; s1++)
+        {
+          for (int s2 = beg; s2 < end; s2++)
+            {
+              for (int s3 = beg; s3 < end; s3++)
+                {
+                  for (int s4 = beg; s4 < end; s4++)
+                    {
+                      for (int s5 = beg; s5 < end; s5++)
+                        {
+                          for (int s6 = beg; s6 < end; s6++)
+                            {
+                              double _centr = (2 * (s1 + s2 + s3 + s4 + s5 + s6) + ds0)/4;
+                              int _end = ceil(m/2 - _centr + 1);
+                              for (int s7 = floor(-m/2 - _centr); s7 < _end; s7++)
+                                {
+                                  int v[8] = {s0, s1, s2, s3, s4, s5, s6, s7};
+                                  int _nm = norm(v)/2;
+                                  if (_nm < MAX_NORM + 1)
+                                    {
+                                      int idx = ++cached_idx[_nm];
+                                      for (int i = 0; i < 8; i++)
+                                        {
+                                          cached_vectors[_nm][idx][i] = v[i];
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
 }
 
-int main() {
+int main()
+{
   _cache_vectors();
   int bl = 1;
   for (int i = 0; i < MAX_NORM + 1; i++)
