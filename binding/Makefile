@@ -1,6 +1,14 @@
+DEBUGOPT = -Wall -g -O0
+FLINTOPT = -lm -lflint -lmpfr -lgmp -lpthread -I /usr/local/include/flint/
+OUT = main
+TARGET = main.c
+CC = gcc
 compile:
-	gcc main.c  -lflint -lmpfr -lgmp -lpthread -I /usr/local/include/flint/ -o main
-clean:
-	rm -f main
+	$(CC) $(TARGET) -o $(OUT) $(FLINTOPT) -O3
 
-.PHONY: compile clean
+debug:
+	$(CC) $(TARGET) -o $(OUT) $(DEBUGOPT) $(FLINTOPT)
+clean:
+	rm -f OUT
+
+.PHONY: compile clean debug
