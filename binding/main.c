@@ -2,7 +2,8 @@
 #include <math.h>
 #include "e8theta.h"
 
-static inline int inner_prod(int s[8], int t[8]) {
+static inline int inner_prod(int s[8], int t[8])
+{
   return ((2*s[0] + s[1] + s[2] + s[3] + s[4] + s[5] + s[6] + s[7]) * t[0] +
           (s[0] + 2*s[1] + s[2] + s[3] + s[4] + s[5] + s[6] + 2*s[7]) * t[1] +
           (s[0] + s[1] + 2*s[2] + s[3] + s[4] + s[5] + s[6] + 2*s[7]) * t[2] +
@@ -15,7 +16,8 @@ static inline int inner_prod(int s[8], int t[8]) {
 
 
 
-static inline int norm(int s[8]) {
+static inline int norm(int s[8])
+{
   return ((2*s[0] + s[1] + s[2] + s[3] + s[4] + s[5] + s[6] + s[7])*s[0] +
           (s[0] + 2*s[1] + s[2] + s[3] + s[4] + s[5] + s[6] + 2*s[7])*s[1] +
           (s[0] + s[1] + 2*s[2] + s[3] + s[4] + s[5] + s[6] + 2*s[7])*s[2] +
@@ -44,7 +46,8 @@ int num_of_vectors[100] = {1, 240, 2160, 6720, 17520, 30240, 60480, 82560, 14040
 int cached_vectors[MAX_NORM + 1][MAX_NM_OF_VECTORS][8];
 int cached_idx[MAX_NORM + 1] = {0};
 
-void _cache_vectors() {
+void _cache_vectors()
+{
 
   double m = sqrt(2 * MAX_NORM);
   int _s0_end = ceil(2 * m + 1);
