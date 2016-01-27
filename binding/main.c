@@ -1,8 +1,11 @@
 #include <fmpz.h>
 #include <math.h>
 #include "e8theta.h"
+int inner_prod(int[8], int[8]);
+int norm(int[8]);
+void _cache_vectors(void);
 
-static inline int inner_prod(int s[8], int t[8])
+inline int inner_prod(int s[8], int t[8])
 {
   return ((2*s[0] + s[1] + s[2] + s[3] + s[4] + s[5] + s[6] + s[7]) * t[0] +
           (s[0] + 2*s[1] + s[2] + s[3] + s[4] + s[5] + s[6] + 2*s[7]) * t[1] +
@@ -16,7 +19,7 @@ static inline int inner_prod(int s[8], int t[8])
 
 
 
-static inline int norm(int s[8])
+inline int norm(int s[8])
 {
   return ((2*s[0] + s[1] + s[2] + s[3] + s[4] + s[5] + s[6] + s[7])*s[0] +
           (s[0] + 2*s[1] + s[2] + s[3] + s[4] + s[5] + s[6] + 2*s[7])*s[1] +
@@ -53,7 +56,7 @@ int num_of_vectors[100] =
 int cached_vectors[MAX_NORM + 1][MAX_NM_OF_VECTORS][8];
 int cached_idx[MAX_NORM + 1] = {0};
 
-void _cache_vectors()
+void _cache_vectors(void)
 {
 
   double m = sqrt(2 * MAX_NORM);
@@ -99,7 +102,7 @@ void _cache_vectors()
     }
 }
 
-int main()
+int main(void)
 {
   _cache_vectors();
   int bl = 1;
