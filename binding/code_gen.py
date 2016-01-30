@@ -2,16 +2,6 @@
 from sage.all import PolynomialRing, mul, ZZ, uniq
 
 
-class Add(object):
-
-    def __init__(self, l, r):
-        self.l = l
-        self.r = r
-
-    def __repr__(self):
-        return "Add(%s, %s)" % (self.l, self.r)
-
-
 def zero_z(a):
     return "fmpz_zero(%s)" % a
 
