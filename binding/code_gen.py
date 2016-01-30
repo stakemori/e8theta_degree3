@@ -258,14 +258,6 @@ def _expr_to_pol(expr):
         return expr
 
 
-# def pol_to_fmpz_code_and_result_var_horner(pl, name):
-#     n = pl.parent().ngens()
-#     vrs = [name + str(a) for a in range(n)]
-#     e = _to_expr(pl)
-#     codes, v, vrs = e.codes(vrs)
-#     return ("\n".join(a + ";" for a in codes), v, uniq(vrs))
-
-
 def pol_to_fmpz_code_and_result_var(pl, name, res_var_name, algorithm=None, sep="\n"):
     if algorithm == "horner":
         n = pl.parent().ngens()
