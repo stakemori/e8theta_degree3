@@ -104,20 +104,526 @@ void _cache_vectors(void)
 
 int main(void)
 {
+  fmpz_t s0; fmpz_t s1; fmpz_t s2; fmpz_t s3; fmpz_t s4; fmpz_t s5; fmpz_t s6; fmpz_t s7;
+  fmpz_t t0; fmpz_t t1; fmpz_t t2; fmpz_t t3; fmpz_t t4; fmpz_t t5; fmpz_t t6; fmpz_t t7;
+  fmpz_t u0; fmpz_t u1; fmpz_t u2; fmpz_t u3; fmpz_t u4; fmpz_t u5; fmpz_t u6; fmpz_t u7;
+  fmpz_t rl_pt; fmpz_t im_pt; fmpz_t res;
+  fmpz_t a0; fmpz_t a1; fmpz_t a2; fmpz_t a3; fmpz_t a4; fmpz_t a5; fmpz_t a6; fmpz_t a7; fmpz_t a8;
+  fmpz_t tmp;
+
+  fmpz_init(s0); fmpz_init(s1); fmpz_init(s2); fmpz_init(s3); fmpz_init(s4); fmpz_init(s5); fmpz_init(s6); fmpz_init(s7);
+  fmpz_init(t0); fmpz_init(t1); fmpz_init(t2); fmpz_init(t3); fmpz_init(t4); fmpz_init(t5); fmpz_init(t6); fmpz_init(t7);
+  fmpz_init(u0); fmpz_init(u1); fmpz_init(u2); fmpz_init(u3); fmpz_init(u4); fmpz_init(u5); fmpz_init(u6); fmpz_init(u7);
+  fmpz_init(rl_pt); fmpz_init(im_pt); fmpz_init(res);
+  fmpz_init(a0); fmpz_init(a1); fmpz_init(a2); fmpz_init(a3); fmpz_init(a4); fmpz_init(a5); fmpz_init(a6); fmpz_init(a7); fmpz_init(a8);
+  fmpz_init(tmp);
+
+  fmpz_zero(res);
+
   _cache_vectors();
-  int bl = 1;
-  for (int i = 0; i < MAX_NORM + 1; i++)
+
+  printf("computation for cached vectors done.\n");
+
+  int vs1[MAX_NM_OF_VECTORS][8];
+  int vs2[MAX_NM_OF_VECTORS][8];
+  int vs3[MAX_NM_OF_VECTORS][8];
+
+  for (int i = 0; i < num_of_vectors[1]; i++)
     {
-      bl = bl && cached_idx[i] == num_of_vectors[i];
+      for (int j = 0; j < 8; j++)
+        {
+          vs1[i][j] = cached_vectors[1][i][j];
+        }
     }
-  if (bl)
+
+  for (int i = 0; i < num_of_vectors[2]; i++)
     {
-      printf("true");
+      for (int j = 0; j < 8; j++)
+        {
+          vs2[i][j] = cached_vectors[2][i][j];
+        }
     }
-  else
+
+  for (int i = 0; i < num_of_vectors[3]; i++)
     {
-      printf("false");
+      for (int j = 0; j < 8; j++)
+        {
+          vs3[i][j] = cached_vectors[3][i][j];
+        }
     }
+
+  int nv1 = num_of_vectors[1];
+  for (int i = 0; i < nv1; i++)
+    {
+      for (int j = 0; j < nv1; j++)
+        {
+          for (int k = 0; k < nv1; k++)
+            {
+              if (inner_prod(vs1[i], vs1[j]) == 0)
+                {
+                  if (inner_prod(vs1[i], vs1[k]) == 0)
+                    {
+                      if (inner_prod(vs1[j], vs1[k]) == 0)
+                        {
+                          fmpz_set_si(s0, vs1[i][0]);
+                          fmpz_set_si(s1, vs1[i][1]);
+                          fmpz_set_si(s2, vs1[i][2]);
+                          fmpz_set_si(s3, vs1[i][3]);
+                          fmpz_set_si(s4, vs1[i][4]);
+                          fmpz_set_si(s5, vs1[i][5]);
+                          fmpz_set_si(s6, vs1[i][6]);
+                          fmpz_set_si(s7, vs1[i][7]);
+                          fmpz_set_si(t0, vs1[j][0]);
+                          fmpz_set_si(t1, vs1[j][1]);
+                          fmpz_set_si(t2, vs1[j][2]);
+                          fmpz_set_si(t3, vs1[j][3]);
+                          fmpz_set_si(t4, vs1[j][4]);
+                          fmpz_set_si(t5, vs1[j][5]);
+                          fmpz_set_si(t6, vs1[j][6]);
+                          fmpz_set_si(t7, vs1[j][7]);
+                          fmpz_set_si(u0, vs1[k][0]);
+                          fmpz_set_si(u1, vs1[k][1]);
+                          fmpz_set_si(u2, vs1[k][2]);
+                          fmpz_set_si(u3, vs1[k][3]);
+                          fmpz_set_si(u4, vs1[k][4]);
+                          fmpz_set_si(u5, vs1[k][5]);
+                          fmpz_set_si(u6, vs1[k][6]);
+                          fmpz_set_si(u7, vs1[k][7]);
+
+                          /* Compute rl_pt */
+                          fmpz_zero(a0);
+                          fmpz_sub(a0, a0, s0);
+                          fmpz_zero(a1);
+                          fmpz_add(a1, a1, s1);
+                          fmpz_zero(a2);
+                          fmpz_sub(a2, a2, s3);
+                          fmpz_zero(a3);
+                          fmpz_add(a3, a3, s4);
+                          fmpz_mul(a3, a3, t0);
+                          fmpz_addmul(a3, a2, t1);
+                          fmpz_addmul(a3, a1, t3);
+                          fmpz_addmul(a3, a0, t4);
+                          fmpz_zero(a0);
+                          fmpz_add(a0, a0, s0);
+                          fmpz_zero(a1);
+                          fmpz_sub(a1, a1, s2);
+                          fmpz_zero(a2);
+                          fmpz_add(a2, a2, s3);
+                          fmpz_zero(a4);
+                          fmpz_sub(a4, a4, s5);
+                          fmpz_mul(a4, a4, t0);
+                          fmpz_addmul(a4, a2, t2);
+                          fmpz_addmul(a4, a1, t3);
+                          fmpz_addmul(a4, a0, t5);
+                          fmpz_zero(a0);
+                          fmpz_sub(a0, a0, s1);
+                          fmpz_zero(a1);
+                          fmpz_add(a1, a1, s2);
+                          fmpz_zero(a2);
+                          fmpz_sub(a2, a2, s4);
+                          fmpz_zero(a5);
+                          fmpz_add(a5, a5, s5);
+                          fmpz_mul(a5, a5, t1);
+                          fmpz_addmul(a5, a2, t2);
+                          fmpz_addmul(a5, a1, t4);
+                          fmpz_addmul(a5, a0, t5);
+                          fmpz_zero(a0);
+                          fmpz_sub(a0, a0, s3);
+                          fmpz_zero(a1);
+                          fmpz_add(a1, a1, s4);
+                          fmpz_zero(a2);
+                          fmpz_add(a2, a2, s0);
+                          fmpz_zero(a6);
+                          fmpz_sub(a6, a6, s1);
+                          fmpz_mul(a6, a6, t0);
+                          fmpz_addmul(a6, a2, t1);
+                          fmpz_addmul(a6, a1, t3);
+                          fmpz_addmul(a6, a0, t4);
+                          fmpz_zero(a0);
+                          fmpz_add(a0, a0, s3);
+                          fmpz_zero(a1);
+                          fmpz_sub(a1, a1, s5);
+                          fmpz_zero(a2);
+                          fmpz_sub(a2, a2, s0);
+                          fmpz_zero(a7);
+                          fmpz_add(a7, a7, s2);
+                          fmpz_mul(a7, a7, t0);
+                          fmpz_addmul(a7, a2, t2);
+                          fmpz_addmul(a7, a1, t3);
+                          fmpz_addmul(a7, a0, t5);
+                          fmpz_zero(a0);
+                          fmpz_sub(a0, a0, s4);
+                          fmpz_zero(a1);
+                          fmpz_add(a1, a1, s5);
+                          fmpz_zero(a2);
+                          fmpz_add(a2, a2, s1);
+                          fmpz_zero(a8);
+                          fmpz_sub(a8, a8, s2);
+                          fmpz_mul(a8, a8, t1);
+                          fmpz_addmul(a8, a2, t2);
+                          fmpz_addmul(a8, a1, t4);
+                          fmpz_addmul(a8, a0, t5);
+                          fmpz_mul(a8, a8, u0);
+                          fmpz_addmul(a8, a7, u1);
+                          fmpz_addmul(a8, a6, u2);
+                          fmpz_addmul(a8, a5, u3);
+                          fmpz_addmul(a8, a4, u4);
+                          fmpz_addmul(a8, a3, u5);
+                          fmpz_set(rl_pt, a8);
+
+                          /* Compute im_pt */
+                          fmpz_zero(a0);
+                          fmpz_sub(a0, a0, s3);
+                          fmpz_zero(a1);
+                          fmpz_add(a1, a1, s4);
+                          fmpz_zero(a2);
+                          fmpz_add(a2, a2, s0);
+                          fmpz_zero(a3);
+                          fmpz_sub(a3, a3, s1);
+                          fmpz_mul(a3, a3, t0);
+                          fmpz_addmul(a3, a2, t1);
+                          fmpz_addmul(a3, a1, t3);
+                          fmpz_addmul(a3, a0, t4);
+                          fmpz_zero(a0);
+                          fmpz_add(a0, a0, s3);
+                          fmpz_zero(a1);
+                          fmpz_sub(a1, a1, s5);
+                          fmpz_zero(a2);
+                          fmpz_sub(a2, a2, s0);
+                          fmpz_zero(a4);
+                          fmpz_add(a4, a4, s2);
+                          fmpz_mul(a4, a4, t0);
+                          fmpz_addmul(a4, a2, t2);
+                          fmpz_addmul(a4, a1, t3);
+                          fmpz_addmul(a4, a0, t5);
+                          fmpz_zero(a0);
+                          fmpz_sub(a0, a0, s4);
+                          fmpz_zero(a1);
+                          fmpz_add(a1, a1, s5);
+                          fmpz_zero(a2);
+                          fmpz_add(a2, a2, s1);
+                          fmpz_zero(a5);
+                          fmpz_sub(a5, a5, s2);
+                          fmpz_mul(a5, a5, t1);
+                          fmpz_addmul(a5, a2, t2);
+                          fmpz_addmul(a5, a1, t4);
+                          fmpz_addmul(a5, a0, t5);
+                          fmpz_zero(a0);
+                          fmpz_add(a0, a0, s0);
+                          fmpz_zero(a1);
+                          fmpz_sub(a1, a1, s1);
+                          fmpz_zero(a2);
+                          fmpz_add(a2, a2, s3);
+                          fmpz_zero(a6);
+                          fmpz_sub(a6, a6, s4);
+                          fmpz_mul(a6, a6, t0);
+                          fmpz_addmul(a6, a2, t1);
+                          fmpz_addmul(a6, a1, t3);
+                          fmpz_addmul(a6, a0, t4);
+                          fmpz_zero(a0);
+                          fmpz_sub(a0, a0, s0);
+                          fmpz_zero(a1);
+                          fmpz_add(a1, a1, s2);
+                          fmpz_zero(a2);
+                          fmpz_sub(a2, a2, s3);
+                          fmpz_zero(a7);
+                          fmpz_add(a7, a7, s5);
+                          fmpz_mul(a7, a7, t0);
+                          fmpz_addmul(a7, a2, t2);
+                          fmpz_addmul(a7, a1, t3);
+                          fmpz_addmul(a7, a0, t5);
+                          fmpz_zero(a0);
+                          fmpz_add(a0, a0, s1);
+                          fmpz_zero(a1);
+                          fmpz_sub(a1, a1, s2);
+                          fmpz_zero(a2);
+                          fmpz_add(a2, a2, s4);
+                          fmpz_zero(a8);
+                          fmpz_sub(a8, a8, s5);
+                          fmpz_mul(a8, a8, t1);
+                          fmpz_addmul(a8, a2, t2);
+                          fmpz_addmul(a8, a1, t4);
+                          fmpz_addmul(a8, a0, t5);
+                          fmpz_mul(a8, a8, u0);
+                          fmpz_addmul(a8, a7, u1);
+                          fmpz_addmul(a8, a6, u2);
+                          fmpz_addmul(a8, a5, u3);
+                          fmpz_addmul(a8, a4, u4);
+                          fmpz_addmul(a8, a3, u5);
+                          fmpz_set(im_pt, a8);
+
+                          /* Computation of tmp = (rl_pt ** 8 - 28 * rl_pt ** 6 * im_pt ** 2 + 70 * rl_pt ** 4 * im_pt ** 4 - 28 * rl_pt ** 2 * im_pt ** 6 + im_pt ** 8)  */
+                          fmpz_zero(tmp);
+                          fmpz_pow_ui(a0, im_pt, 6);
+                          fmpz_pow_ui(a1, rl_pt, 2);
+                          fmpz_mul(a0, a0, a1);
+                          fmpz_submul_ui(tmp, a0, 28);
+                          fmpz_pow_ui(a0, rl_pt, 8);
+                          fmpz_add(tmp, tmp, a0);
+                          fmpz_pow_ui(a0, im_pt, 2);
+                          fmpz_pow_ui(a1, rl_pt, 6);
+                          fmpz_mul(a0, a0, a1);
+                          fmpz_submul_ui(tmp, a0, 28);
+                          fmpz_pow_ui(a0, im_pt, 4);
+                          fmpz_pow_ui(a1, rl_pt, 4);
+                          fmpz_mul(a0, a0, a1);
+                          fmpz_addmul_ui(tmp, a0, 70);
+                          fmpz_pow_ui(a0, im_pt, 8);
+                          fmpz_add(tmp, tmp, a0);
+
+                          fmpz_add(res, res, tmp);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+  fmpz_print(res);
+  printf("\n");
+
+  fmpz_zero(res);
+
+  for (int i = 0; i < nv1; i++)
+    {
+      for (int j = 0; j < nv1; j++)
+        {
+          for (int k = 0; k < nv1; k++)
+            {
+              if (inner_prod(vs1[i], vs1[j]) == 1)
+                {
+                  if (inner_prod(vs1[i], vs1[k]) == 1)
+                    {
+                      if (inner_prod(vs1[j], vs1[k]) == 1)
+                        {
+                          fmpz_set_si(s0, vs1[i][0]);
+                          fmpz_set_si(s1, vs1[i][1]);
+                          fmpz_set_si(s2, vs1[i][2]);
+                          fmpz_set_si(s3, vs1[i][3]);
+                          fmpz_set_si(s4, vs1[i][4]);
+                          fmpz_set_si(s5, vs1[i][5]);
+                          fmpz_set_si(s6, vs1[i][6]);
+                          fmpz_set_si(s7, vs1[i][7]);
+
+                          fmpz_set_si(t0, vs1[j][0]);
+                          fmpz_set_si(t1, vs1[j][1]);
+                          fmpz_set_si(t2, vs1[j][2]);
+                          fmpz_set_si(t3, vs1[j][3]);
+                          fmpz_set_si(t4, vs1[j][4]);
+                          fmpz_set_si(t5, vs1[j][5]);
+                          fmpz_set_si(t6, vs1[j][6]);
+                          fmpz_set_si(t7, vs1[j][7]);
+
+                          fmpz_set_si(u0, vs1[k][0]);
+                          fmpz_set_si(u1, vs1[k][1]);
+                          fmpz_set_si(u2, vs1[k][2]);
+                          fmpz_set_si(u3, vs1[k][3]);
+                          fmpz_set_si(u4, vs1[k][4]);
+                          fmpz_set_si(u5, vs1[k][5]);
+                          fmpz_set_si(u6, vs1[k][6]);
+                          fmpz_set_si(u7, vs1[k][7]);
+
+                          /* Compute rl_pt */
+                          fmpz_zero(a0);
+                          fmpz_sub(a0, a0, s0);
+                          fmpz_zero(a1);
+                          fmpz_add(a1, a1, s1);
+                          fmpz_zero(a2);
+                          fmpz_sub(a2, a2, s3);
+                          fmpz_zero(a3);
+                          fmpz_add(a3, a3, s4);
+                          fmpz_mul(a3, a3, t0);
+                          fmpz_addmul(a3, a2, t1);
+                          fmpz_addmul(a3, a1, t3);
+                          fmpz_addmul(a3, a0, t4);
+                          fmpz_zero(a0);
+                          fmpz_add(a0, a0, s0);
+                          fmpz_zero(a1);
+                          fmpz_sub(a1, a1, s2);
+                          fmpz_zero(a2);
+                          fmpz_add(a2, a2, s3);
+                          fmpz_zero(a4);
+                          fmpz_sub(a4, a4, s5);
+                          fmpz_mul(a4, a4, t0);
+                          fmpz_addmul(a4, a2, t2);
+                          fmpz_addmul(a4, a1, t3);
+                          fmpz_addmul(a4, a0, t5);
+                          fmpz_zero(a0);
+                          fmpz_sub(a0, a0, s1);
+                          fmpz_zero(a1);
+                          fmpz_add(a1, a1, s2);
+                          fmpz_zero(a2);
+                          fmpz_sub(a2, a2, s4);
+                          fmpz_zero(a5);
+                          fmpz_add(a5, a5, s5);
+                          fmpz_mul(a5, a5, t1);
+                          fmpz_addmul(a5, a2, t2);
+                          fmpz_addmul(a5, a1, t4);
+                          fmpz_addmul(a5, a0, t5);
+                          fmpz_zero(a0);
+                          fmpz_sub(a0, a0, s3);
+                          fmpz_zero(a1);
+                          fmpz_add(a1, a1, s4);
+                          fmpz_zero(a2);
+                          fmpz_add(a2, a2, s0);
+                          fmpz_zero(a6);
+                          fmpz_sub(a6, a6, s1);
+                          fmpz_mul(a6, a6, t0);
+                          fmpz_addmul(a6, a2, t1);
+                          fmpz_addmul(a6, a1, t3);
+                          fmpz_addmul(a6, a0, t4);
+                          fmpz_zero(a0);
+                          fmpz_add(a0, a0, s3);
+                          fmpz_zero(a1);
+                          fmpz_sub(a1, a1, s5);
+                          fmpz_zero(a2);
+                          fmpz_sub(a2, a2, s0);
+                          fmpz_zero(a7);
+                          fmpz_add(a7, a7, s2);
+                          fmpz_mul(a7, a7, t0);
+                          fmpz_addmul(a7, a2, t2);
+                          fmpz_addmul(a7, a1, t3);
+                          fmpz_addmul(a7, a0, t5);
+                          fmpz_zero(a0);
+                          fmpz_sub(a0, a0, s4);
+                          fmpz_zero(a1);
+                          fmpz_add(a1, a1, s5);
+                          fmpz_zero(a2);
+                          fmpz_add(a2, a2, s1);
+                          fmpz_zero(a8);
+                          fmpz_sub(a8, a8, s2);
+                          fmpz_mul(a8, a8, t1);
+                          fmpz_addmul(a8, a2, t2);
+                          fmpz_addmul(a8, a1, t4);
+                          fmpz_addmul(a8, a0, t5);
+                          fmpz_mul(a8, a8, u0);
+                          fmpz_addmul(a8, a7, u1);
+                          fmpz_addmul(a8, a6, u2);
+                          fmpz_addmul(a8, a5, u3);
+                          fmpz_addmul(a8, a4, u4);
+                          fmpz_addmul(a8, a3, u5);
+                          fmpz_set(rl_pt, a8);
+
+                          /* Compute im_pt */
+                          fmpz_zero(a0);
+                          fmpz_sub(a0, a0, s3);
+                          fmpz_zero(a1);
+                          fmpz_add(a1, a1, s4);
+                          fmpz_zero(a2);
+                          fmpz_add(a2, a2, s0);
+                          fmpz_zero(a3);
+                          fmpz_sub(a3, a3, s1);
+                          fmpz_mul(a3, a3, t0);
+                          fmpz_addmul(a3, a2, t1);
+                          fmpz_addmul(a3, a1, t3);
+                          fmpz_addmul(a3, a0, t4);
+                          fmpz_zero(a0);
+                          fmpz_add(a0, a0, s3);
+                          fmpz_zero(a1);
+                          fmpz_sub(a1, a1, s5);
+                          fmpz_zero(a2);
+                          fmpz_sub(a2, a2, s0);
+                          fmpz_zero(a4);
+                          fmpz_add(a4, a4, s2);
+                          fmpz_mul(a4, a4, t0);
+                          fmpz_addmul(a4, a2, t2);
+                          fmpz_addmul(a4, a1, t3);
+                          fmpz_addmul(a4, a0, t5);
+                          fmpz_zero(a0);
+                          fmpz_sub(a0, a0, s4);
+                          fmpz_zero(a1);
+                          fmpz_add(a1, a1, s5);
+                          fmpz_zero(a2);
+                          fmpz_add(a2, a2, s1);
+                          fmpz_zero(a5);
+                          fmpz_sub(a5, a5, s2);
+                          fmpz_mul(a5, a5, t1);
+                          fmpz_addmul(a5, a2, t2);
+                          fmpz_addmul(a5, a1, t4);
+                          fmpz_addmul(a5, a0, t5);
+                          fmpz_zero(a0);
+                          fmpz_add(a0, a0, s0);
+                          fmpz_zero(a1);
+                          fmpz_sub(a1, a1, s1);
+                          fmpz_zero(a2);
+                          fmpz_add(a2, a2, s3);
+                          fmpz_zero(a6);
+                          fmpz_sub(a6, a6, s4);
+                          fmpz_mul(a6, a6, t0);
+                          fmpz_addmul(a6, a2, t1);
+                          fmpz_addmul(a6, a1, t3);
+                          fmpz_addmul(a6, a0, t4);
+                          fmpz_zero(a0);
+                          fmpz_sub(a0, a0, s0);
+                          fmpz_zero(a1);
+                          fmpz_add(a1, a1, s2);
+                          fmpz_zero(a2);
+                          fmpz_sub(a2, a2, s3);
+                          fmpz_zero(a7);
+                          fmpz_add(a7, a7, s5);
+                          fmpz_mul(a7, a7, t0);
+                          fmpz_addmul(a7, a2, t2);
+                          fmpz_addmul(a7, a1, t3);
+                          fmpz_addmul(a7, a0, t5);
+                          fmpz_zero(a0);
+                          fmpz_add(a0, a0, s1);
+                          fmpz_zero(a1);
+                          fmpz_sub(a1, a1, s2);
+                          fmpz_zero(a2);
+                          fmpz_add(a2, a2, s4);
+                          fmpz_zero(a8);
+                          fmpz_sub(a8, a8, s5);
+                          fmpz_mul(a8, a8, t1);
+                          fmpz_addmul(a8, a2, t2);
+                          fmpz_addmul(a8, a1, t4);
+                          fmpz_addmul(a8, a0, t5);
+                          fmpz_mul(a8, a8, u0);
+                          fmpz_addmul(a8, a7, u1);
+                          fmpz_addmul(a8, a6, u2);
+                          fmpz_addmul(a8, a5, u3);
+                          fmpz_addmul(a8, a4, u4);
+                          fmpz_addmul(a8, a3, u5);
+                          fmpz_set(im_pt, a8);
+
+                          /* Computation of tmp = (rl_pt ** 8 - 28 * rl_pt ** 6 * im_pt ** 2 + 70 * rl_pt ** 4 * im_pt ** 4 - 28 * rl_pt ** 2 * im_pt ** 6 + im_pt ** 8)  */
+                          fmpz_zero(tmp);
+                          fmpz_pow_ui(a0, im_pt, 6);
+                          fmpz_pow_ui(a1, rl_pt, 2);
+                          fmpz_mul(a0, a0, a1);
+                          fmpz_submul_ui(tmp, a0, 28);
+                          fmpz_pow_ui(a0, rl_pt, 8);
+                          fmpz_add(tmp, tmp, a0);
+                          fmpz_pow_ui(a0, im_pt, 2);
+                          fmpz_pow_ui(a1, rl_pt, 6);
+                          fmpz_mul(a0, a0, a1);
+                          fmpz_submul_ui(tmp, a0, 28);
+                          fmpz_pow_ui(a0, im_pt, 4);
+                          fmpz_pow_ui(a1, rl_pt, 4);
+                          fmpz_mul(a0, a0, a1);
+                          fmpz_addmul_ui(tmp, a0, 70);
+                          fmpz_pow_ui(a0, im_pt, 8);
+                          fmpz_add(tmp, tmp, a0);
+
+                          fmpz_add(res, res, tmp);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+  fmpz_print(res);
+
+
+  fmpz_clear(a0); fmpz_clear(a1); fmpz_clear(a2); fmpz_clear(a3); fmpz_clear(a4); fmpz_clear(a5); fmpz_clear(a6); fmpz_clear(a7); fmpz_clear(a8);
+  fmpz_clear(s0); fmpz_clear(s1); fmpz_clear(s2); fmpz_clear(s3); fmpz_clear(s4); fmpz_clear(s5); fmpz_clear(s6); fmpz_clear(s7);
+  fmpz_clear(t0); fmpz_clear(t1); fmpz_clear(t2); fmpz_clear(t3); fmpz_clear(t4); fmpz_clear(t5); fmpz_clear(t6); fmpz_clear(t7);
+  fmpz_clear(u0); fmpz_clear(u1); fmpz_clear(u2); fmpz_clear(u3); fmpz_clear(u4); fmpz_clear(u5); fmpz_clear(u6); fmpz_clear(u7);
+  fmpz_clear(rl_pt); fmpz_clear(im_pt); fmpz_clear(res); fmpz_clear(tmp);
 
   return 0;
 }
+
+/* Local Variables: */
+/* compile-command: "make compile" */
+/* End: */
