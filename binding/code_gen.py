@@ -1,5 +1,5 @@
 # -*- coding: utf-8; mode: sage -*-
-from sage.all import PolynomialRing, mul, ZZ, uniq
+from sage.all import PolynomialRing, mul, ZZ, uniq, SR
 from abc import ABCMeta, abstractmethod
 
 
@@ -290,6 +290,16 @@ def pol_to_fmpz_code_and_result_var(pl, name, res_var_name, algorithm=None, sep=
                     codes.append(_admul_code(res_var_name, _expt(t, gns), cf))
 
     return (sep.join(codes), uniq(vrs))
+
+
+def fmpz_init_clear(vrs, sep=" "):
+    if isinstance(vrs, str):
+        vrs = SR.var(vrs)
+    res = sep.join(
+        ["fmpz_t %s;" % v for v in vrs] + ["fmpz_init(%s);" % v for v in vrs])
+    res = res + "\n\n"
+    res = res + sep.join("fmpz_clear(%s);" % v for v in vrs)
+    return res
 
 
 def _monom_codes(t, v, gns):
