@@ -318,12 +318,13 @@ def _monom_codes(t, v, v1, gns):
         for _, x in _tv[1:]:
             codes.append(cur_sty.set_mul(v, v, x))
     else:
+        _tv = list(sorted(_tv, key=lambda x: -x[1]))
         e0, x0 = _tv[0]
         codes.append(cur_sty.pow_ui(v, x0, e0))
         for e, x in _tv[1:]:
             if e == 1:
                 codes.append(cur_sty.set_mul(v, v, x))
             else:
-                codes.append(cur_sty.pow_ui(v1, v1, e))
+                codes.append(cur_sty.pow_ui(v1, x, e))
                 codes.append(cur_sty.set_mul(v, v, v1))
     return codes
