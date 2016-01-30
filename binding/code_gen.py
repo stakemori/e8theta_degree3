@@ -289,7 +289,7 @@ def pol_to_fmpz_code_and_result_var(pl, name, res_var_name, algorithm=None, sep=
                 elif sum(t) == 1:
                     codes.append(_admul_code(res_var_name, _expt(t, gns), cf))
 
-        return (sep.join(codes), uniq(vrs))
+    return (sep.join(codes), uniq(vrs))
 
 
 def _monom_codes(t, v, gns):
