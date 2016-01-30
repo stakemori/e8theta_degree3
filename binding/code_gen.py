@@ -258,14 +258,14 @@ def _expr_to_pol(expr):
         return expr
 
 
-def pol_to_fmpz_code_and_result_var(pl, name, res_var_name, algorithm=None, sep="\n"):
+def pol_to_fmpz_code_and_result_var(pl, name, res_var_name, algorithm=None, sep="\n", indent=None):
     if algorithm == "horner":
         n = pl.parent().ngens()
         vrs = [name + str(a) for a in range(n)]
         e = _to_expr(pl)
         codes, v, vrs = e.codes(vrs)
         codes.append(cur_sty.set_z(res_var_name, v))
-    else:
+    elif algorithm is None:
         v = name + "0"
         if pl.constant_coefficient() == 0:
             codes = [cur_sty.zero_z(res_var_name)]
@@ -293,6 +293,10 @@ def pol_to_fmpz_code_and_result_var(pl, name, res_var_name, algorithm=None, sep=
                     codes.append(_admul_code(res_var_name, _expt(t, gns), cf))
             if v1 is not None:
                 vrs.append(v1)
+    else:
+        raise ValueError
+    if indent is not None:
+        codes = [indent + c for c in codes]
     return (sep.join(codes), uniq(vrs))
 
 
