@@ -272,6 +272,7 @@ def pol_to_fmpz_code_and_result_var(pl, name, res_var_name, algorithm=None, sep=
         else:
             codes = [cur_sty.set_si(res_var_name, pl.constant_coefficient())]
         vrs = [v]
+        v1 = None
         if pl.parent().ngens() == 1:
             x = pl.parent().gen()
             for e, cf in pl.dict().items():
@@ -284,11 +285,14 @@ def pol_to_fmpz_code_and_result_var(pl, name, res_var_name, algorithm=None, sep=
             gns = pl.parent().gens()
             for t, cf in pl.dict().items():
                 if sum(t) > 1:
-                    codes.append(_monom_codes(t, v, gns))
+                    if any(a > 1 for a in t):
+                        v1 = name + "1"
+                    codes.extend(_monom_codes(t, v, v1, gns))
                     codes.append(_admul_code(res_var_name, v, cf))
                 elif sum(t) == 1:
                     codes.append(_admul_code(res_var_name, _expt(t, gns), cf))
-
+            if v1 is not None:
+                vrs.append(v1)
     return (sep.join(codes), uniq(vrs))
 
 
@@ -302,10 +306,24 @@ def fmpz_init_clear(vrs, sep=" "):
     return res
 
 
-def _monom_codes(t, v, gns):
-    '''t: monomial, v: variable name.
+def _monom_codes(t, v, v1, gns):
+    '''t: monomial, v: variable name for result.
+    v1: tmp var name.
     Return codes.
     '''
-    _tv = [(e, x) for e, x in zip(t, v) if e > 0]
-    if all(e == 1 for e, _ in _tv):
-        pass
+    codes = []
+    _tv = [(e, x) for e, x in zip(t, gns) if e > 0]
+    if all(e == 1 for e, x in _tv):
+        codes.append(cur_sty.set_z(v, _tv[0][1]))
+        for _, x in _tv[1:]:
+            codes.append(cur_sty.set_mul(v, v, x))
+    else:
+        e0, x0 = _tv[0]
+        codes.append(cur_sty.pow_ui(v, x0, e0))
+        for e, x in _tv[1:]:
+            if e == 1:
+                codes.append(cur_sty.set_mul(v, v, x))
+            else:
+                codes.append(cur_sty.pow_ui(v1, v1, e))
+                codes.append(cur_sty.set_mul(v, v, v1))
+    return codes
