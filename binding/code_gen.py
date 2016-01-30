@@ -1,53 +1,100 @@
 # -*- coding: utf-8; mode: sage -*-
 from sage.all import PolynomialRing, mul, ZZ, uniq
+from abc import ABCMeta, abstractmethod
 
 
-def zero_z(a):
-    return "fmpz_zero(%s)" % a
+class CodeStyle(object):
+
+    __metaclass__ = ABCMeta
+
+    @abstractmethod
+    def zero_z(self, a):
+        pass
+
+    @abstractmethod
+    def set_mul(self, a, b, c):
+        pass
+
+    @abstractmethod
+    def set_add_mul(self, a, b, c):
+        pass
+
+    @abstractmethod
+    def set_si(self, a, b):
+        pass
+
+    @abstractmethod
+    def set_z(self, a, b):
+        pass
+
+    @abstractmethod
+    def add_ui(self, a, b, c):
+        pass
+
+    @abstractmethod
+    def sub_ui(self, a, b, c):
+        pass
+
+    @abstractmethod
+    def pow_ui(self, a, b, c):
+        pass
+
+    @abstractmethod
+    def add_mul_ui(self, a, b, c):
+        pass
+
+    @abstractmethod
+    def add_z(self, a, b, c):
+        pass
+
+    @abstractmethod
+    def sub_mul_ui(self, a, b, c):
+        pass
+
+    @abstractmethod
+    def sub_z(self, a, b, c):
+        pass
 
 
-def set_mul(a, b, c):
-    return "fmpz_mul(%s, %s, %s)" % (a, b, c)
+class FmpzStyle(CodeStyle):
 
+    def zero_z(self, a):
+        return "fmpz_zero(%s);" % a
 
-def set_add_mul(a, b, c):
-    return "fmpz_addmul(%s, %s, %s)" % (a, b, c)
+    def set_mul(self, a, b, c):
+        return "fmpz_mul(%s, %s, %s);" % (a, b, c)
 
+    def set_add_mul(self, a, b, c):
+        return "fmpz_addmul(%s, %s, %s);" % (a, b, c)
 
-def set_si(a, b):
-    return "fmpz_set_si(%s, %s)" % (a, b)
+    def set_si(self, a, b):
+        return "fmpz_set_si(%s, %s);" % (a, b)
 
+    def set_z(self, a, b):
+        return "fmpz_set(%s, %s);" % (a, b)
 
-def set_z(a, b):
-    return "fmpz_set(%s, %s)" % (a, b)
+    def add_ui(self, a, b, c):
+        return "fmpz_add_ui(%s, %s, %s);" % (a, b, c)
 
+    def sub_ui(self, a, b, c):
+        return "fmpz_sub_ui(%s, %s, %s);" % (a, b, c)
 
-def add_ui(a, b, c):
-    return "fmpz_add_ui(%s, %s, %s)" % (a, b, c)
+    def pow_ui(self, a, b, c):
+        return "fmpz_pow_ui(%s, %s, %s);" % (a, b, c)
 
+    def add_mul_ui(self, a, b, c):
+        return "fmpz_addmul_ui(%s, %s, %s);" % (a, b, c)
 
-def sub_ui(a, b, c):
-    return "fmpz_sub_ui(%s, %s, %s)" % (a, b, c)
+    def add_z(self, a, b, c):
+        return "fmpz_add(%s, %s, %s);" % (a, b, c)
 
+    def sub_mul_ui(self, a, b, c):
+        return "fmpz_submul_ui(%s, %s, %s);" % (a, b, c)
 
-def pow_ui(a, b, c):
-    return "fmpz_pow_ui(%s, %s, %s)" % (a, b, c)
+    def sub_z(self, a, b, c):
+        return "fmpz_sub(%s, %s, %s);" % (a, b, c)
 
-
-def add_mul_ui(a, b, c):
-    return "fmpz_addmul_ui(%s, %s, %s)" % (a, b, c)
-
-
-def add_z(a, b, c):
-    return "fmpz_add(%s, %s, %s)" % (a, b, c)
-
-
-def sub_mul_ui(a, b, c):
-    return "fmpz_submul_ui(%s, %s, %s)" % (a, b, c)
-
-
-def sub_z(a, b, c):
-    return "fmpz_sub(%s, %s, %s)" % (a, b, c)
+cur_sty = FmpzStyle()
 
 
 class Mul(object):
@@ -62,7 +109,7 @@ class Mul(object):
 
     def codes1(self, tmp_var):
         cds = self.l.codes1(tmp_var)
-        cds.append(set_mul(tmp_var, tmp_var, self.r))
+        cds.append(cur_sty.set_mul(tmp_var, tmp_var, self.r))
         return cds
 
     def codes(self, tmp_vars):
@@ -72,7 +119,7 @@ class Mul(object):
         if self.ngens == 1:
             return (self.codes1(tmp_vars[0]), tmp_vars[0], [tmp_vars[0]])
         cd, v, vrs = self.l.codes(tmp_vars)
-        cd.append(set_mul(v, v, self.r))
+        cd.append(cur_sty.set_mul(v, v, self.r))
         vrs.append(v)
         return (cd, v, vrs)
 
@@ -94,9 +141,9 @@ class AddMul(object):
         cds = m.codes1(tmp_var)
         a = ZZ(self.a.pl)
         if a > 0:
-            cds.append(add_ui(tmp_var, tmp_var, a))
+            cds.append(cur_sty.add_ui(tmp_var, tmp_var, a))
         elif a < 0:
-            cds.append(sub_ui(tmp_var, tmp_var, -a))
+            cds.append(cur_sty.sub_ui(tmp_var, tmp_var, -a))
         return cds
 
     def codes(self, tmp_vars):
@@ -105,7 +152,7 @@ class AddMul(object):
         cds, v, vrs = self.b.codes(tmp_vars)
         cds1, v1, vrs1 = self.a.codes([a for a in tmp_vars if a != v])
         cds.extend(cds1)
-        cds.append(set_add_mul(v1, v, self.c))
+        cds.append(cur_sty.set_add_mul(v1, v, self.c))
         vrs.extend(vrs1)
         vrs.extend([v, v1])
         return (cds, v1, vrs)
@@ -122,9 +169,9 @@ class Deg1Pol(object):
     def codes(self, tmp_vars):
         v = tmp_vars[0]
         if self.pl.constant_coefficient() != 0:
-            codes = [set_si(v, self.pl.constant_coefficient())]
+            codes = [cur_sty.set_si(v, self.pl.constant_coefficient())]
         else:
-            codes = [zero_z(v)]
+            codes = [cur_sty.zero_z(v)]
         pl = self.pl
         if pl.parent().ngens() == 1:
             x = pl.parent().gen()
@@ -148,13 +195,13 @@ class Deg1Pol(object):
 def _admul_code(v, x, a):
     res = None
     if a > 1:
-        res = add_mul_ui(v, x, a)
+        res = cur_sty.add_mul_ui(v, x, a)
     elif a == 1:
-        res = add_z(v, v, x)
+        res = cur_sty.add_z(v, v, x)
     elif a == -1:
-        res = sub_z(v, v, x)
+        res = cur_sty.sub_z(v, v, x)
     elif a < -1:
-        res = sub_mul_ui(v, x, -a)
+        res = cur_sty.sub_mul_ui(v, x, -a)
     return res
 
 
@@ -211,33 +258,33 @@ def _expr_to_pol(expr):
         return expr
 
 
-def pol_to_fmpz_code_and_result_var_horner(pl, name):
-    n = pl.parent().ngens()
-    vrs = [name + str(a) for a in range(n)]
-    e = _to_expr(pl)
-    codes, v, vrs = e.codes(vrs)
-    return ("\n".join(a + ";" for a in codes), v, uniq(vrs))
+# def pol_to_fmpz_code_and_result_var_horner(pl, name):
+#     n = pl.parent().ngens()
+#     vrs = [name + str(a) for a in range(n)]
+#     e = _to_expr(pl)
+#     codes, v, vrs = e.codes(vrs)
+#     return ("\n".join(a + ";" for a in codes), v, uniq(vrs))
 
 
-def pol_to_fmpz_code_and_result_var(pl, name, res_var_name, algorithm=None):
+def pol_to_fmpz_code_and_result_var(pl, name, res_var_name, algorithm=None, sep="\n"):
     if algorithm == "horner":
         n = pl.parent().ngens()
         vrs = [name + str(a) for a in range(n)]
         e = _to_expr(pl)
         codes, v, vrs = e.codes(vrs)
-        codes.append(set_z(res_var_name, v))
+        codes.append(cur_sty.set_z(res_var_name, v))
     else:
         v = name + "0"
         if pl.constant_coefficient() == 0:
-            codes = [zero_z(res_var_name)]
+            codes = [cur_sty.zero_z(res_var_name)]
         else:
-            codes = [set_si(res_var_name, pl.constant_coefficient())]
+            codes = [cur_sty.set_si(res_var_name, pl.constant_coefficient())]
         vrs = [v]
         if pl.parent().ngens() == 1:
             x = pl.parent().gen()
             for e, cf in pl.dict().items():
                 if e > 1:
-                    codes.append(pow_ui(v, x, e))
+                    codes.append(cur_sty.pow_ui(v, x, e))
                     codes.append(_admul_code(res_var_name, v, cf))
                 elif e == 1:
                     codes.append(_admul_code(res_var_name, x, cf))
@@ -250,7 +297,7 @@ def pol_to_fmpz_code_and_result_var(pl, name, res_var_name, algorithm=None):
                 elif sum(t) == 1:
                     codes.append(_admul_code(res_var_name, _expt(t, gns), cf))
 
-        return ("\n".join(a + ";" for a in codes), uniq(vrs))
+        return (sep.join(codes), uniq(vrs))
 
 
 def _monom_codes(t, v, gns):
