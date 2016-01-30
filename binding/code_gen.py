@@ -12,12 +12,52 @@ class Add(object):
         return "Add(%s, %s)" % (self.l, self.r)
 
 
+def zero_z(a):
+    return "fmpz_zero(%s)" % a
+
+
 def set_mul(a, b, c):
     return "fmpz_mul(%s, %s, %s)" % (a, b, c)
 
 
 def set_add_mul(a, b, c):
     return "fmpz_addmul(%s, %s, %s)" % (a, b, c)
+
+
+def set_si(a, b):
+    return "fmpz_set_si(%s, %s)" % (a, b)
+
+
+def set_z(a, b):
+    return "fmpz_set(%s, %s)" % (a, b)
+
+
+def add_ui(a, b, c):
+    return "fmpz_add_ui(%s, %s, %s)" % (a, b, c)
+
+
+def sub_ui(a, b, c):
+    return "fmpz_sub_ui(%s, %s, %s)" % (a, b, c)
+
+
+def pow_ui(a, b, c):
+    return "fmpz_pow_ui(%s, %s, %s)" % (a, b, c)
+
+
+def add_mul_ui(a, b, c):
+    return "fmpz_addmul_ui(%s, %s, %s)" % (a, b, c)
+
+
+def add_z(a, b, c):
+    return "fmpz_add(%s, %s, %s)" % (a, b, c)
+
+
+def sub_mul_ui(a, b, c):
+    return "fmpz_submul_ui(%s, %s, %s)" % (a, b, c)
+
+
+def sub_z(a, b, c):
+    return "fmpz_sub(%s, %s, %s)" % (a, b, c)
 
 
 class Mul(object):
@@ -64,9 +104,9 @@ class AddMul(object):
         cds = m.codes1(tmp_var)
         a = ZZ(self.a.pl)
         if a > 0:
-            cds.append("fmpz_add_ui(%s, %s, %s)" % (tmp_var, tmp_var, a))
+            cds.append(add_ui(tmp_var, tmp_var, a))
         elif a < 0:
-            cds.append("fmpz_sub_ui(%s, %s, %s)" % (tmp_var, tmp_var, -a))
+            cds.append(sub_ui(tmp_var, tmp_var, -a))
         return cds
 
     def codes(self, tmp_vars):
@@ -92,10 +132,9 @@ class Deg1Pol(object):
     def codes(self, tmp_vars):
         v = tmp_vars[0]
         if self.pl.constant_coefficient() != 0:
-            codes = ["fmpz_set_si(%s, %s)" %
-                     (v, self.pl.constant_coefficient())]
+            codes = [set_si(v, self.pl.constant_coefficient())]
         else:
-            codes = ["fmpz_zero(%s)" % (v, )]
+            codes = [zero_z(v)]
         pl = self.pl
         if pl.parent().ngens() == 1:
             x = pl.parent().gen()
@@ -119,13 +158,13 @@ class Deg1Pol(object):
 def _admul_code(v, x, a):
     res = None
     if a > 1:
-        res = "fmpz_addmul_ui(%s, %s, %s)" % (v, x, a)
+        res = add_mul_ui(v, x, a)
     elif a == 1:
-        res = "fmpz_add(%s, %s, %s)" % (v, v, x)
+        res = add_z(v, v, x)
     elif a == -1:
-        res = "fmpz_sub(%s, %s, %s)" % (v, v, x)
+        res = sub_z(v, v, x)
     elif a < -1:
-        res = "fmpz_submul_ui(%s, %s, %s)" % (v, x, -a)
+        res = sub_mul_ui(v, x, -a)
     return res
 
 
@@ -196,20 +235,19 @@ def pol_to_fmpz_code_and_result_var(pl, name, res_var_name, algorithm=None):
         vrs = [name + str(a) for a in range(n)]
         e = _to_expr(pl)
         codes, v, vrs = e.codes(vrs)
-        codes.append("fmpz_set(%s, %s)" % (res_var_name, v))
+        codes.append(set_z(res_var_name, v))
     else:
         v = name + "0"
         if pl.constant_coefficient() == 0:
-            codes = ["fmpz_zero(%s)" % (res_var_name, )]
+            codes = [zero_z(res_var_name)]
         else:
-            codes = ["fmpz_set_si(%s, %s)" %
-                     (res_var_name, pl.constant_coefficient())]
+            codes = [set_si(res_var_name, pl.constant_coefficient())]
         vrs = [v]
         if pl.parent().ngens() == 1:
             x = pl.parent().gen()
             for e, cf in pl.dict().items():
                 if e > 1:
-                    codes.append("fmpz_pow_ui(%s, %s, %s)" % (v, x, e))
+                    codes.append(pow_ui(v, x, e))
                     codes.append(_admul_code(res_var_name, v, cf))
                 elif e == 1:
                     codes.append(_admul_code(res_var_name, x, cf))
