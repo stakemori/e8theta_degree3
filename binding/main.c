@@ -86,7 +86,7 @@ void _cache_vectors(void)
                                   int _nm = norm(v)/2;
                                   if (_nm < MAX_NORM + 1)
                                     {
-                                      int idx = ++cached_idx[_nm];
+                                      int idx = cached_idx[_nm]++;
                                       for (int i = 0; i < 8; i++)
                                         {
                                           cached_vectors[_nm][idx][i] = v[i];
@@ -103,7 +103,9 @@ void _cache_vectors(void)
 }
 
 
-void miyawaki_theta(int vs1[MAX_NM_OF_VECTORS][8], int vs2[MAX_NM_OF_VECTORS][8], int vs3[MAX_NM_OF_VECTORS][8],
+void miyawaki_theta(int vs1[MAX_NM_OF_VECTORS][8],
+                    int vs2[MAX_NM_OF_VECTORS][8],
+                    int vs3[MAX_NM_OF_VECTORS][8],
                     int a, int b, int c, int d, int e, int f)
 {
   fmpz_t s0; fmpz_t s1; fmpz_t s2; fmpz_t s3; fmpz_t s4; fmpz_t s5; fmpz_t s6; fmpz_t s7;
@@ -128,11 +130,11 @@ void miyawaki_theta(int vs1[MAX_NM_OF_VECTORS][8], int vs2[MAX_NM_OF_VECTORS][8]
         {
           for (int k = 0; k < num_of_vectors[c]; k++)
             {
-              if (inner_prod(vs1[i], vs2[j]) == d)
+              if (inner_prod(vs1[i], vs2[j]) == f)
                 {
                   if (inner_prod(vs1[i], vs3[k]) == e)
                     {
-                      if (inner_prod(vs2[j], vs3[k]) == f)
+                      if (inner_prod(vs2[j], vs3[k]) == d)
                         {
                           fmpz_set_si(s0, vs1[i][0]);
                           fmpz_set_si(s1, vs1[i][1]);
@@ -378,11 +380,22 @@ int main(void)
 
   printf("computation for cached vectors done.\n");
 
+  int vs0[MAX_NM_OF_VECTORS][8];
   int vs1[MAX_NM_OF_VECTORS][8];
+  int vs2[MAX_NM_OF_VECTORS][8];
+  int vs3[MAX_NM_OF_VECTORS][8];
+  int vs4[MAX_NM_OF_VECTORS][8];
+  _set_vs(vs0, 0);
+  _set_vs(vs1, 1);
+  _set_vs(vs2, 2);
+  _set_vs(vs3, 3);
+  _set_vs(vs4, 4);
 
-  _set_vs(vs1, num_of_vectors[1]);
 
   miyawaki_theta(vs1, vs1, vs1, 1, 1, 1, 0, 0, 0);
+  printf("\n");
+  miyawaki_theta(vs1, vs1, vs1, 1, 1, 1, 1, 1, 1);
+
   return 0;
 }
 
