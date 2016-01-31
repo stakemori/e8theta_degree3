@@ -94,6 +94,45 @@ class FmpzStyle(CodeStyle):
     def sub_z(self, a, b, c):
         return "fmpz_sub(%s, %s, %s);" % (a, b, c)
 
+
+class PythonStyle(CodeStyle):
+
+    def zero_z(self, a):
+        return "%s = 0" % a
+
+    def set_mul(self, a, b, c):
+        return "%s = %s * %s" % (a, b, c)
+
+    def set_add_mul(self, a, b, c):
+        return "%s = %s + %s * %s" % (a, a, b, c)
+
+    def set_si(self, a, b):
+        return "%s = %s" % (a, b)
+
+    def set_z(self, a, b):
+        return self.set_si(a, b)
+
+    def add_ui(self, a, b, c):
+        return "%s = %s + %s" % (a, b, c)
+
+    def sub_ui(self, a, b, c):
+        return "%s = %s - %s" % (a, b, c)
+
+    def pow_ui(self, a, b, c):
+        return "%s = %s ** %s" % (a, b, c)
+
+    def add_mul_ui(self, a, b, c):
+        return self.set_add_mul(a, b, c)
+
+    def add_z(self, a, b, c):
+        return self.add_ui(a, b, c)
+
+    def sub_mul_ui(self, a, b, c):
+        return "%s = %s - %s * %s" % (a, a, b, c)
+
+    def sub_z(self, a, b, c):
+        return "%s = %s - %s" % (a, b, c)
+
 cur_sty = FmpzStyle()
 
 
@@ -332,3 +371,38 @@ def _monom_codes(t, v, v1, gns):
                 codes.append(cur_sty.pow_ui(v1, x, e))
                 codes.append(cur_sty.set_mul(v, v, v1))
     return codes
+
+
+def _test():
+    gi = globals()["get_ipython"]
+    ip = gi()
+
+    def check(R):
+        for _ in range(100):
+            if R.ngens() == 1:
+                f = R.random_element(degree=(-1, 10))
+            else:
+                f = R.random_element(degree=10)
+            c = pol_to_fmpz_code_and_result_var(
+                f, "a", "res", sep=";", algorithm="horner")[0]
+            ip.run_cell(c)
+            res = globals()["res"]
+            assert res == f
+            c = pol_to_fmpz_code_and_result_var(
+                f, "a", "res", sep=";", algorithm=None)[0]
+            ip.run_cell(c)
+            res = globals()["res"]
+            assert res == f
+
+    R1 = PolynomialRing(ZZ, names="x")
+    R2 = PolynomialRing(ZZ, names="x, y")
+    R3 = PolynomialRing(ZZ, names="x, y, z")
+    print "check1"
+    ip.run_cell("x = PolynomialRing(ZZ, names='x').gen()")
+    check(R1)
+    print "check2"
+    ip.run_cell("x, y = PolynomialRing(ZZ, names='x, y').gens()")
+    check(R2)
+    print "check3"
+    ip.run_cell("x, y, z = PolynomialRing(ZZ, names='x, y, z').gens()")
+    check(R3)
