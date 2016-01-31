@@ -103,6 +103,39 @@ void _cache_vectors(void)
 }
 
 
+void eisenstein(int vs1[MAX_NM_OF_VECTORS][8],
+                    int vs2[MAX_NM_OF_VECTORS][8],
+                    int vs3[MAX_NM_OF_VECTORS][8],
+                    int a, int b, int c, int d, int e, int f)
+{
+  fmpz_t res;
+  fmpz_init(res); fmpz_zero(res);
+  for (int i = 0; i < num_of_vectors[a]; i++)
+    {
+      for (int j = 0; j < num_of_vectors[b]; j++)
+        {
+          for (int k = 0; k < num_of_vectors[c]; k++)
+            {
+              if (inner_prod(vs1[i], vs2[j]) == f)
+                {
+                  if (inner_prod(vs1[i], vs3[k]) == e)
+                    {
+                      if (inner_prod(vs2[j], vs3[k]) == d)
+                        {
+                          fmpz_add_ui(res, res, 1);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+  fmpz_print(res);
+
+  fmpz_clear(res);
+}
+
+
 void miyawaki_theta(int vs1[MAX_NM_OF_VECTORS][8],
                     int vs2[MAX_NM_OF_VECTORS][8],
                     int vs3[MAX_NM_OF_VECTORS][8],
@@ -392,10 +425,11 @@ int main(void)
   _set_vs(vs4, 4);
 
 
-  miyawaki_theta(vs1, vs1, vs1, 1, 1, 1, 0, 0, 0);
+  eisenstein(vs1, vs1, vs0, 1, 1, 0, 0, 0, 1);
   printf("\n");
-  miyawaki_theta(vs1, vs1, vs1, 1, 1, 1, 1, 1, 1);
-
+  eisenstein(vs1, vs1, vs1, 1, 1, 1, 0, 0, 0);
+  printf("\n");
+  eisenstein(vs1, vs1, vs1, 1, 1, 1, 1, 1, 1);
   return 0;
 }
 
