@@ -449,7 +449,7 @@ int main(void)
 {
   _cache_vectors();
 
-  printf("computation for cached vectors done.\n");
+  printf("Computation of cached vectors done.\n");
 
   int vs0[MAX_NM_OF_VECTORS][8];
   int vs1[MAX_NM_OF_VECTORS][8];
