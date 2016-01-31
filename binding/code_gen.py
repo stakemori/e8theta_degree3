@@ -55,6 +55,10 @@ class CodeStyle(object):
     def sub_z(self, a, b, c):
         pass
 
+    @abstractmethod
+    def mul_si(self, a, b, c):
+        pass
+
 
 class FmpzStyle(CodeStyle):
 
@@ -94,6 +98,16 @@ class FmpzStyle(CodeStyle):
     def sub_z(self, a, b, c):
         return "fmpz_sub(%s, %s, %s);" % (a, b, c)
 
+    def mul_si(self, a, b, c):
+        if c == 1:
+            return self.set_z(a, b)
+        elif c == -1:
+            return "fmpz_neg(%s, %s);" % (a, b)
+        elif c > 0:
+            return "fmpz_mul_ui(%s, %s, %s);" % (a, b, c)
+        elif c < 0:
+            return "fmpz_mul_si(%s, %s, %s);" % (a, b, c)
+
 
 class PythonStyle(CodeStyle):
 
@@ -132,6 +146,9 @@ class PythonStyle(CodeStyle):
 
     def sub_z(self, a, b, c):
         return "%s = %s - %s" % (a, b, c)
+
+    def mul_si(self, a, b, c):
+        return "%s = %s * (%s)" % (a, b, c)
 
 cur_sty = FmpzStyle()
 
@@ -207,11 +224,16 @@ class Deg1Pol(object):
 
     def codes(self, tmp_vars):
         v = tmp_vars[0]
-        if self.pl.constant_coefficient() != 0:
+        pl = self.pl
+        gens = pl.parent().gens()
+
+        if pl.constant_coefficient() != 0:
             codes = [cur_sty.set_si(v, self.pl.constant_coefficient())]
         else:
-            codes = [cur_sty.zero_z(v)]
-        pl = self.pl
+            _ls = list(pl.dict().items())
+            _t, a = _ls[0]
+            codes = [cur_sty.mul_si(v, _expt(_t, gens), a)]
+            pl = pl.parent()(sum(_expt(_t, gens) * a for _t, a in _ls[1:]))
         if pl.parent().ngens() == 1:
             x = pl.parent().gen()
             cd = _admul_code(v, x, pl[1])
@@ -249,6 +271,8 @@ def _count(ts, i):
 
 
 def _expt(t, vrs):
+    if t in ZZ:
+        return vrs[0] ** t
     return mul(x ** e for e, x in zip(t, vrs))
 
 
