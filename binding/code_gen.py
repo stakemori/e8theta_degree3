@@ -1,5 +1,5 @@
 # -*- coding: utf-8; mode: sage -*-
-from sage.all import PolynomialRing, mul, ZZ, uniq, SR
+from sage.all import PolynomialRing, mul, ZZ, uniq, SR, factor, is_prime_power
 from abc import ABCMeta, abstractmethod
 
 
@@ -99,14 +99,25 @@ class FmpzStyle(CodeStyle):
         return "fmpz_sub(%s, %s, %s);" % (a, b, c)
 
     def mul_si(self, a, b, c):
+        if c == 0:
+            return self.zero_z(a)
+        tpw = False
+        fc = factor(c)
+        if is_prime_power(c) and fc[0][0] == 2:
+            tpw = True
+            e = fc[0][1]
         if c == 1:
             return self.set_z(a, b)
+        elif c > 0 and tpw:
+            return "fmpz_mul_2exp(%s, %s, %s);" % (a, b, e)
+        elif c < 0 and tpw:
+            return "%s fmpz_neg(%s, %s);" % (self.mul_si(a, b, -c), a, a)
         elif c == -1:
             return "fmpz_neg(%s, %s);" % (a, b)
         elif c > 0:
             return "fmpz_mul_ui(%s, %s, %s);" % (a, b, c)
         elif c < 0:
-            return "fmpz_mul_si(%s, %s, %s);" % (a, b, c)
+            return "%s fmpz_neg(%s, %s);" % (self.mul_si(a, b, -c), a, a)
 
 
 class PythonStyle(CodeStyle):
