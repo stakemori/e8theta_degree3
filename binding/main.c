@@ -4,6 +4,10 @@
 int inner_prod(int[8], int[8]);
 int norm(int[8]);
 void _cache_vectors(void);
+static void _set_vs(int[MAX_NM_OF_VECTORS][8], int);
+static void _set_vs3(int[MAX_NM_OF_VECTORS][8], int[MAX_NM_OF_VECTORS][8], int[MAX_NM_OF_VECTORS][8], int, int, int);
+void miyawaki_theta(int, int, int, int, int, int);
+
 
 inline int inner_prod(int s[8], int t[8])
 {
@@ -102,45 +106,14 @@ void _cache_vectors(void)
     }
 }
 
-
-void eisenstein(int vs1[MAX_NM_OF_VECTORS][8],
-                    int vs2[MAX_NM_OF_VECTORS][8],
-                    int vs3[MAX_NM_OF_VECTORS][8],
-                    int a, int b, int c, int d, int e, int f)
+void miyawaki_theta(int a, int b, int c, int d, int e, int f)
 {
-  fmpz_t res;
-  fmpz_init(res); fmpz_zero(res);
-  for (int i = 0; i < num_of_vectors[a]; i++)
-    {
-      for (int j = 0; j < num_of_vectors[b]; j++)
-        {
-          for (int k = 0; k < num_of_vectors[c]; k++)
-            {
-              if (inner_prod(vs1[i], vs2[j]) == f)
-                {
-                  if (inner_prod(vs1[i], vs3[k]) == e)
-                    {
-                      if (inner_prod(vs2[j], vs3[k]) == d)
-                        {
-                          fmpz_add_ui(res, res, 1);
-                        }
-                    }
-                }
-            }
-        }
-    }
+  int vs1[MAX_NM_OF_VECTORS][8];
+  int vs2[MAX_NM_OF_VECTORS][8];
+  int vs3[MAX_NM_OF_VECTORS][8];
 
-  fmpz_print(res);
+  _set_vs3(vs1, vs2, vs3, a, b, c);
 
-  fmpz_clear(res);
-}
-
-
-void miyawaki_theta(int vs1[MAX_NM_OF_VECTORS][8],
-                    int vs2[MAX_NM_OF_VECTORS][8],
-                    int vs3[MAX_NM_OF_VECTORS][8],
-                    int a, int b, int c, int d, int e, int f)
-{
   fmpz_t res, rl_pt, im_pt;
   fmpz_t a0; fmpz_t a1; fmpz_t a2; fmpz_t a3; fmpz_t a4; fmpz_t a5; fmpz_t a6; fmpz_t a7; fmpz_t a8;
   fmpz_t tmp;
@@ -242,28 +215,25 @@ static void _set_vs(int vs[MAX_NM_OF_VECTORS][8], int a)
     }
 }
 
+static void _set_vs3(int vs1[MAX_NM_OF_VECTORS][8],
+                     int vs2[MAX_NM_OF_VECTORS][8],
+                     int vs3[MAX_NM_OF_VECTORS][8],
+                     int a, int b, int c)
+{
+  _set_vs(vs1, a);
+  _set_vs(vs2, b);
+  _set_vs(vs3, c);
+}
+
 int main(void)
 {
   _cache_vectors();
 
   printf("Computation of cached vectors done.\n");
 
-  int vs0[MAX_NM_OF_VECTORS][8];
-  int vs1[MAX_NM_OF_VECTORS][8];
-  int vs2[MAX_NM_OF_VECTORS][8];
-  int vs3[MAX_NM_OF_VECTORS][8];
-  int vs4[MAX_NM_OF_VECTORS][8];
-  _set_vs(vs0, 0);
-  _set_vs(vs1, 1);
-  _set_vs(vs2, 2);
-  _set_vs(vs3, 3);
-  _set_vs(vs4, 4);
-
   /* miyawaki_theta(vs1, vs1, vs1, 1, 1, 1, 0, 0, 0); */
   /* printf("\n"); */
-  miyawaki_theta(vs1, vs1, vs1, 1, 1, 1, 1, 1, 1);
-  printf("\n");
-  miyawaki_theta(vs2, vs2, vs2, 2, 2, 2, 0, 0, 0);
+  miyawaki_theta(1, 1, 1, 1, 1, 1);
   printf("\n");
   return 0;
 }
