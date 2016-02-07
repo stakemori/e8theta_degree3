@@ -1,4 +1,4 @@
-DEBUGOPT = -Wall -g -O0 -std=c11
+DEBUGOPT = -Wall -g -Og -std=c11
 FLINTOPT = -lm -lflint -lmpfr -lgmp -lpthread -I /usr/local/include/flint/
 OUT = main
 TARGET = main.c
