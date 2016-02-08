@@ -4,7 +4,7 @@ OUT = main
 TARGET = main.c
 CC = gcc
 compile:
-	$(CC) $(TARGET) -o $(OUT) $(FLINTOPT) -O3 -std=c11
+	$(CC) $(TARGET) -o $(OUT) $(FLINTOPT) -O2 -std=c11
 
 debug:
 	$(CC) $(TARGET) -o $(OUT) $(DEBUGOPT) $(FLINTOPT)
