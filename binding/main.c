@@ -1,13 +1,6 @@
 #include <fmpz.h>
 #include <math.h>
 #include "e8theta.h"
-int inner_prod(int[8], int[8]);
-int norm(int[8]);
-void _cache_vectors(void);
-static void _set_vs(int[MAX_NM_OF_VECTORS][8], int);
-static void _set_vs3(int[MAX_NM_OF_VECTORS][8], int[MAX_NM_OF_VECTORS][8], int[MAX_NM_OF_VECTORS][8], int, int, int);
-void miyawaki_theta(int, int, int, int, int, int);
-
 
 inline int inner_prod(int s[8], int t[8])
 {
@@ -60,7 +53,7 @@ int num_of_vectors[100] =
 int cached_vectors[MAX_NORM + 1][MAX_NM_OF_VECTORS][8];
 int cached_idx[MAX_NORM + 1] = {0};
 
-void _cache_vectors(void)
+static void _cache_vectors(void)
 {
 
   double m = sqrt(2 * MAX_NORM);
@@ -105,6 +98,31 @@ void _cache_vectors(void)
         }
     }
 }
+
+
+static void _set_vs(int vs[MAX_NM_OF_VECTORS][8], int a)
+{
+  int n = num_of_vectors[a];
+  for (int i = 0; i < n; i++)
+    {
+      for (int j = 0; j < 8; j++)
+        {
+          vs[i][j] = cached_vectors[a][i][j];
+        }
+    }
+}
+
+static void _set_vs3(int vs1[MAX_NM_OF_VECTORS][8],
+                     int vs2[MAX_NM_OF_VECTORS][8],
+                     int vs3[MAX_NM_OF_VECTORS][8],
+                     int a, int b, int c)
+{
+  _set_vs(vs1, a);
+  _set_vs(vs2, b);
+  _set_vs(vs3, c);
+}
+
+
 
 void miyawaki_theta(int a, int b, int c, int d, int e, int f)
 {
@@ -201,28 +219,6 @@ void miyawaki_theta(int a, int b, int c, int d, int e, int f)
   fmpz_clear(a0); fmpz_clear(a1); fmpz_clear(a2); fmpz_clear(a3); fmpz_clear(a4); fmpz_clear(a5); fmpz_clear(a6); fmpz_clear(a7); fmpz_clear(a8);
   fmpz_clear(rl_pt); fmpz_clear(im_pt); fmpz_clear(res); fmpz_clear(tmp);
 
-}
-
-static void _set_vs(int vs[MAX_NM_OF_VECTORS][8], int a)
-{
-  int n = num_of_vectors[a];
-  for (int i = 0; i < n; i++)
-    {
-      for (int j = 0; j < 8; j++)
-        {
-          vs[i][j] = cached_vectors[a][i][j];
-        }
-    }
-}
-
-static void _set_vs3(int vs1[MAX_NM_OF_VECTORS][8],
-                     int vs2[MAX_NM_OF_VECTORS][8],
-                     int vs3[MAX_NM_OF_VECTORS][8],
-                     int a, int b, int c)
-{
-  _set_vs(vs1, a);
-  _set_vs(vs2, b);
-  _set_vs(vs3, c);
 }
 
 int main(void)
