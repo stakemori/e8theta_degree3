@@ -9,23 +9,29 @@ def schur_polynomial(n, wt):
 
 class YoungTableu(object):
 
-    def __init__(self, n=None, numbers=None):
+    def __init__(self, n=None, col_numbers=None):
         self._n = n
-        self._numbers = numbers
+        self._col_numbers = col_numbers
 
     @property
     def n(self):
         return self._n
 
     @property
-    def numbers(self):
-        return self._numbers
+    def col_numbers(self):
+        return self._col_numbers
+
+    def row_numbers(self):
+        res = []
+        for i in range(self.n):
+            res.append([c[i] for c in self.col_numbers if len(c) > i])
+        return res
 
     def weight(self):
-        return [len(l) for l in self.numbers]
+        return [len(l) for l in self.row_numbers()]
 
     def __repr__(self):
-        return "\n".join(str(a) for a in self.numbers)
+        return "\n".join(str(a) for a in self.row_numbers())
 
 
 def _increasing_nums(n, m, lower_bds=None):
