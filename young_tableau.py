@@ -1,4 +1,4 @@
-from sage.all import PolynomialRing, QQ, matrix
+from sage.all import PolynomialRing, QQ, matrix, Combinations
 
 
 def schur_polynomial(n, wt):
@@ -28,7 +28,7 @@ class YoungTableu(object):
         return "\n".join(str(a) for a in self.numbers)
 
 
-def _increasing_nums(n, m, lower_bds):
+def _increasing_nums(n, m, lower_bds=None):
     '''
     n, m: positive integers,
     lower_bds: list of integers of length m.
@@ -36,7 +36,15 @@ def _increasing_nums(n, m, lower_bds):
     such that a0, a1, .. in [1, ..., n] and
     a0 >= lower_bds[0], a1 >= lower_bds[1] .. and a_(m-1) >= lower_bds[m-1].
     '''
-    pass
+    cmbs = Combinations(range(1, n + 1), m)
+    cmbs = (list(sorted(a)) for a in cmbs)
+    if lower_bds is None:
+        for a in cmbs:
+            yield a
+    else:
+        for a in cmbs:
+            if all(x >= y for x, y in zip(a, lower_bds)):
+                yield a
 
 
 def semistandard_young_tableaux(n, wt):
