@@ -33,7 +33,8 @@ def _increasing_nums(n, m, lower_bds=None):
     n, m: positive integers,
     lower_bds: list of integers of length m.
     Returns a generator of m numbers (a0, a1, ..., a_(m-1)),
-    such that a0, a1, .. in [1, ..., n] and
+    such that a0, a1, .. in [1, ..., n],
+    a0 < a1 < ... a_(m-1),
     a0 >= lower_bds[0], a1 >= lower_bds[1] .. and a_(m-1) >= lower_bds[m-1].
     '''
     cmbs = Combinations(range(1, n + 1), m)
