@@ -1,4 +1,5 @@
-from sage.all import PolynomialRing, QQ, matrix, Combinations
+from sage.all import PolynomialRing, QQ, matrix
+from itertools import combinations
 
 
 def schur_polynomial(n, wt):
@@ -43,7 +44,7 @@ def _increasing_nums(n, m, lower_bds=None):
     a0 < a1 < ... a_(m-1),
     a0 >= lower_bds[0], a1 >= lower_bds[1] .. and a_(m-1) >= lower_bds[m-1].
     '''
-    cmbs = Combinations(range(1, n + 1), m)
+    cmbs = combinations(range(1, n + 1), m)
     cmbs = (list(sorted(a)) for a in cmbs)
     if lower_bds is None:
         for a in cmbs:
