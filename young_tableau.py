@@ -1,8 +1,18 @@
-from sage.all import PolynomialRing, QQ, matrix
+from sage.all import PolynomialRing, QQ, matrix, cached_function
 from itertools import combinations
 
 
-def schur_polynomial(n, wt):
+def poly_repn_dim(wt):
+    return sum(schur_polynomial(wt).coefficients())
+
+
+def schur_polynomial(wt):
+    return _schur_polynomial_cached(tuple(wt))
+
+
+@cached_function
+def _schur_polynomial_cached(wt):
+    n = len(wt)
     R = PolynomialRing(QQ, names=["x%s" % i for i in xrange(n)])
     l = [i + a for i, a in zip(reversed(xrange(n)), wt)]
     return R(_vandermonde(n, l) / _vandermonde(n, reversed(range(n))))
