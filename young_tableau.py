@@ -56,9 +56,24 @@ def _increasing_nums(n, m, lower_bds=None):
 
 
 def semistandard_young_tableaux(n, wt):
-    '''Returns a list of semistandard Young tableaux.
+    '''Returns a generator of semistandard Young tableaux.
     '''
-    pass
+    wt_rvsd = list(reversed(wt))
+    wt_df = [wt_rvsd[0]] + [wt_rvsd[i + 1] - wt_rvsd[i] for i in range(n - 1)]
+    col_lngs = reduce(
+        lambda x, y: x + y, [[l] * a for l, a in zip(reversed(range(1, n + 1)), wt_df)])
+
+    def _prod(col_lngs):
+        if len(col_lngs) == 1:
+            for a in _increasing_nums(n, col_lngs[0]):
+                yield [a]
+        else:
+            for b in _prod(col_lngs[:-1]):
+                for c in _increasing_nums(n, col_lngs[-1], lower_bds=b[-1]):
+                    yield list(b) + [c]
+
+    for a in _prod(col_lngs):
+        yield YoungTableu(n=n, col_numbers=a)
 
 
 def _vandermonde(n, wt):
