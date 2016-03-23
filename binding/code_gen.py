@@ -99,25 +99,33 @@ class FmpzStyle(CodeStyle):
         return "fmpz_sub(%s, %s, %s);" % (a, b, c)
 
     def mul_si(self, a, b, c):
-        if c == 0:
-            return self.zero_z(a)
+        res_dct_special_case = {0: self.zero_z(a),
+                                1: self.set_z(a, b),
+                                -1: "fmpz_neg(%s, %s);" % (a, b)}
+        if c in res_dct_special_case:
+            return res_dct_special_case[c]
+
         tpw = False
+        e = None
         fc = factor(c)
         if is_prime_power(c) and fc[0][0] == 2:
+            # The case when c is a power of 2
             tpw = True
             e = fc[0][1]
-        if c == 1:
-            return self.set_z(a, b)
-        elif c > 0 and tpw:
+
+        if c > 0:
+            return self._mul_si_pos(a, b, c, e, tpw)
+        else:
+            return "%s fmpz_neg(%s, %s);" % (self._mul_si_pos(a, b, -c, e, tpw), a, a)
+
+    def _mul_si_pos(self, a, b, c, e, tpw):
+        '''
+        Assume c > 1.
+        '''
+        if tpw:
             return "fmpz_mul_2exp(%s, %s, %s);" % (a, b, e)
-        elif c < 0 and tpw:
-            return "%s fmpz_neg(%s, %s);" % (self.mul_si(a, b, -c), a, a)
-        elif c == -1:
-            return "fmpz_neg(%s, %s);" % (a, b)
-        elif c > 0:
+        else:
             return "fmpz_mul_ui(%s, %s, %s);" % (a, b, c)
-        elif c < 0:
-            return "%s fmpz_neg(%s, %s);" % (self.mul_si(a, b, -c), a, a)
 
 
 class PythonStyle(CodeStyle):
