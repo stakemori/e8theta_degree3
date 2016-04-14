@@ -151,7 +151,7 @@ def __gl3_coset_gamma0_distinct(a1, a2, a3, p):
             for m32 in range(p**(a3 - a2)):
                 m = matrix([[1, p * m12, p * m13],
                             [0, 1, 0],
-                            [0, m32, 0]])
+                            [0, m32, 1]])
                 yield w23 * m
 
     # w = (13)
@@ -168,7 +168,7 @@ def __gl3_coset_gamma0_distinct(a1, a2, a3, p):
         for m23 in range(p**(a2 - a1 - 1)):
             for m31 in range(p**(a3 - a2)):
                 m = matrix([[1, 0, 0],
-                            [m21, 1, p * 23],
+                            [m21, 1, p * m23],
                             [m31, 0, 1]])
                 yield w123 * m
     # w = (132)
