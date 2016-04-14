@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from sage.all import ZZ, mul, matrix
+from sage.all import ZZ, mul, matrix, block_diagonal_matrix
 from itertools import groupby
 
 
@@ -23,6 +23,30 @@ def _index_of_gamma_0_gl_n(alphas, p):
             if i < j:
                 res *= p ** ((ej - ei) * ri * rj)
     return res
+
+
+def _gl2_coset_gamma_subscript0(a, p):
+    w = matrix([[0, -1],
+                [1, 0]])
+    for m21 in range(p**a):
+        yield matrix([[1, 0],
+                      [m21, 1]])
+    for m12 in range(p**(a - 1)):
+        m = matrix([[1, p * m12],
+                    [0, 1]])
+        yield w * m
+
+
+def _gl2_coset_gamma0(a, p):
+    w = matrix([[0, -1],
+                [1, 0]])
+    for m12 in range(p**a):
+        yield matrix([[1, m12],
+                      [0, 1]])
+    for m21 in range(p**(a - 1)):
+        m = matrix([[1, 0],
+                    [p * m21, 1]])
+        yield w * m
 
 
 def _gl3_coset_gamma0(alphas, p):
@@ -55,11 +79,33 @@ def __gl3_coset_gamma0_2_1(a1, a3, p):
                         [0, 0, 1]])
             yield m
 
+    for m32 in range(p**(a3 - a1)):
+        m = matrix([[1, 0, 0],
+                    [0, 1, 0],
+                    [0, m32, 1]])
+        for g in _gl2_coset_gamma0(a3 - a1, p):
+            n = block_diagonal_matrix(g, matrix([[1]]))
+            yield w23 * m * n
+
 
 def __gl3_coset_gamma0_1_2(a1, a2, p):
     w12 = matrix([[0, 1, 0],
                   [1, 0, 0],
                   [0, 0, 1]])
+
+    for m12 in range(p**(a2 - a1 - 1)):
+        for m13 in range(p**(a2 - a1 - 1)):
+            m = matrix([[1, p * m12, p * m13],
+                        [0, 1, 0],
+                        [0, 0, 1]])
+            yield m
+    for m23 in range(p**(a2 - a1)):
+        m = matrix([[1, 0, 0],
+                    [0, 1, m23],
+                    [0, 0, 1]])
+        for g in _gl2_coset_gamma_subscript0(a2 - a1, p):
+            n = block_diagonal_matrix(g, matrix([[1]]))
+            yield w12 * m * n
 
 
 def __gl3_coset_gamma0_distinct(a1, a2, a3, p):
