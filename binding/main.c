@@ -235,5 +235,5 @@ int main(void)
 }
 
 /* Local Variables: */
-/* compile-command: "make compile" */
+/* compile-command: "cd ..; make compile" */
 /* End: */

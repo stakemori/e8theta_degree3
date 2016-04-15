@@ -1,7 +1,7 @@
 DEBUGOPT = -Wall -g -Og -std=c11
 FLINTOPT = -lm -lflint -lmpfr -lgmp -lpthread -I /usr/local/include/flint/
-OUT = main
-TARGET = main.c
+OUT = binding/main
+TARGET = binding/main.c
 CC = gcc
 compile:
 	$(CC) $(TARGET) -o $(OUT) $(FLINTOPT) -O2 -std=c11
