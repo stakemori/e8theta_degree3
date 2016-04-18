@@ -4,7 +4,7 @@ from sage.all import ZZ, mul, matrix, block_diagonal_matrix
 from itertools import groupby
 
 
-def _index_of_gamma_0_gl_n(alphas, p):
+def _index_of_gamma_0_gl_n(alpha, p):
     '''
     Returns delta(a1, ..., an) defined in Shimura, Euler products and Eisenstein
     series, pp 118, (15.1.7).
@@ -16,8 +16,8 @@ def _index_of_gamma_0_gl_n(alphas, p):
         return mul(1 - p ** (-i) for i in xrange(1, n + 1))
 
     e_r_ls = [(k, len(list(v)))
-              for k, v in groupby(sorted(alphas), lambda x: x)]
-    res = _bn(len(alphas)) / mul(_bn(r) for _, r in e_r_ls)
+              for k, v in groupby(sorted(alpha), lambda x: x)]
+    res = _bn(len(alpha)) / mul(_bn(r) for _, r in e_r_ls)
     for i, (ei, ri) in enumerate(e_r_ls):
         for j, (ej, rj) in enumerate(e_r_ls):
             if i < j:
@@ -37,15 +37,15 @@ def _gl2_coset_gamma0(a, p):
         yield w * m
 
 
-def _gl3_coset_gamma0(alphas, p):
+def _gl3_coset_gamma0(alpha, p):
     r'''
-    Let alphas = [a0, a1, a2] with a0 <= a1 <= a2,
+    Let alpha = [a0, a1, a2] with a0 <= a1 <= a2,
     g = diag([p^a0, p^a1, p^a2]), and Gamma0 = g^(-1) GL3(Z) g ∧ GL3(Z).
     Return a complete set Gamma0 \ GL3(Z).
     '''
     if p in ZZ:
         p = ZZ(p)
-    a0, a1, a2 = alphas
+    a0, a1, a2 = alpha
     if a0 < a1 < a2:
         return list(__gl3_coset_gamma0_distinct(a0, a1, a2, p))
     elif a0 == a1 and a1 < a2:
