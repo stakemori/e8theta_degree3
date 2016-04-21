@@ -167,3 +167,37 @@ def __gl3_coset_gamma0_distinct(a1, a2, a3, p):
                             [0, 1, 0],
                             [m31, m32, 1]])
                 yield w132 * m
+
+
+class HalfIntMatElement(object):
+
+    def __init__(self, T):
+        '''
+        :params T: half integral matrix of size 3 or a list
+        '''
+        if isinstance(T, list):
+            a, b, c, d, e, f = [ZZ(x) for x in T]
+            self.__T = matrix([[a, f / 2, e / 2],
+                               [f / 2, b, d / 2],
+                               [e / 2, d / 2, c]])
+        else:
+            self.__T = T
+
+    def __eq__(self, other):
+        if isinstance(other, HalfIntMatElement):
+            return self.T == other.T
+        else:
+            raise NotImplementedError
+
+    def __hash__(self):
+        return hash(tuple(self.T.list()))
+
+    @property
+    def T(self):
+        return self.__T
+
+
+def tp_action_fourier_coeff(p, T, F):
+    '''
+    Return the Tth Fourier coefficient of F|T(p), where F is a modular form.
+    '''
