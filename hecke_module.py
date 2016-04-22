@@ -3,7 +3,10 @@
 from sage.all import mul
 from sage.rings.integer_ring import ZZ
 from sage.rings.rational_field import QQ
+from sage.quadratic_forms.quadratic_form import QuadraticForm
+from sage.functions.other import floor
 from sage.matrix.constructor import diagonal_matrix, matrix, block_diagonal_matrix, identity_matrix
+from sage.modules.free_module_element import vector
 from itertools import groupby
 
 
@@ -263,7 +266,7 @@ def tp_action_fourier_coeff(p, T, F):
 
 
 def __tp_action_fc_dict(p, T):
-    res = []
+    res1 = []
     for alpha in alpha_list(1):
         D = diagonal_matrix([p**a for a in alpha])
         for V in _gl3_coset_gamma0(alpha, p):
@@ -271,6 +274,88 @@ def __tp_action_fc_dict(p, T):
             S = T.right_action(M.transpose())
             if S.is_divisible_by(p):
                 S = S // p
-                res.append(
+                res1.append(
                     (S, mul(p**alpha[i] for i in range(3) for j in range(i, 3)), M**(-1)))
+    res = []
+    for s, a, g in res1:
+        q = QuadraticForm(ZZ, ZZ(2) * s.T)
+        q1, u1 = q.reduced_binary_form()
+        q2, u2 = q1.minkowski_reduction()
+        u = u1 * u2
+        T = q2.scale_by_factor(ZZ(2)).Gram_matrix() / ZZ(2)
+        t = HalfIntMatElement(T)
+        assert s.right_action(u) == t
+        res.append((t, a, g * u.transpose() ** (-1)))
     return res
+
+
+def _nearest_integer(x):
+    r = floor(x)
+    if x - r > 0.5:
+        return r + 1
+    else:
+        return r
+
+
+def _gaussian_reduction(b1, b2, S):
+    '''
+    b1, b2: vectors of length 3
+    S: symmetric matrix of size 3
+    '''
+    u = identity_matrix(ZZ, 2)
+    while True:
+        nb1 = b1 * S * b1
+        nb2 = b2 * S * b2
+        if nb2 < nb1:
+            b1, b2 = b2, b1
+            u = u * matrix([[0, 1], [1, 0]])
+        x = b2 * S * b1 / b1 * S * b1
+        r = _nearest_integer(x)
+        a = b2 - r * b1
+        if a * S * a >= b1 * S * b1:
+            return (b1, b2, u)
+        else:
+            b1, b2 = a, b1
+            u = u * matrix([[-r, ZZ(1)], [ZZ(1), ZZ(0)]])
+
+
+def _minkowski_reduction(b1, b2, b3, S):
+
+    def inner_prod(x, y):
+        return x * S * y
+
+    u = identity_matrix(ZZ, 3)
+
+    while True:
+        (b1, e0), (b2, e1), (b3, e2) = sorted(
+            [(b1, 0), (b2, 1), (b3, 2)], key=lambda b: b[0] * S * b[0])
+        _u = matrix(ZZ, 3)
+        for i, j in zip(range(3), [e0, e1, e2]):
+            _u[i, j] = 1
+        u = u * _u
+
+        b1, b2, v = _gaussian_reduction(b1, b2, S)
+        u = u * block_diagonal_matrix(v, matrix([[ZZ(1)]]))
+
+        b23 = inner_prod(b2, b3)
+        b12 = inner_prod(b1, b2)
+        b13 = inner_prod(b1, b3)
+        b11 = inner_prod(b1, b1)
+        b22 = inner_prod(b2, b2)
+        b33 = inner_prod(b3, b3)
+
+        y1 = - (b13 / b11 - b12 * b23 / (b11 * b22)) / \
+            (1 - b12 ** 2 / (b11 * b22))
+        y2 = - (b23 / b22 - b12 * b13 / (b11 * b22)) / \
+            (1 - b12 ** 2 / (b11 * b22))
+        x1 = _nearest_integer(y1)
+        x2 = _nearest_integer(y2)
+
+        a = b3 + x2 * b2 + x1 * b1
+        if inner_prod(a, a) >= b33:
+            return (b1, b2, b3, u)
+        else:
+            u = u * matrix([[1, 0, x1],
+                            [0, 1, x2],
+                            [0, 0, 1]])
+            b3 = a
