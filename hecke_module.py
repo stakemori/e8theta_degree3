@@ -1,6 +1,9 @@
 # -*- coding: utf-8 -*-
 
-from sage.all import ZZ, mul, matrix, block_diagonal_matrix
+from sage.all import mul
+from sage.rings.integer_ring import ZZ
+from sage.rings.rational_field import QQ
+from sage.matrix.constructor import diagonal_matrix, matrix, block_diagonal_matrix, identity_matrix
 from itertools import groupby
 
 
@@ -52,6 +55,8 @@ def _gl3_coset_gamma0(alpha, p):
         return list(__gl3_coset_gamma0_2_1(a0, a2, p))
     elif a0 < a1 and a1 == a2:
         return list(__gl3_coset_gamma0_1_2(a0, a2, p))
+    elif a0 == a1 == a2:
+        return [identity_matrix(ZZ, 3)]
     else:
         raise ValueError
 
@@ -177,27 +182,95 @@ class HalfIntMatElement(object):
         '''
         if isinstance(T, list):
             a, b, c, d, e, f = [ZZ(x) for x in T]
-            self.__T = matrix([[a, f / 2, e / 2],
-                               [f / 2, b, d / 2],
-                               [e / 2, d / 2, c]])
+            mat = matrix([[a, f / 2, e / 2],
+                          [f / 2, b, d / 2],
+                          [e / 2, d / 2, c]])
         else:
-            self.__T = T
+            mat = T
+        self.__entries = tuple(mat.list())
 
     def __eq__(self, other):
         if isinstance(other, HalfIntMatElement):
-            return self.T == other.T
+            return self.__entries == other.__entries
         else:
             raise NotImplementedError
 
+    def __repr__(self):
+        return self.T.__repr__()
+
     def __hash__(self):
-        return hash(tuple(self.T.list()))
+        return hash(self.__entries)
 
     @property
     def T(self):
-        return self.__T
+        return matrix(3, self.__entries)
+
+    def right_action(self, g):
+        '''
+        :param g: matrix of size n
+        return self[g] (Siegel's notation)
+        '''
+        S = g.transpose() * self.T * g
+        return HalfIntMatElement(S)
+
+    def satisfy_cong_condition(self, p, alpha):
+        '''
+        Test if sum_{B mod D} exp(2pi T B D^(-1)) is zero, where D = diag(p^a1, p^a2, a^a3),
+        a1, a2, a3 = alpha.
+        '''
+        return (all(ZZ(self.T[i, i]) % p**alpha[i] == 0 for i in range(3)) and
+                all(ZZ(self.T[i, j] * 2) % p ** alpha[i] == 0
+                    for i in range(3) for j in range(i + 1, 3)))
+
+    def is_divisible_by(self, m):
+        '''
+        Test if self is divisible by m
+        :param m: integer
+        '''
+        return (all(ZZ(self.T[i, i]) % m == 0 for i in range(3)) and
+                all(ZZ(self.T[i, j] * 2) % m == 0
+                    for i in range(3) for j in range(i + 1, 3)))
+
+    def __floordiv__(self, other):
+        S = identity_matrix(QQ, 3)
+        for i in range(3):
+            S[i, i] = ZZ(self.T[i, i]) // other
+        for i in range(3):
+            for j in range(i + 1, 3):
+                S[i, j] = S[j, i] = (ZZ(self.T[i, j] * 2) // other) / 2
+        return HalfIntMatElement(S)
+
+
+def alpha_list(dl):
+    '''
+    Return a list of (a0, a1, a2) with 0 <= a0 <= a1 <= a2 <= dl
+    '''
+    return [(a0, a1, a2) for a0 in range(dl + 1)
+            for a1 in range(a0, dl + 1) for a2 in range(a1, dl + 1)]
 
 
 def tp_action_fourier_coeff(p, T, F):
     '''
     Return the Tth Fourier coefficient of F|T(p), where F is a modular form.
+    :param p: a prime number
+    :param T: a half integral matrix or an instance of HalfIntMatElement
+    :param F: a dictionary or a Siegel modular form of degree 3
     '''
+    res = 0
+    p = ZZ(p)
+    if not isinstance(T, HalfIntMatElement):
+        T = HalfIntMatElement(T)
+
+
+def __tp_action_fc_dict(p, T):
+    res = []
+    for alpha in alpha_list(1):
+        D = diagonal_matrix([p**a for a in alpha])
+        for V in _gl3_coset_gamma0(alpha, p):
+            M = D * V
+            S = T.right_action(M.transpose())
+            if S.is_divisible_by(p):
+                S = S // p
+                res.append(
+                    (S, mul(p**alpha[i] for i in range(3) for j in range(i, 3)), M**(-1)))
+    return res
