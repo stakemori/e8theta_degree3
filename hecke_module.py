@@ -263,7 +263,7 @@ def tp_action_fourier_coeff(p, T, F):
         T = HalfIntMatElement(T)
 
 
-def __tp_action_fc_dict(p, T):
+def __tp_action_fc_alist(p, T):
     res1 = []
     for alpha in alpha_list(1):
         D = diagonal_matrix([p**a for a in alpha])
