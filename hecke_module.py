@@ -3,10 +3,8 @@
 from sage.all import mul
 from sage.rings.integer_ring import ZZ
 from sage.rings.rational_field import QQ
-from sage.quadratic_forms.quadratic_form import QuadraticForm
 from sage.functions.other import floor
 from sage.matrix.constructor import diagonal_matrix, matrix, block_diagonal_matrix, identity_matrix
-from sage.modules.free_module_element import vector
 from itertools import groupby
 
 
@@ -274,14 +272,16 @@ def __tp_action_fc_dict(p, T):
             S = T.right_action(M.transpose())
             if S.is_divisible_by(p):
                 S = S // p
+                # p**(-6) and p in the third item are for normalization.
                 res1.append(
-                    (S, mul(p**alpha[i] for i in range(3) for j in range(i, 3)), M**(-1)))
+                    (S, p**(-6) * mul(p**alpha[i] for i in range(3) for j in range(i, 3)),
+                     M**(-1) * p))
     res = []
     # Use reduced quadratic forms
     for s, a, g in res1:
         u = _minkowski_reduction_transform_matrix(s.T)
         t = s.right_action(u)
-        res.append((t, a, g * u.transpose() ** (-1)))
+        res.append((t, a, g * u.transpose()))
     return res
 
 
