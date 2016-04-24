@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
-
+from itertools import groupby
 from sage.all import mul
 from sage.rings.integer_ring import ZZ
 from sage.rings.rational_field import QQ
 from sage.functions.other import floor
 from sage.matrix.constructor import diagonal_matrix, matrix, block_diagonal_matrix, identity_matrix
-from itertools import groupby
+from sage.rings.number_field.number_field import CyclotomicField
 
 
 def _index_of_gamma_0_gl_n(alpha, p):
@@ -310,6 +310,39 @@ def _gaussian_reduction(b1, b2, S):
             return (b1, b2)
         else:
             b1, b2 = a, b1
+
+
+def _B_genrator(p, alpha):
+    '''
+    Yield B s.t. BD^(-1) symmetric and BD^(-1) mod Sym_3(Z)
+    '''
+    a1, a2, a3 = alpha
+    for b11 in range(p**a1):
+        for b22 in range(p**a2):
+            for b33 in range(p**a3):
+                for b21 in range(p**a1):
+                    for b31 in range(p**a1):
+                        for b32 in range(p**a2):
+                            yield matrix([[b11, b21 * p**(a2 - a1), b31 * p**(a3 - a1)],
+                                          [b21, b22, b32 * p**(a3 - a2)],
+                                          [b31, b32, b33]])
+
+
+def _expt_sum(S, p, alpha, D, pred=None):
+    '''
+    Return the exponential sum in Miyawaki's paper, where alpha[-1] <= 2.
+    '''
+    p = ZZ(p)
+    K = CyclotomicField(p**2)
+    a = K.gens()[0]
+    res = 0
+    for B in _B_genrator(p, alpha):
+        if pred is None or pred(B, D, p):
+            res += a ** ZZ((S.T * B * D**(-1)).trace() * p ** 2)
+    try:
+        return QQ(res)
+    except TypeError:
+        return res
 
 
 def __minkowski_reduction(b1, b2, b3, S):
