@@ -402,6 +402,10 @@ def __minkowski_reduction(b1, b2, b3, S):
 
         a = b3 + x2 * b2 + x1 * b1
         if inner_prod(a, a) >= b33:
+            if b23 < 0:
+                b3 = - b3
+            if b12 < 0:
+                b1 = - b1
             return (b1, b2, b3)
         else:
             b3 = a
