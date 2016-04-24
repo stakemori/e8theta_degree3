@@ -320,12 +320,12 @@ def _B_genrator(p, alpha):
     Yield B s.t. BD^(-1) symmetric and BD^(-1) mod Sym_3(Z)
     '''
     a1, a2, a3 = alpha
-    for b11 in range(p**a1):
-        for b22 in range(p**a2):
-            for b33 in range(p**a3):
-                for b21 in range(p**a1):
-                    for b31 in range(p**a1):
-                        for b32 in range(p**a2):
+    for b11 in xrange(p**a1):
+        for b22 in xrange(p**a2):
+            for b33 in xrange(p**a3):
+                for b21 in xrange(p**a1):
+                    for b31 in xrange(p**a1):
+                        for b32 in xrange(p**a2):
                             yield matrix([[b11, b21 * p**(a2 - a1), b31 * p**(a3 - a1)],
                                           [b21, b22, b32 * p**(a3 - a2)],
                                           [b31, b32, b33]])
