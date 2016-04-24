@@ -4,9 +4,11 @@ from sage.all import mul
 from sage.rings.integer_ring import ZZ
 from sage.rings.rational_field import QQ
 from sage.functions.other import floor
-from sage.matrix.constructor import diagonal_matrix, matrix, block_diagonal_matrix, identity_matrix
+from sage.matrix.constructor import (diagonal_matrix, matrix, block_diagonal_matrix,
+                                     identity_matrix, block_matrix)
 from sage.rings.number_field.number_field import CyclotomicField
 from sage.misc.cachefunc import cached_function
+from sage.rings.finite_rings.constructor import FiniteField
 
 
 def _index_of_gamma_0_gl_n(alpha, p):
@@ -279,13 +281,39 @@ def __tp_action_fc_alist(p, T):
                     res1.append(
                         (S, p**(-6) * mul(p**alpha[i] for i in range(3) for j in range(i, 3)),
                          M**(-1) * p))
+    return __convert_reduced_res(res1)
+
+
+def __convert_reduced_res(alst):
     res = []
-    # Use reduced quadratic forms
-    for s, a, g in res1:
+    for s, a, g in alst:
         u = _minkowski_reduction_transform_matrix(s.T)
         t = s.right_action(u)
         res.append((t, a, g * u.transpose()))
     return res
+
+
+@cached_function
+def __tp2_action_fc_alist(p, T, i):
+    res1 = []
+
+    def pred(B, D, p):
+        M = block_matrix([[p**2 * D**(-1), B],
+                          [matrix(ZZ, 3), D]])
+        m = M.change_ring(FiniteField(p))
+        return m.rank() == 3 - i
+
+    for alpha in alpha_list(2):
+        D = diagonal_matrix([p**a for a in alpha])
+        for V in _gl3_coset_gamma0(alpha, p):
+            M = D * V
+            S = T.right_action(M.transpose())
+            if S.is_divisible_by(p**2):
+                S = S // (p**2)
+                res1.append((S, p**(-12) * _expt_sum(S, p, alpha, D, pred=pred),
+                             M**(-1) * p**2))
+
+    return __convert_reduced_res([(a, b, c) for a, b, c in res1 if b != 0])
 
 
 def _nearest_integer(x):
