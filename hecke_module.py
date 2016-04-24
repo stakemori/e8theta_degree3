@@ -6,6 +6,7 @@ from sage.rings.rational_field import QQ
 from sage.functions.other import floor
 from sage.matrix.constructor import diagonal_matrix, matrix, block_diagonal_matrix, identity_matrix
 from sage.rings.number_field.number_field import CyclotomicField
+from sage.misc.cachefunc import cached_function
 
 
 def _index_of_gamma_0_gl_n(alpha, p):
@@ -233,7 +234,7 @@ class HalfIntMatElement(object):
                     for i in range(3) for j in range(i + 1, 3)))
 
     def __floordiv__(self, other):
-        S = identity_matrix(QQ, 3)
+        S = matrix(QQ, 3)
         for i in range(3):
             S[i, i] = ZZ(self.T[i, i]) // other
         for i in range(3):
@@ -263,6 +264,7 @@ def tp_action_fourier_coeff(p, T, F):
         T = HalfIntMatElement(T)
 
 
+@cached_function
 def __tp_action_fc_alist(p, T):
     res1 = []
     for alpha in alpha_list(1):
