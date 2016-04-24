@@ -214,7 +214,7 @@ class HalfIntMatElement(object):
         S = g.transpose() * self.T * g
         return HalfIntMatElement(S)
 
-    def satisfy_cong_condition(self, p, alpha):
+    def satisfy_cong_condition_tp(self, p, alpha):
         '''
         Test if sum_{B mod D} exp(2pi T B D^(-1)) is zero, where D = diag(p^a1, p^a2, a^a3),
         a1, a2, a3 = alpha.
@@ -272,10 +272,11 @@ def __tp_action_fc_alist(p, T):
             S = T.right_action(M.transpose())
             if S.is_divisible_by(p):
                 S = S // p
-                # p**(-6) and p in the third item are for normalization.
-                res1.append(
-                    (S, p**(-6) * mul(p**alpha[i] for i in range(3) for j in range(i, 3)),
-                     M**(-1) * p))
+                if S.satisfy_cong_condition_tp(p, alpha):
+                    # p**(-6) and p in the third item are for normalization.
+                    res1.append(
+                        (S, p**(-6) * mul(p**alpha[i] for i in range(3) for j in range(i, 3)),
+                         M**(-1) * p))
     res = []
     # Use reduced quadratic forms
     for s, a, g in res1:
