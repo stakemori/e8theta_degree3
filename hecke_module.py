@@ -1,14 +1,13 @@
 # -*- coding: utf-8 -*-
 from itertools import groupby
-from sage.all import mul
-from sage.rings.integer_ring import ZZ
-from sage.rings.rational_field import QQ
-from sage.functions.other import floor
-from sage.matrix.constructor import (diagonal_matrix, matrix, block_diagonal_matrix,
-                                     identity_matrix, block_matrix)
-from sage.rings.number_field.number_field import CyclotomicField
-from sage.misc.cachefunc import cached_function
-from sage.rings.finite_rings.constructor import FiniteField
+from sage.all import mul, floor
+from sage.arith.all import kronecker_symbol
+from sage.matrix.all import (diagonal_matrix, matrix, block_diagonal_matrix,
+                             identity_matrix, block_matrix)
+from sage.misc.all import cached_function
+from sage.rings.all import FiniteField, CyclotomicField, ZZ, QQ
+from sage.quadratic_forms.all import least_quadratic_nonresidue
+import itertools
 
 
 def _index_of_gamma_0_gl_n(alpha, p):
@@ -297,12 +296,6 @@ def __convert_reduced_res(alst):
 def __tp2_action_fc_alist(p, T, i):
     res1 = []
 
-    def pred(B, D, p):
-        M = block_matrix([[p**2 * D**(-1), B],
-                          [matrix(ZZ, 3), D]])
-        m = M.change_ring(FiniteField(p))
-        return m.rank() == 3 - i
-
     for alpha in alpha_list(2):
         D = diagonal_matrix([p**a for a in alpha])
         for V in _gl3_coset_gamma0(alpha, p):
@@ -310,7 +303,7 @@ def __tp2_action_fc_alist(p, T, i):
             S = T.right_action(M.transpose())
             if S.is_divisible_by(p**2):
                 S = S // (p**2)
-                res1.append((S, p**(-12) * _expt_sum(S, p, alpha, D, pred=pred),
+                res1.append((S, p**(-12) * _expt_sum(S, p, alpha, D, i),
                              M**(-1) * p**2))
 
     return __convert_reduced_res([(a, b, c) for a, b, c in res1 if b != 0])
@@ -343,37 +336,100 @@ def _gaussian_reduction(b1, b2, S):
             b1, b2 = a, b1
 
 
-def _B_genrator(p, alpha):
-    '''
-    Yield B s.t. BD^(-1) symmetric and BD^(-1) mod Sym_3(Z)
-    '''
-    a1, a2, a3 = alpha
-    for b11 in xrange(p**a1):
-        for b22 in xrange(p**a2):
-            for b33 in xrange(p**a3):
-                for b21 in xrange(p**a1):
-                    for b31 in xrange(p**a1):
-                        for b32 in xrange(p**a2):
-                            yield matrix([[b11, b21 * p**(a2 - a1), b31 * p**(a3 - a1)],
-                                          [b21, b22, b32 * p**(a3 - a2)],
-                                          [b31, b32, b33]])
+def _sym_mat_gen(p, n):
+    if n == 1:
+        for a in range(p):
+            yield matrix([[a]])
+    else:
+        for s in _sym_mat_gen(p, n - 1):
+            ls = [range(p) for _ in range(n)]
+            for a in itertools.product(*ls):
+                v = matrix([a[:-1]])
+                yield block_matrix([[s, v.transpose()], [v, matrix([[a[-1]]])]])
 
 
-def _expt_sum(S, p, alpha, D, pred=None):
-    '''
-    Return the exponential sum in Miyawaki's paper, where alpha[-1] <= 2.
-    '''
-    p = ZZ(p)
-    K = CyclotomicField(p**2)
-    a = K.gens()[0]
+def _gen_gauss_sum_direct_way(N, p, r):
     res = 0
-    for B in _B_genrator(p, alpha):
-        if pred is None or pred(B, D, p):
-            res += a ** ZZ((S.T * B * D**(-1)).trace() * p ** 2)
+    K = CyclotomicField(p)
+    zeta = K.gen()
+    for S in _sym_mat_gen(p, N.ncols()):
+        if S.change_ring(FiniteField(p)).rank() == r:
+            res += zeta**((N * S).trace())
     try:
         return QQ(res)
     except TypeError:
         return res
+
+
+def _generalized_gauss_sum(N, p, r):
+    if r == 0:
+        return 1
+    if p == 2:
+        return _gen_gauss_sum_direct_way(N, p, r)
+    else:
+        N_mp = N.change_ring(FiniteField(p))
+        d, _, v = N_mp.smith_form()
+        t = d.rank()
+        N1 = (v.transpose() * N_mp *
+              v).matrix_from_rows_and_columns(range(t), range(t))
+        eps = kronecker_symbol(N1.det(), p)
+        return _gen_gauss_sum_non_dyadic(p, eps, N.ncols(), t, r)
+
+
+@cached_function
+def _gen_gauss_sum_non_dyadic(p, eps, n, t, r):
+    '''
+    cf. H. Saito, a generalization of Gauss sums
+    '''
+
+    def parenthesis_prod(a, b, m):
+        if m == 0:
+            return 1
+        else:
+            return mul(1 - a * b**i for i in range(0, m))
+
+    if (n - r) % 2 == 0:
+        m = (n - t) // 2
+    else:
+        m = (n - t + 1) // 2
+
+    if n == r:
+        if n % 2 == 1:
+            return ((-1) ** ((n - 2 * m + 1) // 2) * p**((n**2 + (2 * m)**2 - 1) // 4) *
+                    parenthesis_prod(p**(-1), p**(-2), m))
+        elif n % 2 == t % 2 == 0:
+            return ((-kronecker_symbol(-1, p)) ** ((n - 2 * m) // 2) *
+                    eps * p**((n**2 + (2 * m + 1)**2 - 1) // 4) *
+                    parenthesis_prod(p**(-1), p**(-2), m))
+        else:
+            return 0
+    else:
+        diag = [1 for _ in range(t)]
+        if eps == -1:
+            diag[-1] = least_quadratic_nonresidue(p)
+        diag = diag + [0 for _ in range(n - t)]
+        N = diagonal_matrix(diag).change_ring(FiniteField(p))
+        return _gen_gauss_sum_direct_way(N, p, r)
+
+
+def _expt_sum(S, p, alpha, D, i):
+    '''
+    Return the exponential sum in Miyawaki's paper, where alpha[-1] <= 2, for T_i(p^2).
+    '''
+    a, b, c = [alpha.count(_i) for _i in range(3)]
+    S33 = S.T.matrix_from_rows_and_columns(range(a + b, 3), range(a + b, 3))
+    S22 = S.T.matrix_from_rows_and_columns(range(a, a + b), range(a, a + b))
+    S32 = S.T.matrix_from_rows_and_columns(range(a + b, 3), range(a))
+
+    if c > 0 and not HalfIntMatElement(S33).is_divisible_by(p**2):
+        return 0
+    if c > 0 and b > 0 and any(x % p != 0 for x in (S32 * ZZ(2)).change_ring(ZZ).list()):
+        return 0
+
+    if b == 0:
+        return p**(c * (c + 1))
+    else:
+        return p**(c * (c + 1)) * p ** (b * c) * _generalized_gauss_sum(S22, p, b - i)
 
 
 def __minkowski_reduction(b1, b2, b3, S):
