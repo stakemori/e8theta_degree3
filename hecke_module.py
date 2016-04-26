@@ -376,7 +376,7 @@ def _generalized_gauss_sum(N, p, r):
 
 def _half_int_mat_is_div_by(S, m):
     n = S.ncols()
-    return (all(S[i, i] % m == 0 for i in range(n)) and
+    return (all(ZZ(S[i, i]) % m == 0 for i in range(n)) and
             all(ZZ(2 * S[i, j]) % m == 0 for i in range(n) for j in range(i + 1, n)))
 
 
@@ -430,8 +430,10 @@ def _expt_sum(S, p, alpha, D, i):
     if c > 0 and b > 0 and any(x % p != 0 for x in (S32 * ZZ(2)).change_ring(ZZ).list()):
         return 0
 
-    if b == 0:
+    if b == 0 and a + c == 3 - i:
         return p**(c * (c + 1))
+    elif b == 0:
+        return 0
     else:
         return p**(c * (c + 1)) * p ** (b * c) * _generalized_gauss_sum(S22, p, b - i)
 
