@@ -230,9 +230,7 @@ class HalfIntMatElement(object):
         Test if self is divisible by m
         :param m: integer
         '''
-        return (all(ZZ(self.T[i, i]) % m == 0 for i in range(3)) and
-                all(ZZ(self.T[i, j] * 2) % m == 0
-                    for i in range(3) for j in range(i + 1, 3)))
+        return _half_int_mat_is_div_by(self.T, m)
 
     def __floordiv__(self, other):
         S = matrix(QQ, 3)
@@ -376,6 +374,12 @@ def _generalized_gauss_sum(N, p, r):
         return _gen_gauss_sum_non_dyadic(p, eps, N.ncols(), t, r)
 
 
+def _half_int_mat_is_div_by(S, m):
+    n = S.ncols()
+    return (all(S[i, i] % m == 0 for i in range(n)) and
+            all(ZZ(2 * S[i, j]) % m == 0 for i in range(n) for j in range(i + 1, n)))
+
+
 @cached_function
 def _gen_gauss_sum_non_dyadic(p, eps, n, t, r):
     '''
@@ -421,7 +425,7 @@ def _expt_sum(S, p, alpha, D, i):
     S22 = S.T.matrix_from_rows_and_columns(range(a, a + b), range(a, a + b))
     S32 = S.T.matrix_from_rows_and_columns(range(a + b, 3), range(a))
 
-    if c > 0 and not HalfIntMatElement(S33).is_divisible_by(p**2):
+    if c > 0 and not _half_int_mat_is_div_by(S33, p**2):
         return 0
     if c > 0 and b > 0 and any(x % p != 0 for x in (S32 * ZZ(2)).change_ring(ZZ).list()):
         return 0
