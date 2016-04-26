@@ -16,5 +16,7 @@ clean:
 
 test-coset:
 	sage -c 'sys.path.append("$(parent_dir)"); import e8theta_degree3.tests.hecke_module_test'
+test-gen-gauss-sum:
+	sage -c 'sys.path.append("$(parent_dir)"); import e8theta_degree3.tests.gen_gauss_sum_test'
 
 .PHONY: compile clean debug
