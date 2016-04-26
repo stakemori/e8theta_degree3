@@ -386,9 +386,9 @@ def _gen_gauss_sum_non_dyadic(p, eps, n, t, r):
         if m == 0:
             return 1
         else:
-            return mul(1 - a * b**i for i in range(0, m))
+            return mul(1 - a * b**i for i in range(m))
 
-    if (n - r) % 2 == 0:
+    if (n - t) % 2 == 0:
         m = (n - t) // 2
     else:
         m = (n - t + 1) // 2
