@@ -6,7 +6,7 @@ from sage.matrix.all import (diagonal_matrix, matrix, block_diagonal_matrix,
                              identity_matrix, block_matrix)
 from sage.misc.all import cached_function
 from sage.rings.all import FiniteField, CyclotomicField, ZZ, QQ
-from sage.quadratic_forms.all import least_quadratic_nonresidue
+from sage.quadratic_forms.all import least_quadratic_nonresidue, QuadraticForm
 from sage.functions.all import sgn, floor, ceil
 import itertools
 
@@ -279,16 +279,32 @@ def __tp_action_fc_alist(p, T):
                     res1.append(
                         (S, p**(-6) * mul(p**alpha[i] for i in range(3) for j in range(i, 3)),
                          M**(-1) * p))
-    return __convert_reduced_res(res1)
+    return __convert_reduced_nonisom_matrices(res1)
 
 
-def __convert_reduced_res(alst):
-    res = []
+def __convert_reduced_nonisom_matrices(alst):
+    red_res = []
     for s, a, g in alst:
         u = _minkowski_reduction_transform_matrix(s.T)
         t = s.right_action(u)
-        res.append((t, a, g * u.transpose()))
-    return res
+        red_res.append((t, a, g * u.transpose()**(-1)))
+
+    non_isoms = []
+
+    for s, a, g in red_res:
+        q = QuadraticForm(ZZ, 2 * s.T)
+        u = None
+        for t, _, _ in non_isoms:
+            q1 = QuadraticForm(ZZ, 2 * t.T)
+            if q.det() == q1.det():
+                u = q.is_globally_equivalent_to(q1, return_matrix=True)
+                if u:
+                    break
+        if u:
+            non_isoms.append((s.right_action(u), a, g * u.transpose()**(-1)))
+        else:
+            non_isoms.append((s, a, g))
+    return non_isoms
 
 
 @cached_function
@@ -305,7 +321,7 @@ def __tp2_action_fc_alist(p, T, i):
                 res1.append((S, p**(-12) * _expt_sum(S, p, alpha, D, i),
                              M**(-1) * p**2))
 
-    return __convert_reduced_res([(a, b, c) for a, b, c in res1 if b != 0])
+    return __convert_reduced_nonisom_matrices([(a, b, c) for a, b, c in res1 if b != 0])
 
 
 def _nearest_integer(x):
