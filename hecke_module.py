@@ -7,6 +7,7 @@ from sage.matrix.all import (diagonal_matrix, matrix, block_diagonal_matrix,
 from sage.misc.all import cached_function
 from sage.rings.all import FiniteField, CyclotomicField, ZZ, QQ
 from sage.quadratic_forms.all import least_quadratic_nonresidue
+from sage.functions.all import sgn
 import itertools
 
 
@@ -464,10 +465,27 @@ def _minkowski_reduction(b1, b2, b3, S):
 
         a = b3 + x2 * b2 + x1 * b1
         if inner_prod(a, a) >= b33:
-            if b23 < 0:
-                b3 = - b3
-            if b12 < 0:
-                b1 = - b1
+            # Change sings of b1, b2, b3 and terminate the alogrithm
+            sngs = [sgn(b12), sgn(b13), sgn(b23)]
+            bs = [b1, b2, b3]
+            try:
+                # If b12, b13 or b23 is zero, change sgns of b1, b2, b3 so that
+                # b12, b13, b23 >= 0.
+                zero_i = sngs.index(0)
+                set_ls = [set([1, 2]), set([1, 3]), set([2, 3])]
+                t = set_ls[zero_i]
+                _other = [x for x in [1, 2, 3] if x not in t][0]
+                for x in t:
+                    i = set_ls.index(set([x, _other]))
+                    if sngs[i] < 0:
+                        bs[x - 1] *= -1
+                b1, b2, b3 = bs
+            except ValueError:
+                # Else change sgns so that b12, b13 > 0
+                if b12 < 0:
+                    b2 = -b2
+                if b13 < 0:
+                    b3 = -b3
             return (b1, b2, b3)
         else:
             b3 = a
