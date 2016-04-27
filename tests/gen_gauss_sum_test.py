@@ -19,7 +19,8 @@ class GenGaussSum(unittest.TestCase):
         N = diagonal_matrix([1, 2, 0])
         p = ZZ(3)
         N = N.change_ring(FiniteField(p))
-        for diag in [[1, 2, 0], [1, 0, 0], [2, 0, 0], [1, 0, 0], [0, 0, 0]]:
+        for diag in [[1, 2, 0], [1, 0, 0], [2, 0, 0], [1, 0, 0], [0, 0, 0],
+                     [1, 1, 1], [1, 1, 2]]:
             for r in [1, 2, 3]:
                 self.assert_gauss_sums(diag, ZZ(3), r, verbose=True)
 
