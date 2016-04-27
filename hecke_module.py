@@ -475,7 +475,7 @@ def _minkowski_reduction(b1, b2, b3, S):
 
 def _minkowski_reduction_transform_matrix(S):
     '''
-    Return a unimodular matrix u such that u * S * u^t is reduced in Minkowski's sense.
+    Return a unimodular matrix u such that u^t * S * u is reduced in Minkowski's sense.
     '''
     b1, b2, b3 = identity_matrix(QQ, 3).columns()
     c1, c2, c3 = _minkowski_reduction(b1, b2, b3, S)
