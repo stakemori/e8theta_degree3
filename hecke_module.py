@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 from itertools import groupby
-from sage.all import mul, floor
+from sage.all import mul
 from sage.arith.all import kronecker_symbol
 from sage.matrix.all import (diagonal_matrix, matrix, block_diagonal_matrix,
                              identity_matrix, block_matrix)
 from sage.misc.all import cached_function
 from sage.rings.all import FiniteField, CyclotomicField, ZZ, QQ
 from sage.quadratic_forms.all import least_quadratic_nonresidue
-from sage.functions.all import sgn
+from sage.functions.all import sgn, floor, ceil
 import itertools
 
 
@@ -460,11 +460,18 @@ def _minkowski_reduction(b1, b2, b3, S):
             (1 - b12 ** 2 / (b11 * b22))
         y2 = - (b23 / b22 - b12 * b13 / (b11 * b22)) / \
             (1 - b12 ** 2 / (b11 * b22))
-        x1 = _nearest_integer(y1)
-        x2 = _nearest_integer(y2)
 
-        a = b3 + x2 * b2 + x1 * b1
-        if inner_prod(a, a) >= b33:
+        # Find integers x1, x2 so that norm(b3 + x2 * b2 + x1 * b1) is minimal.
+        a_norms_alst = []
+
+        for x1 in [floor(y1), ceil(y1)]:
+            for x2 in [floor(y2), ceil(y2)]:
+                a = b3 + x2 * b2 + x1 * b1
+                a_norms_alst.append((x1, x2, a, inner_prod(a, a)))
+        _inner_prod_a = min(x[-1] for x in a_norms_alst)
+        x1, x2, a, _ = next(x for x in a_norms_alst if x[-1] == _inner_prod_a)
+
+        if _inner_prod_a >= b33:
             # Change sings of b1, b2, b3 and terminate the alogrithm
             sngs = [sgn(b12), sgn(b13), sgn(b23)]
             bs = [b1, b2, b3]
