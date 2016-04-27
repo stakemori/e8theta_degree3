@@ -328,7 +328,7 @@ def _gaussian_reduction(b1, b2, S):
         x = (b2 * S * b1) / (b1 * S * b1)
         r = _nearest_integer(x)
         a = b2 - r * b1
-        if a * S * a >= b1 * S * b1:
+        if a * S * a >= b2 * S * b2:
             return (b1, b2)
         else:
             b1, b2 = a, b1
