@@ -31,7 +31,3 @@ class GenGaussSum(unittest.TestCase):
 
 suite = unittest.TestLoader().loadTestsFromTestCase(GenGaussSum)
 unittest.TextTestRunner(verbosity=2).run(suite)
-
-# Local Variables:
-# compile-command: "cd ..; make test-gen-gauss-sum"
-# End:

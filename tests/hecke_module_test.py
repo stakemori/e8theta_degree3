@@ -47,7 +47,3 @@ class CosetTest(unittest.TestCase):
 
 suite = unittest.TestLoader().loadTestsFromTestCase(CosetTest)
 unittest.TextTestRunner(verbosity=2).run(suite)
-
-# Local Variables:
-# compile-command: "cd ..; make test-coset"
-# End:

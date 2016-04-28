@@ -32,7 +32,3 @@ class MinkowskiReductionTest(unittest.TestCase):
 
 suite = unittest.TestLoader().loadTestsFromTestCase(MinkowskiReductionTest)
 unittest.TextTestRunner(verbosity=2).run(suite)
-
-# Local Variables:
-# compile-command: "cd ..; make test-minkowski"
-# End:
