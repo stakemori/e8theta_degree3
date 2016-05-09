@@ -10,6 +10,9 @@ class ReplSpaceElement(object):
     def vector(self):
         return self._v
 
+    def __repr__(self):
+        return repr(self.vector)
+
     def __init__(self, v):
         self._v = vector((a for a in v))
 
