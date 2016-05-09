@@ -34,7 +34,7 @@ class ReplSpaceElement(object):
             raise ValueError
 
     @abstractmethod
-    def right_action(self, g):
+    def left_action(self, g):
         r'''
         :param g: an element of GL_n
         :returns g \dot self

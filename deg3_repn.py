@@ -23,6 +23,6 @@ def _bideterminant(a, b):
     return res
 
 
-def _t_lambda(wts):
+def _t_lambda(wt):
     return YoungTableu(n=3, row_numbers=[[i + 1 for _ in range(a)]
-                                         for i, a in enumerate(wts)])
+                                         for i, a in enumerate(wt)])
