@@ -37,6 +37,10 @@ class ReplSpaceElement(object):
             raise ValueError
 
     @abstractmethod
+    def parent(self):
+        pass
+
+    @abstractmethod
     def left_action(self, g):
         r'''
         :param g: an element of GL_n

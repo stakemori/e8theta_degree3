@@ -109,4 +109,8 @@ def element_constructor(wt):
             pol = M.to_pol(self.vector)
             pol1 = left_action_as_pol(pol, g)
             return GL3RepnElement(M.to_vector(pol1))
+
+        def parent(self):
+            return M
+
     return GL3RepnElement
