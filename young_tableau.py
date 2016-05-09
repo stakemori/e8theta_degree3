@@ -1,5 +1,5 @@
 from sage.all import PolynomialRing, QQ, matrix, cached_function
-from itertools import combinations
+from itertools import combinations, takewhile
 
 
 def poly_repn_dim(wt):
@@ -25,11 +25,20 @@ def _vandermonde(n, wt):
     return m.det()
 
 
+def _transpose(lss):
+    '''
+    lss: list of lists whose length are descreasing. Return the transpose of lss.
+    '''
+    return [[ls[i] for ls in takewhile(lambda x, i=i: len(x) > i, lss)]
+            for i in range(len(lss[0]))]
+
+
 class YoungTableu(object):
 
-    def __init__(self, n=None, col_numbers=None):
+    def __init__(self, n=None, col_numbers=None, row_numbers=None):
         self._n = n
         self._col_numbers = col_numbers
+        self._row_numers = row_numbers
 
     @property
     def n(self):
@@ -37,19 +46,25 @@ class YoungTableu(object):
 
     @property
     def col_numbers(self):
-        return self._col_numbers
+        if self._col_numbers is not None:
+            return self._col_numbers
+        else:
+            self._col_numbers = _transpose(self.row_numbers)
+            return self._col_numbers
 
+    @property
     def row_numbers(self):
-        res = []
-        for i in range(self.n):
-            res.append([c[i] for c in self.col_numbers if len(c) > i])
-        return res
+        if self._row_numers is not None:
+            return self._row_numers
+        else:
+            self._row_numers = _transpose(self._col_numbers)
+            return self._row_numers
 
     def weight(self):
-        return [len(l) for l in self.row_numbers()]
+        return [len(l) for l in self.row_numbers]
 
     def __repr__(self):
-        return "\n".join(str(a) for a in self.row_numbers())
+        return "\n".join(str(a) for a in self.row_numbers)
 
 
 def _increasing_nums(n, m, lower_bds=None):
