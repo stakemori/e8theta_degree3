@@ -1,7 +1,7 @@
 from sage.rings.all import PolynomialRing, QQ
 from sage.matrix.all import matrix
 from sage.misc.all import cached_function
-from .young_tablue import YoungTableau
+from e8theta_degree3.young_tableau import YoungTableu
 
 
 @cached_function
@@ -24,5 +24,5 @@ def _bideterminant(a, b):
 
 
 def _t_lambda(wts):
-    return YoungTableau(n=3, col_numbers=[[i + 1 for _ in range(a)]
-                                          for i, a in enumerate(wts)])
+    return YoungTableu(n=3, row_numbers=[[i + 1 for _ in range(a)]
+                                         for i, a in enumerate(wts)])
