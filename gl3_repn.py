@@ -83,7 +83,7 @@ class GL3RepnModule(object):
         m = matrix([[b[t] for t in tpls] for b in self.basis_as_pol()])
         return v * m ** (-1)
 
-    def repr_matrix(self, g):
+    def matrix_representaion(self, g):
         '''
         g: matrix of size 3.
         Return matrix representation of the left action of g by self.basis_as_pol().
