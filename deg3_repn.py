@@ -25,6 +25,11 @@ def matrix_var_right_mul_dict(g):
     return {m[i, j]: m1[i, j] for i in range(3) for j in range(3)}
 
 
+def left_action_as_pol(pol, g):
+    d = matrix_var_right_mul_dict(g)
+    return pol.subs(d)
+
+
 def _bideterminant(a, b):
     '''
     a, b: an instance of young_tableau.YoungTableu
@@ -58,7 +63,7 @@ class GL3RepnModule(object):
     @cached_method
     def basis_as_pol(self):
         t = _t_lambda(self.wt)
-        return [_bideterminant(a, t) for a in semistandard_young_tableaux(3, self.wt)]
+        return [_bideterminant(t, a) for a in semistandard_young_tableaux(3, self.wt)]
 
     @cached_method
     def linearly_indep_tpls(self):
