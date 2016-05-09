@@ -3,7 +3,7 @@ from itertools import combinations, takewhile
 
 
 def poly_repn_dim(wt):
-    return sum(schur_polynomial(wt).coefficients())
+    return int(sum(schur_polynomial(wt).coefficients()))
 
 
 def schur_polynomial(wt):
