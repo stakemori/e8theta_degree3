@@ -99,6 +99,14 @@ class GL3RepnModule(object):
         return matrix([self.to_vector(a) for a in bs_acted]).transpose()
 
 
-class Gl3RepnElement(ReplSpaceElement):
+def element_constructor(wt):
 
-    pass
+    M = GL3RepnModule(wt)
+
+    class GL3RepnElement(ReplSpaceElement):
+
+        def left_action(self, g):
+            pol = M.to_pol(self.vector)
+            pol1 = left_action_as_pol(pol, g)
+            return GL3RepnElement(M.to_vector(pol1))
+    return GL3RepnElement
