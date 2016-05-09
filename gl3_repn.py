@@ -73,15 +73,21 @@ class GL3RepnModule(object):
         vecs = [[a[t] for a in self.basis_as_pol()] for t in kys]
         return [kys[i] for i in find_linearly_indep_indices(vecs, self.dimension())]
 
+    @cached_method
+    def _transform_mat(self):
+        return matrix([[b[t] for t in self.linearly_indep_tpls()] for b in self.basis_as_pol()])
+
     def to_vector(self, a):
         '''
         an element of the parent of matrix_var().
         Return vector corresponding a.
         '''
-        tpls = self.linearly_indep_tpls()
-        v = vector([a[t] for t in tpls])
-        m = matrix([[b[t] for t in tpls] for b in self.basis_as_pol()])
+        v = vector([a[t] for t in self.linearly_indep_tpls()])
+        m = self._transform_mat()
         return v * m ** (-1)
+
+    def to_pol(self, v):
+        return sum(a * b for a, b in zip(v, self.basis_as_pol()))
 
     def matrix_representaion(self, g):
         '''
