@@ -1,12 +1,16 @@
 # -*- coding: utf-8; mode: sage -*-
 from sage.all import PolynomialRing, mul, ZZ, uniq, SR, factor, is_prime_power
-from abc import ABCMeta, abstractmethod
+from abc import ABCMeta, abstractmethod, abstractproperty
 
 
 class CodeStyle(object):
 
     __metaclass__ = ABCMeta
 
+    @abstractproperty
+    def sep(self):
+        pass
+
     @abstractmethod
     def zero_z(self, a):
         pass
@@ -56,52 +60,21 @@ class CodeStyle(object):
         pass
 
     @abstractmethod
-    def mul_si(self, a, b, c):
+    def mul_ui(self, a, b, c):
         pass
 
+    @abstractmethod
+    def neg(self, a, b):
+        pass
 
-class FmpzStyle(CodeStyle):
-
-    def zero_z(self, a):
-        return "fmpz_zero(%s);" % a
-
-    def set_mul(self, a, b, c):
-        return "fmpz_mul(%s, %s, %s);" % (a, b, c)
-
-    def set_add_mul(self, a, b, c):
-        return "fmpz_addmul(%s, %s, %s);" % (a, b, c)
-
-    def set_si(self, a, b):
-        return "fmpz_set_si(%s, %s);" % (a, b)
-
-    def set_z(self, a, b):
-        return "fmpz_set(%s, %s);" % (a, b)
-
-    def add_ui(self, a, b, c):
-        return "fmpz_add_ui(%s, %s, %s);" % (a, b, c)
-
-    def sub_ui(self, a, b, c):
-        return "fmpz_sub_ui(%s, %s, %s);" % (a, b, c)
-
-    def pow_ui(self, a, b, c):
-        return "fmpz_pow_ui(%s, %s, %s);" % (a, b, c)
-
-    def add_mul_ui(self, a, b, c):
-        return "fmpz_addmul_ui(%s, %s, %s);" % (a, b, c)
-
-    def add_z(self, a, b, c):
-        return "fmpz_add(%s, %s, %s);" % (a, b, c)
-
-    def sub_mul_ui(self, a, b, c):
-        return "fmpz_submul_ui(%s, %s, %s);" % (a, b, c)
-
-    def sub_z(self, a, b, c):
-        return "fmpz_sub(%s, %s, %s);" % (a, b, c)
+    @abstractmethod
+    def mul_2exp(self, a, b, e):
+        pass
 
     def mul_si(self, a, b, c):
         res_dct_special_case = {0: self.zero_z(a),
                                 1: self.set_z(a, b),
-                                -1: "fmpz_neg(%s, %s);" % (a, b)}
+                                -1: self.neg(a, b)}
         if c in res_dct_special_case:
             return res_dct_special_case[c]
 
@@ -116,19 +89,77 @@ class FmpzStyle(CodeStyle):
         if c > 0:
             return self._mul_si_pos(a, b, c, e, tpw)
         else:
-            return "%s fmpz_neg(%s, %s);" % (self._mul_si_pos(a, b, -c, e, tpw), a, a)
+            return "%s%s %s" % (self._mul_si_pos(a, b, -c, e, tpw),
+                                self.sep,
+                                self.neg(a, a))
 
     def _mul_si_pos(self, a, b, c, e, tpw):
         '''
         Assume c > 1.
         '''
         if tpw:
-            return "fmpz_mul_2exp(%s, %s, %s);" % (a, b, e)
+            return self.mul_2exp(a, b, e)
         else:
-            return "fmpz_mul_ui(%s, %s, %s);" % (a, b, c)
+            return self.mul_ui(a, b, c)
+
+
+class FmpzStyle(CodeStyle):
+
+    @property
+    def sep(self):
+        return ";"
+
+    def zero_z(self, a):
+        return "fmpz_zero(%s)" % a
+
+    def set_mul(self, a, b, c):
+        return "fmpz_mul(%s, %s, %s)" % (a, b, c)
+
+    def set_add_mul(self, a, b, c):
+        return "fmpz_addmul(%s, %s, %s)" % (a, b, c)
+
+    def set_si(self, a, b):
+        return "fmpz_set_si(%s, %s)" % (a, b)
+
+    def set_z(self, a, b):
+        return "fmpz_set(%s, %s)" % (a, b)
+
+    def add_ui(self, a, b, c):
+        return "fmpz_add_ui(%s, %s, %s)" % (a, b, c)
+
+    def sub_ui(self, a, b, c):
+        return "fmpz_sub_ui(%s, %s, %s)" % (a, b, c)
+
+    def pow_ui(self, a, b, c):
+        return "fmpz_pow_ui(%s, %s, %s)" % (a, b, c)
+
+    def add_mul_ui(self, a, b, c):
+        return "fmpz_addmul_ui(%s, %s, %s)" % (a, b, c)
+
+    def add_z(self, a, b, c):
+        return "fmpz_add(%s, %s, %s)" % (a, b, c)
+
+    def sub_mul_ui(self, a, b, c):
+        return "fmpz_submul_ui(%s, %s, %s)" % (a, b, c)
+
+    def sub_z(self, a, b, c):
+        return "fmpz_sub(%s, %s, %s)" % (a, b, c)
+
+    def neg(self, a, b):
+        return "fmpz_neg(%s, %s)" % (a, b)
+
+    def mul_2exp(self, a, b, e):
+        return "fmpz_mul_2exp(%s, %s, %s)" % (a, b, e)
+
+    def mul_ui(self, a, b, c):
+        return "fmpz_mul_ui(%s, %s, %s)" % (a, b, c)
 
 
 class PythonStyle(CodeStyle):
+
+    @property
+    def sep(self):
+        return ";"
 
     def zero_z(self, a):
         return "%s = 0" % a
@@ -166,10 +197,16 @@ class PythonStyle(CodeStyle):
     def sub_z(self, a, b, c):
         return "%s = %s - %s" % (a, b, c)
 
-    def mul_si(self, a, b, c):
+    def mul_ui(self, a, b, c):
         return "%s = %s * (%s)" % (a, b, c)
 
-cur_sty = FmpzStyle()
+    def neg(self, a, b):
+        return "%s = -%s" % (a, b)
+
+    def mul_2exp(self, a, b, e):
+        return "%s = %s * 2**(%s)" % (a, b, e)
+
+cur_sty = PythonStyle()
 
 
 class Mul(object):
@@ -340,7 +377,7 @@ def _expr_to_pol(expr):
         return expr
 
 
-def pol_to_fmpz_code_and_result_var(pl, name, res_var_name, algorithm=None, sep="\n", indent=None):
+def pol_to_fmpz_code_and_result_var(pl, name, res_var_name, algorithm=None, sep=";\n", indent=None):
     if algorithm == "horner":
         n = pl.parent().ngens()
         vrs = [name + str(a) for a in range(n)]
