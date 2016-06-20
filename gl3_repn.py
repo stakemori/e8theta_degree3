@@ -100,6 +100,11 @@ class GL3RepnModule(object):
 
 
 def element_constructor(wt):
+    '''
+    wt: a list/tuple of non-increasing integers of length 3.
+    Returns a sub class of ReplSpaceElement of given wt.
+    Used for Hecke operators.
+    '''
 
     M = GL3RepnModule(wt)
 
