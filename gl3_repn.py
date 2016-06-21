@@ -1,8 +1,9 @@
 import operator
+import itertools
 
 from sage.rings.all import PolynomialRing, QQ
 from sage.matrix.all import matrix
-from sage.misc.all import cached_function, cached_method
+from sage.misc.all import cached_function, cached_method, mul
 from sage.modules.all import vector
 from e8theta_degree3.young_tableau import YoungTableu, semistandard_young_tableaux, poly_repn_dim
 from e8theta_degree3.repn import ReplSpaceElement
@@ -45,6 +46,11 @@ def _bideterminant(a, b):
 def _t_lambda(wt):
     return YoungTableu(n=3, row_numbers=[[i + 1 for _ in range(a)]
                                          for i, a in enumerate(wt)])
+
+
+@cached_function
+def gl3_repn_module(wt):
+    return GL3RepnModule(wt)
 
 
 class GL3RepnModule(object):
@@ -119,3 +125,115 @@ def element_constructor(wt):
             return M
 
     return GL3RepnElement
+
+
+@cached_function
+def _s_t_u_ring(base_ring=None):
+    if base_ring is None:
+        base_ring = QQ
+    R = PolynomialRing(
+        base_ring, names=("s0, s1, s2, s3, s4, s5, s6, s7,"
+                          "t0, t1, t2, t3, t4, t5, t6, t7,"
+                          "u0, u1, u2, u3, u4, u5, u6, u7"))
+    return R
+
+
+def _conj(pol):
+    return pol.map_coefficients(lambda c: c.conjugate())
+
+
+def _rl_part(pol):
+    S = _s_t_u_ring(QQ)
+    return S((pol + _conj(pol)) / QQ(2))
+
+
+def _im_part(pol):
+    K = pol.base_ring()
+    i = K.gen()
+    S = _s_t_u_ring(QQ)
+    return S((pol - _conj(pol)) / (QQ(2) * i))
+
+
+def _normalized_factor(pol):
+    '''
+    Prime factors of pol may differ by constant.
+    '''
+    l = [(a / a.lc(), b) for a, b in pol.factor() if not a.is_constant()]
+    a = pol.lc() / mul(a ** b for a, b in l).lc()
+    return NormFactorELt(a, l)
+
+
+class NormFactorELt(object):
+
+    def __init__(self, c, facs):
+        self._c = c
+        self._facs = facs
+
+    @property
+    def const(self):
+        return self._c
+
+    @property
+    def pols(self):
+        return self._facs
+
+    def __iter__(self):
+        yield (self.const, 1)
+        for a in self.pols:
+            yield a
+
+
+@cached_function
+def _pol_basis_factor_dct_and_ls(wt):
+    '''
+    wt: a list/tuple of non-increasing integers of length 3.
+    Let M a corresponding repn of GL3.
+    return a pair (d, l)
+    l: a list of polynomials obtained from prime factors of M.basis_as_pol().
+    d: dict s.t whose keys are M.basis_as_pol() and
+    f => [const, (b1, t1), (b2, t2), ... ],
+    where f = const b1^t1 * b2^t2 * ..., and b1, b2, ... in l.
+    '''
+    M = gl3_repn_module(wt)
+    basis = M.basis_as_pol()
+    facs = [(pol, _normalized_factor(pol)) for pol in basis]
+    l = list(
+        set(itertools.chain(*[[a for a, _ in fc.pols] for _, fc in facs])))
+    return [{pol: [fc.const] + fc.pols for pol, fc in facs}, l]
+
+
+@cached_function
+def euclidean_basis():
+    basis_vecs = [(QQ(1) / QQ(2), QQ(1) / QQ(2), QQ(1) / QQ(2),
+                   QQ(1) / QQ(2), QQ(1) / QQ(2), QQ(1) / QQ(2),
+                   QQ(1) / QQ(2), QQ(1) / QQ(2)),
+                  (0, 1, 0, 0, 0, 0, 0, 1),
+                  (0, 0, 1, 0, 0, 0, 0, 1),
+                  (0, 0, 0, 1, 0, 0, 0, 1),
+                  (0, 0, 0, 0, 1, 0, 0, 1),
+                  (0, 0, 0, 0, 0, 1, 0, 1),
+                  (0, 0, 0, 0, 0, 0, 1, 1),
+                  (0, 0, 0, 0, 0, 0, 0, 2)]
+    return [vector([QQ(a) for a in v1]) for v1 in basis_vecs]
+
+
+def to_eulidian_vec(t):
+    return sum([a * b for a, b in zip(t, euclidean_basis())])
+
+
+def _bideterminants_dict(mat, wt):
+    '''
+    wt: a list/tuple of non-increasing integers of length 3
+    mat: 3 * 8 matrix with mat * mat.transpose() = 0 with coefficients in
+    an imaginary quadratic field.
+    Return a dict
+    a: (real_part, imag_part) as polynomials of _s_t_u_ring(QQ),
+    where a is a prime factor of polynomial basis
+    '''
+    R = _s_t_u_ring()
+    stu_mt = matrix(R, 3, R.gens())
+    stu_mt = matrix([to_eulidian_vec(v) for v in stu_mt.rows()]).transpose()
+    subs_dct = dict(zip(matrix_var().list(), (mat * stu_mt).list()))
+    _, l = _pol_basis_factor_dct_and_ls(wt)
+    d = {a: a.subs(subs_dct) for a in l}
+    return {a: (_rl_part(b), _im_part(b)) for a, b in d.items()}
