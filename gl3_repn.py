@@ -54,6 +54,16 @@ class BiDeterminant(object):
                 [i - 1 for i in l1], [j - 1 for j in l2]).det())
         return res
 
+    def factor(self):
+        const = QQ(1)
+        dets = []
+        for d in self.determinants():
+            const = const * (-d.lc())
+            dets.append(d * (-d.lc()) ** (-1))
+        l = [(k, len(list(v)))
+             for k, v in itertools.groupby(sorted(dets), key=lambda x: x)]
+        return NormFactorELt(const, l)
+
     def as_pol(self):
         return mul(a for a in self.determinants())
 
@@ -192,15 +202,6 @@ def _im_part(pol):
     return ((pol - _conj(pol)) / (QQ(2) * i)).change_ring(QQ)
 
 
-def _normalized_factor(pol):
-    '''
-    Prime factors of pol may differ by constant.
-    '''
-    l = [(a / a.lc(), b) for a, b in pol.factor() if not a.is_constant()]
-    a = pol.lc() / mul(a ** b for a, b in l).lc()
-    return NormFactorELt(a, l)
-
-
 class NormFactorELt(object):
 
     def __init__(self, c, facs):
@@ -233,8 +234,8 @@ def _pol_basis_factor_dct_and_ls(wt):
     where f = const b1^t1 * b2^t2 * ..., and b1, b2, ... in l.
     '''
     M = gl3_repn_module(wt)
-    basis = M.basis_as_pol()
-    facs = [(pol, _normalized_factor(pol)) for pol in basis]
+    basis = M.basis()
+    facs = [(pol, pol.factor()) for pol in basis]
     l = list(
         set(itertools.chain(*[[a for a, _ in fc.pols] for _, fc in facs])))
     return [{pol: [fc.const] + fc.pols for pol, fc in facs}, l]
