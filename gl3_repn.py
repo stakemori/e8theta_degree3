@@ -31,6 +31,42 @@ def left_action_as_pol(pol, g):
     return pol.subs(d)
 
 
+class BiDeterminant(object):
+
+    def __init__(self, a, b):
+        self._a = a
+        self._b = b
+
+    @property
+    def a(self):
+        return self._a
+
+    @property
+    def b(self):
+        return self._b
+
+    @cached_method
+    def determinants(self):
+        m = matrix_var()
+        res = []
+        for l1, l2 in zip(self.a.col_numbers, self.b.col_numbers):
+            res.append(m.matrix_from_rows_and_columns(
+                [i - 1 for i in l1], [j - 1 for j in l2]).det())
+        return res
+
+    def as_pol(self):
+        return mul(a for a in self.determinants())
+
+    def __hash__(self):
+        return hash(('BiDeterminant', self.as_pol()))
+
+    def __eq__(self, other):
+        if isinstance(other, BiDeterminant):
+            return self.as_pol() == other.as_pol()
+        else:
+            return False
+
+
 def _bideterminant(a, b):
     '''
     a, b: an instance of young_tableau.YoungTableu
@@ -68,8 +104,12 @@ class GL3RepnModule(object):
 
     @cached_method
     def basis_as_pol(self):
+        return [b.as_pol() for b in self.basis()]
+
+    @cached_method
+    def basis(self):
         t = _t_lambda(self.wt)
-        return [_bideterminant(t, a) for a in semistandard_young_tableaux(3, self.wt)]
+        return [BiDeterminant(t, a) for a in semistandard_young_tableaux(3, self.wt)]
 
     @cached_method
     def linearly_indep_tpls(self):
