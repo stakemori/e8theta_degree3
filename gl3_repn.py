@@ -143,15 +143,13 @@ def _conj(pol):
 
 
 def _rl_part(pol):
-    S = _s_t_u_ring(QQ)
-    return S((pol + _conj(pol)) / QQ(2))
+    return ((pol + _conj(pol)) / QQ(2)).change_ring(QQ)
 
 
 def _im_part(pol):
     K = pol.base_ring()
     i = K.gen()
-    S = _s_t_u_ring(QQ)
-    return S((pol - _conj(pol)) / (QQ(2) * i))
+    return ((pol - _conj(pol)) / (QQ(2) * i)).change_ring(QQ)
 
 
 def _normalized_factor(pol):
@@ -237,3 +235,27 @@ def _bideterminants_dict(mat, wt):
     _, l = _pol_basis_factor_dct_and_ls(wt)
     d = {a: a.subs(subs_dct) for a in l}
     return {a: (_rl_part(b), _im_part(b)) for a, b in d.items()}
+
+
+def _pol_basis_as_polof_factors(wt, imag_quad, names_base=('rl', 'im')):
+    '''
+    wt: weight of repn of GL3
+    imag_quad: imaginary quadratic field
+    Returns a pair of dicts
+    '''
+    d, l = _pol_basis_factor_dct_and_ls(wt)
+    n = len(l)
+    names = itertools.chain(
+        *[[names_base[0] + str(a), names_base[1] + str(a)] for a in range(n)])
+    R = PolynomialRing(imag_quad, names=list(names))
+    omega = imag_quad.gen()
+    r_gens = R.gens()
+    subs_dct = {fc: gns[0] + omega * gns[1]
+                for gns, fc in zip([r_gens[a:a + 2] for a in range(0, n, 2)], l)}
+
+    def _subs(ls):
+        return ls[0] * mul(subs_dct[a] ** b for a, b in ls[1:])
+
+    res = {k: _subs(v) for k, v in d.items()}
+    return ({k: (_rl_part(v), _im_part(v)) for k, v in res.items()},
+            subs_dct)
