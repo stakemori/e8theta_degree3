@@ -260,7 +260,7 @@ def to_eulidian_vec(t):
     return sum([a * b for a, b in zip(t, euclidean_basis())])
 
 
-def _bideterminants_dict(mat, wt):
+def _bideterminant_prime_factors_dict(mat, wt):
     '''
     wt: a list/tuple of non-increasing integers of length 3
     mat: 3 * 8 matrix with mat * mat.transpose() = 0 with coefficients in
