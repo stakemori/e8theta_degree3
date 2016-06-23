@@ -109,5 +109,5 @@ void _set_vs3(int vs1[MAX_NM_OF_VECTORS][8],
 
 
 /* Local Variables: */
-/* compile-command: "gcc e8vectors.c -I. -shared -fPIC -o libe8vectors.so" */
+/* compile-command: "gcc e8vectors.c -I. -O2 -shared -fPIC -o libe8vectors.so" */
 /* End: */
