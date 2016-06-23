@@ -2,7 +2,7 @@ current_dir = $(shell pwd)
 parent_dir = $(shell dirname "$(current_dir)")
 DEBUGOPT = -Wall -g -Og -std=c11
 PATHOPT = -L$(current_dir)/binding -I/usr/local/include/flint/
-LIBOPT = -lm -lflint -lmpfr -lgmp -lpthread -le8vectors
+LIBOPT = -le8vectors -lm -lflint -lmpfr -lgmp -lpthread
 OUT = binding/main
 TARGET = binding/main.c
 CC = gcc
