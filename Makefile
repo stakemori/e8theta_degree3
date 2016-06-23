@@ -1,16 +1,17 @@
+current_dir = $(shell pwd)
+parent_dir = $(shell dirname "$(current_dir)")
 DEBUGOPT = -Wall -g -Og -std=c11
-FLINTOPT = -lm -lflint -lmpfr -lgmp -lpthread -I /usr/local/include/flint/
+PATHOPT = -L$(current_dir)/binding -I/usr/local/include/flint/
+LIBOPT = -lm -lflint -lmpfr -lgmp -lpthread -le8vectors
 OUT = binding/main
 TARGET = binding/main.c
 CC = gcc
-current_dir = $(shell pwd)
-parent_dir = $(shell dirname "$(current_dir)")
 
 compile:
-	$(CC) $(TARGET) -o $(OUT) $(FLINTOPT) -O2 -std=c11
+	$(CC) $(TARGET) -o $(OUT) $(PATHOPT) -O2 -std=c11 $(LIBOPT)
 
 debug:
-	$(CC) $(TARGET) -o $(OUT) $(DEBUGOPT) $(FLINTOPT)
+	$(CC) $(TARGET) -o $(OUT) $(DEBUGOPT) $(PATHOPT) $(LIBOPT)
 clean:
 	rm -f OUT
 
