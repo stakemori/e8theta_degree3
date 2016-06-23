@@ -17,9 +17,10 @@ static inline int inner_prod(int s[8], int t[8])
 
 void miyawaki_theta(int a, int b, int c, int d, int e, int f)
 {
-  int vs1[MAX_NM_OF_VECTORS][8];
-  int vs2[MAX_NM_OF_VECTORS][8];
-  int vs3[MAX_NM_OF_VECTORS][8];
+  /* Use static to avoid segmentation fault */
+  static int vs1[MAX_NM_OF_VECTORS][8];
+  static int vs2[MAX_NM_OF_VECTORS][8];
+  static int vs3[MAX_NM_OF_VECTORS][8];
 
   _set_vs3(vs1, vs2, vs3, a, b, c);
 
@@ -324,12 +325,12 @@ int main(void)
 
   miyawaki_theta(1, 1, 1, 1, 1, 1);
   printf("\n");
-  /* miyawaki_theta(2, 1, 1, 0, 0, 0); */
-  /* printf("\n"); */
-  /* miyawaki_theta(3, 1, 1, 1, 1, 0); */
-  /* printf("\n"); */
-  /* miyawaki_theta(6, 1, 1, 1, 0, 0); */
-  /* printf("\n"); */
+  miyawaki_theta(2, 1, 1, 0, 0, 0);
+  printf("\n");
+  miyawaki_theta(3, 1, 1, 1, 1, 0);
+  printf("\n");
+  miyawaki_theta(6, 1, 1, 1, 0, 0);
+  printf("\n");
   return 0;
 }
 

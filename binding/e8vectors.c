@@ -35,7 +35,7 @@ int num_of_vectors[100] =
    181466880, 213183360, 200202240, 224259840, 207446400,
    251657280, 219041760, 254864880, 241997760};
 
-int cached_vectors[MAX_NORM + 1][MAX_NM_OF_VECTORS][8];
+static int cached_vectors[MAX_NORM + 1][MAX_NM_OF_VECTORS][8];
 int cached_idx[MAX_NORM + 1] = {0};
 
 void _cache_vectors(void)
