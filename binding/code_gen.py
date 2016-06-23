@@ -207,7 +207,7 @@ class PythonStyle(CodeStyle):
     def mul_2exp(self, a, b, e):
         return "%s = %s * 2**(%s)" % (a, b, e)
 
-cur_sty = PythonStyle()
+cur_sty = FmpzStyle()
 
 
 class Mul(object):
