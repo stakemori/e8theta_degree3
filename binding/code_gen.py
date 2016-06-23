@@ -72,6 +72,7 @@ class CodeStyle(object):
         pass
 
     def mul_si(self, a, b, c):
+        c = ZZ(c)
         res_dct_special_case = {0: self.zero_z(a),
                                 1: self.set_z(a, b),
                                 -1: self.neg(a, b)}
@@ -80,8 +81,8 @@ class CodeStyle(object):
 
         tpw = False
         e = None
-        fc = factor(c)
-        if is_prime_power(c) and fc[0][0] == 2:
+        fc = factor(c.abs())
+        if is_prime_power(c.abs()) and fc[0][0] == 2:
             # The case when c is a power of 2
             tpw = True
             e = fc[0][1]
