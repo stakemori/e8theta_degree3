@@ -1,5 +1,7 @@
 #include <math.h>
 #include "e8vectors.h"
+#include <string.h>
+#include <stdlib.h>
 
 static inline int norm(int s[8])
 {
@@ -107,7 +109,18 @@ void _set_vs3(int vs1[MAX_NM_OF_VECTORS][8],
   _set_vs(vs3, c);
 }
 
+char * _store_fmpz_str_using_malloc(fmpz_t x) {
+    char * buffer;
+    char * resstr = fmpz_get_str(NULL, 10, x);
+    buffer = malloc(strlen(resstr) + 1);
+    if (buffer == NULL) {
+      printf("Cannot allocate memory.\n");
+      exit(1);
+    }
+    strcpy(buffer, resstr);
+    return buffer;
+}
 
 /* Local Variables: */
-/* compile-command: "gcc e8vectors.c -I. -O2 -shared -fPIC -o libe8vectors.so" */
+/* compile-command: "cd ..; make compile-e8vector" */
 /* End: */

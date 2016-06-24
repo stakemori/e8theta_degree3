@@ -1,8 +1,6 @@
-#include <fmpz.h>
-#include <math.h>
 #include "e8vectors.h"
 
-static inline int inner_prod(int s[8], int t[8])
+int inner_prod(int s[8], int t[8])
 {
   return ((2*s[0] + s[1] + s[2] + s[3] + s[4] + s[5] + s[6] + s[7]) * t[0] +
           (s[0] + 2*s[1] + s[2] + s[3] + s[4] + s[5] + s[6] + 2*s[7]) * t[1] +
@@ -14,8 +12,7 @@ static inline int inner_prod(int s[8], int t[8])
           (s[0] + 2*s[1] + 2*s[2] + 2*s[3] + 2*s[4] + 2*s[5] + 2*s[6] + 4*s[7]) * t[7]);
 }
 
-
-void miyawaki_theta(int a, int b, int c, int d, int e, int f)
+char * miyawaki_theta(int a, int b, int c, int d, int e, int f)
 {
   /* Use static to avoid segmentation fault */
   static int vs1[MAX_NM_OF_VECTORS][8];
@@ -307,14 +304,13 @@ void miyawaki_theta(int a, int b, int c, int d, int e, int f)
         }
     }
 
-  fmpz_print(res);
+  char *res_str = _store_fmpz_str_using_malloc(res);
 
   fmpz_clear(a0); fmpz_clear(a1); fmpz_clear(a2); fmpz_clear(a3); fmpz_clear(a4); fmpz_clear(a5); fmpz_clear(a6); fmpz_clear(a7); fmpz_clear(a8);
   fmpz_clear(rl_pt); fmpz_clear(im_pt); fmpz_clear(res); fmpz_clear(tmp);
 
-
   fmpz_clear(s0); fmpz_clear(s1); fmpz_clear(s2); fmpz_clear(s3); fmpz_clear(s4); fmpz_clear(s5); fmpz_clear(s6); fmpz_clear(s7); fmpz_clear(t0); fmpz_clear(t1); fmpz_clear(t2); fmpz_clear(t3); fmpz_clear(t4); fmpz_clear(t5); fmpz_clear(t6); fmpz_clear(t7); fmpz_clear(u0); fmpz_clear(u1); fmpz_clear(u2); fmpz_clear(u3); fmpz_clear(u4); fmpz_clear(u5); fmpz_clear(u6); fmpz_clear(u7);
-
+  return res_str;
 }
 
 int main(void)
@@ -323,14 +319,14 @@ int main(void)
 
   printf("Computation of cached vectors done.\n");
 
-  miyawaki_theta(1, 1, 1, 1, 1, 1);
-  printf("\n");
-  miyawaki_theta(2, 1, 1, 0, 0, 0);
-  printf("\n");
-  miyawaki_theta(3, 1, 1, 1, 1, 0);
-  printf("\n");
-  miyawaki_theta(6, 1, 1, 1, 0, 0);
-  printf("\n");
+  char *s = miyawaki_theta(1, 1, 1, 1, 1, 1);
+  printf("%s\n", s);
+  free(s);
+
+  char *t = miyawaki_theta(2, 1, 1, 1, 1, 1);
+  printf("%s\n", t);
+  free(t);
+
   return 0;
 }
 
