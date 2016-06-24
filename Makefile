@@ -4,17 +4,16 @@ DEBUGOPT = -Wall -g -Og -std=c11
 PATHOPT = -L$(current_dir)/binding -I/usr/local/include/flint/ -I$(current_dir)/binding
 LIBOPTBASE = -lm -lflint -lmpfr -lgmp -lpthread
 OPT = -O2 -std=c11
-OUT = binding/miyawaki
-TARGET = binding/miyawaki_theta.c
 SHARED = -shared -fPIC
 CC = gcc
 
 compile-e8vector:
 	$(CC) binding/e8vectors.c -o binding/libe8vectors.so $(PATHOPT) $(OPT) $(LIBOPTBASE) $(SHARED)
 
+compile-miyawaki-theta:
+	$(CC) binding/miyawaki_theta.c -o binding/libmiyawaki_theta.so $(PATHOPT) $(OPT) -le8vectors $(LIBOPTBASE) $(SHARED)
 compile:
-	$(CC) $(TARGET) -o $(OUT) $(PATHOPT) $(OPT) -le8vectors $(LIBOPTBASE)
-
+	$(CC) binding/miyawaki_theta.c -o binding/miyawaki $(PATHOPT) $(OPT) -le8vectors $(LIBOPTBASE)
 debug:
 	$(CC) $(TARGET) -o $(OUT) $(DEBUGOPT) $(PATHOPT) $(LIBOPT)
 clean:

@@ -1,6 +1,6 @@
 #include "e8vectors.h"
 
-static inline int inner_prod(int s[8], int t[8])
+inline int inner_prod(int s[8], int t[8])
 {
   return ((2*s[0] + s[1] + s[2] + s[3] + s[4] + s[5] + s[6] + s[7]) * t[0] +
           (s[0] + 2*s[1] + s[2] + s[3] + s[4] + s[5] + s[6] + 2*s[7]) * t[1] +
@@ -14,6 +14,7 @@ static inline int inner_prod(int s[8], int t[8])
 
 char * miyawaki_theta_c(int a, int b, int c, int d, int e, int f)
 {
+  cache_vectors();
   /* Use static to avoid segmentation fault */
   static int vs1[MAX_NM_OF_VECTORS][8];
   static int vs2[MAX_NM_OF_VECTORS][8];
@@ -275,8 +276,8 @@ char * miyawaki_theta_c(int a, int b, int c, int d, int e, int f)
                           fmpz_addmul(a8, a5, u0);
                           fmpz_set(im_pt, a8);
 
-                            /* Computation of a0 = (rl_pt ** 8 - 28 * rl_pt ** 6 * im_pt ** 2 + 70 * rl_pt ** 4 * im_pt ** 4 - 28 * rl_pt ** 2
-* im_pt ** 6 + im_pt ** 8)  */
+                          /* Computation of a0 = (rl_pt ** 8 - 28 * rl_pt ** 6 * im_pt ** 2 + 70 * rl_pt ** 4 * im_pt ** 4 - 28 * rl_pt ** 2
+                           * im_pt ** 6 + im_pt ** 8)  */
 
                           fmpz_zero(tmp);
                           fmpz_pow_ui(a0, im_pt, 6);
@@ -315,26 +316,20 @@ char * miyawaki_theta_c(int a, int b, int c, int d, int e, int f)
 
 /* int main(void) */
 /* { */
-/*   _cache_vectors(); */
-
-/*   printf("Computation of cached vectors done.\n"); */
-
 /*   char *s; */
 /*   s = miyawaki_theta_c(1, 1, 1, 1, 1, 1); */
 /*   printf("%s\n", s); */
 /*   free(s); */
+/*   s = NULL; */
 
 /*   s = miyawaki_theta_c(2, 1, 1, 1, 1, 1); */
 /*   printf("%s\n", s); */
 /*   free(s); */
-
-/*   s = miyawaki_theta_c(6, 1, 1, 1, 1, 1); */
-/*   printf("%s\n", s); */
-/*   free(s); */
+/*   s = NULL; */
 
 /*   return 0; */
 /* } */
 
 /* Local Variables: */
-/* compile-command: "cd ..; make compile" */
+/* compile-command: "cd ..; make compile-miyawaki-theta" */
 /* End: */
