@@ -12,7 +12,7 @@ static inline int inner_prod(int s[8], int t[8])
           (s[0] + 2*s[1] + 2*s[2] + 2*s[3] + 2*s[4] + 2*s[5] + 2*s[6] + 4*s[7]) * t[7]);
 }
 
-char * miyawaki_theta(int a, int b, int c, int d, int e, int f)
+char * miyawaki_theta_c(int a, int b, int c, int d, int e, int f)
 {
   /* Use static to avoid segmentation fault */
   static int vs1[MAX_NM_OF_VECTORS][8];
@@ -313,22 +313,27 @@ char * miyawaki_theta(int a, int b, int c, int d, int e, int f)
   return res_str;
 }
 
-int main(void)
-{
-  _cache_vectors();
+/* int main(void) */
+/* { */
+/*   _cache_vectors(); */
 
-  printf("Computation of cached vectors done.\n");
+/*   printf("Computation of cached vectors done.\n"); */
 
-  char *s = miyawaki_theta(1, 1, 1, 1, 1, 1);
-  printf("%s\n", s);
-  free(s);
+/*   char *s; */
+/*   s = miyawaki_theta_c(1, 1, 1, 1, 1, 1); */
+/*   printf("%s\n", s); */
+/*   free(s); */
 
-  char *t = miyawaki_theta(2, 1, 1, 1, 1, 1);
-  printf("%s\n", t);
-  free(t);
+/*   s = miyawaki_theta_c(2, 1, 1, 1, 1, 1); */
+/*   printf("%s\n", s); */
+/*   free(s); */
 
-  return 0;
-}
+/*   s = miyawaki_theta_c(6, 1, 1, 1, 1, 1); */
+/*   printf("%s\n", s); */
+/*   free(s); */
+
+/*   return 0; */
+/* } */
 
 /* Local Variables: */
 /* compile-command: "cd ..; make compile" */

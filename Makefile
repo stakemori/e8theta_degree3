@@ -5,7 +5,7 @@ PATHOPT = -L$(current_dir)/binding -I/usr/local/include/flint/ -I$(current_dir)/
 LIBOPTBASE = -lm -lflint -lmpfr -lgmp -lpthread
 OPT = -O2 -std=c11
 OUT = binding/miyawaki
-TARGET = binding/miwayaki_theta.c
+TARGET = binding/miyawaki_theta.c
 SHARED = -shared -fPIC
 CC = gcc
 
