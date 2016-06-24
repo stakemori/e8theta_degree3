@@ -1,6 +1,6 @@
 #include "e8vectors.h"
 
-int inner_prod(int s[8], int t[8])
+static inline int inner_prod(int s[8], int t[8])
 {
   return ((2*s[0] + s[1] + s[2] + s[3] + s[4] + s[5] + s[6] + s[7]) * t[0] +
           (s[0] + 2*s[1] + s[2] + s[3] + s[4] + s[5] + s[6] + 2*s[7]) * t[1] +
