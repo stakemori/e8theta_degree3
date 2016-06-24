@@ -14,6 +14,10 @@ compile-miyawaki-theta:
 	$(CC) binding/miyawaki_theta.c -o binding/libmiyawaki_theta.so $(PATHOPT) $(OPT) -le8vectors $(LIBOPTBASE) $(SHARED)
 compile:
 	$(CC) binding/miyawaki_theta.c -o binding/miyawaki $(PATHOPT) $(OPT) -le8vectors $(LIBOPTBASE)
+
+compile-cython: compile-e8vector compile-miyawaki-theta
+	sage -c 'sh.eval("cd binding; python setup.py build_ext -i")'
+
 debug:
 	$(CC) $(TARGET) -o $(OUT) $(DEBUGOPT) $(PATHOPT) $(LIBOPT)
 clean:

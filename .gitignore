@@ -68,3 +68,4 @@ target/
 /binding/main
 TAGS
 *.o
+/binding/e8theta.c
