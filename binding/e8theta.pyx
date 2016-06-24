@@ -5,7 +5,7 @@ include "cysignals/signals.pxi"
 
 
 cdef extern from "miyawaki_theta.h":
-    cpdef char * miyawaki_theta_c(int x1, int x2, int x3, int x4, int x5, int x6)
+    cpdef char * miyawaki_theta_c(int, int, int, int, int, int)
 
 
 @cached_function
