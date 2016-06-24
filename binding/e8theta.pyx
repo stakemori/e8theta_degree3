@@ -15,7 +15,7 @@ def miyawaki_theta(a, b, c, d, e, f):
         a, b, c, d, e, f = [int(x) for x in l]
     except:
         raise ValueError
-    if max([a, b, c]) > 6:
+    if max([a, b, c]) > 7:
         raise ValueError
     sig_on()
     s = miyawaki_theta_c(a, b, c, d, e, f)
