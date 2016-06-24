@@ -23,3 +23,7 @@ def miyawaki_theta(a, b, c, d, e, f):
     free(s)
     sig_off()
     return res
+
+# Local Variables:
+# compile-command: "cd ..; make compile-cython"
+# End:
