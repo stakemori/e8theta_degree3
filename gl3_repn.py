@@ -37,6 +37,9 @@ class BiDeterminant(object):
         self._a = a
         self._b = b
 
+    def __repr__(self):
+        return repr(self.factor())
+
     @property
     def a(self):
         return self._a
@@ -58,8 +61,8 @@ class BiDeterminant(object):
         const = QQ(1)
         dets = []
         for d in self.determinants():
-            const = const * (-d.lc())
-            dets.append(d * (-d.lc()) ** (-1))
+            const = const * d.lc()
+            dets.append(d * d.lc() ** (-1))
         l = [(k, len(list(v)))
              for k, v in itertools.groupby(sorted(dets), key=lambda x: x)]
         return NormFactorELt(const, l)
@@ -220,6 +223,10 @@ class NormFactorELt(object):
         yield (self.const, 1)
         for a in self.pols:
             yield a
+
+    def __repr__(self):
+        l = [self.const] + self.pols
+        return repr(l)
 
 
 @cached_function
