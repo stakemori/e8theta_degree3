@@ -292,7 +292,7 @@ def _pol_basis_as_polof_factors(wt, imag_quad, names_base=('rl', 'im')):
     omega = imag_quad.gen()
     r_gens = R.gens()
     subs_dct = {fc: gns[0] + omega * gns[1]
-                for gns, fc in zip([r_gens[a:a + 2] for a in range(0, n, 2)], l)}
+                for gns, fc in zip([r_gens[a:a + 2] for a in range(0, 2 * n, 2)], l)}
 
     def _subs(ls):
         return ls[0] * mul(subs_dct[a] ** b for a, b in ls[1:])
