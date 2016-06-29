@@ -18,9 +18,13 @@ def miyawaki_theta(a, b, c, d, e, f):
     if max([a, b, c]) > 7:
         raise ValueError
     sig_on()
-    s = miyawaki_theta_c(a, b, c, d, e, f)
-    res = Integer(s)
-    free(s)
+    cdef char* c_str = miyawaki_theta_c(a, b, c, d, e, f)
+    cdef bytes py_str;
+    try:
+        py_str = c_str
+    finally:
+        free(c_str)
+    res = Integer(py_str)
     sig_off()
     return res
 
