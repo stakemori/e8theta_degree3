@@ -185,6 +185,10 @@ def element_constructor(wt):
         def weight(cls):
             return M.wt
 
+        @classmethod
+        def zero(cls):
+            return cls(vector([QQ(0) for _ in range(M.dimension())]))
+
     return GL3RepnElement
 
 
