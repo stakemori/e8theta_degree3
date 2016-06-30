@@ -177,6 +177,10 @@ def element_constructor(wt):
         def parent(self):
             return M
 
+        @classmethod
+        def dimension(cls):
+            return M.dimension()
+
     return GL3RepnElement
 
 
