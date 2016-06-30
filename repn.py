@@ -32,7 +32,7 @@ class ReplSpaceElement(object):
 
     def __mul__(self, other):
         if other in self.vector.base_ring():
-            return ReplSpaceElement(self * other)
+            return ReplSpaceElement(self.vector * other)
         else:
             raise ValueError
 
