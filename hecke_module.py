@@ -251,17 +251,17 @@ def alpha_list(dl):
             for a1 in range(a0, dl + 1) for a2 in range(a1, dl + 1)]
 
 
-def tp_action_fourier_coeff(p, T, F):
-    '''
-    Return the Tth Fourier coefficient of F|T(p), where F is a modular form.
-    :param p: a prime number
-    :param T: a half integral matrix or an instance of HalfIntMatElement
-    :param F: a dictionary or a Siegel modular form of degree 3
-    '''
-    res = 0
-    p = ZZ(p)
-    if not isinstance(T, HalfIntMatElement):
-        T = HalfIntMatElement(T)
+# def tp_action_fourier_coeff(p, T, F):
+#     '''
+#     Return the Tth Fourier coefficient of F|T(p), where F is a modular form.
+#     :param p: a prime number
+#     :param T: a half integral matrix or an instance of HalfIntMatElement
+#     :param F: a dictionary or a Siegel modular form of degree 3
+#     '''
+#     res = 0
+#     p = ZZ(p)
+#     if not isinstance(T, HalfIntMatElement):
+#         T = HalfIntMatElement(T)
 
 
 @cached_function
