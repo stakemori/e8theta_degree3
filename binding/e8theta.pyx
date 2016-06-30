@@ -9,9 +9,9 @@ cdef extern from "miyawaki_theta.h":
 
 
 @cached_function
-def miyawaki_theta(a, b, c, d, e, f):
+def miyawaki_theta(m):
     try:
-        l = [a, b, c, d, e, f]
+        l = [m[i, i] for i in range(3)] + [2*m[t] for t in [(1, 2), (0, 2), (0, 1)]]
         a, b, c, d, e, f = [int(x) for x in l]
     except:
         raise ValueError
