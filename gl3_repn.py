@@ -289,7 +289,14 @@ def _pol_basis_as_polof_factors(wt, imag_quad, names_base=('rl', 'im')):
     '''
     wt: weight of repn of GL3
     imag_quad: imaginary quadratic field
-    Returns a pair of dicts
+    Returns a pair of dicts (d, subs_dct).
+    subs_dct is a dict s.t.
+    a => rli + imi omega
+    where a is a prime factor of baisis_as_pol,
+    rli, imi are variables and omega is the gen of imag_quad.
+    The set of keys of d is basis of the corresponding representation.
+    Its value at x is a pair (f, g) of polynomials of rl0, im0, rl1, im1, ... s.t.
+    x.subs(subs_dct) = f + g * omega.
     '''
     d, l = _pol_basis_factor_dct_and_ls(wt)
     n = len(l)
