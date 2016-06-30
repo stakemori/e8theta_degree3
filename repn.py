@@ -36,6 +36,9 @@ class ReplSpaceElement(object):
         else:
             raise ValueError
 
+    def __rmul__(self, other):
+        return self * other
+
     @abstractmethod
     def parent(self):
         pass
