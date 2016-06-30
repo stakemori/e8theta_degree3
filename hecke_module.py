@@ -251,17 +251,66 @@ def alpha_list(dl):
             for a1 in range(a0, dl + 1) for a2 in range(a1, dl + 1)]
 
 
-# def tp_action_fourier_coeff(p, T, F):
-#     '''
-#     Return the Tth Fourier coefficient of F|T(p), where F is a modular form.
-#     :param p: a prime number
-#     :param T: a half integral matrix or an instance of HalfIntMatElement
-#     :param F: a dictionary or a Siegel modular form of degree 3
-#     '''
-#     res = 0
-#     p = ZZ(p)
-#     if not isinstance(T, HalfIntMatElement):
-#         T = HalfIntMatElement(T)
+def tp_action_fourier_coeff(p, T, F):
+    '''
+    Return the Tth Fourier coefficient of F|T(p), where F is a modular form.
+    :param p: a prime number
+    :param T: a half integral matrix or an instance of HalfIntMatElement
+    :param F: a dictionary or a Siegel modular form of degree 3
+    '''
+    p = ZZ(p)
+    return _action_fc_base(tp_action_fc_alist(p, T), F, T)
+
+
+def tp2_action_fourier_coeff(p, i, T, F):
+    '''
+    Similar to tp_action_fourier_coeff for T_i(p^2).
+    '''
+    p = ZZ(p)
+    return _action_fc_base(tp2_action_fc_alist(p, T, i), F, T)
+
+
+def _action_fc_base(ls, F, T):
+    if not isinstance(T, HalfIntMatElement):
+        T = HalfIntMatElement(T)
+    res = F[T].zero()
+    for s, a, g in ls:
+        res = a * F[s].left_action(g) + res
+    return res
+
+
+def hecke_eigenvalue_tp(p, F, T=None):
+    '''
+    p, F, T: same as aruments of tp_action_fourier_coeff.
+    Assuming F is an eigenform, return the eigenvalue for T(p),
+    T is used for the computation of Fourier coefficients.
+    If T is omitted, T will be set to
+    matrix([[1, 1/2, 1/2], [1/2, 1, 1/2], [1/2, 1/2, 1]]).
+    '''
+    return _hecke_eigenvalue_base(lambda s: tp_action_fourier_coeff(p, s, F), F, T=T)
+
+
+def hecke_eigenvalue_tp2(p, i, F, T=None):
+    '''
+    Similar to hecke_eigenvalue_tp for T(p^2).
+    '''
+    return _hecke_eigenvalue_base(lambda s: tp2_action_fourier_coeff(p, i, s, F), F, T=T)
+
+
+def _hecke_eigenvalue_base(fc_func, F, T=None):
+    if T is None:
+        T = HalfIntMatElement(matrix([[ZZ(1), ZZ(1) / ZZ(2), ZZ(1) / ZZ(2)],
+                                      [ZZ(1) / ZZ(2), ZZ(1), ZZ(1) / ZZ(2)],
+                                      [ZZ(1) / ZZ(2), ZZ(1) / ZZ(2), ZZ(1)]]))
+    if not isinstance(T, HalfIntMatElement):
+        T = HalfIntMatElement(T)
+    v1 = fc_func(T).vector
+    v = F[T].vector
+    if v == 0:
+        raise ZeroDivisionError
+    else:
+        i = next(i for i in range(len(v)) if v[i] != 0)
+        return v1[i] / v[i]
 
 
 @cached_function
