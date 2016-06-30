@@ -35,10 +35,10 @@ def _index_of_gamma_0_gl_n(alpha, p):
 def _gl2_coset_gamma0(a, p):
     w = matrix([[0, -1],
                 [1, 0]])
-    for m12 in range(p**a):
+    for m12 in range(p ** a):
         yield matrix([[1, m12],
                       [0, 1]])
-    for m21 in range(p**(a - 1)):
+    for m21 in range(p ** (a - 1)):
         m = matrix([[1, 0],
                     [p * m21, 1]])
         yield w * m
@@ -69,14 +69,14 @@ def __gl3_coset_gamma0_2_1(a1, a3, p):
     w23 = matrix([[1, 0, 0],
                   [0, 0, 1],
                   [0, 1, 0]])
-    for m13 in range(p**(a3 - a1 - 1)):
-        for m23 in range(p**(a3 - a1 - 1)):
+    for m13 in range(p ** (a3 - a1 - 1)):
+        for m23 in range(p ** (a3 - a1 - 1)):
             m = matrix([[1, 0, p * m13],
                         [0, 1, p * m23],
                         [0, 0, 1]])
             yield m
 
-    for m32 in range(p**(a3 - a1)):
+    for m32 in range(p ** (a3 - a1)):
         m = matrix([[1, 0, 0],
                     [0, 1, 0],
                     [0, m32, 1]])
@@ -90,13 +90,13 @@ def __gl3_coset_gamma0_1_2(a1, a2, p):
                   [1, 0, 0],
                   [0, 0, 1]])
 
-    for m12 in range(p**(a2 - a1 - 1)):
-        for m13 in range(p**(a2 - a1 - 1)):
+    for m12 in range(p ** (a2 - a1 - 1)):
+        for m13 in range(p ** (a2 - a1 - 1)):
             m = matrix([[1, p * m12, p * m13],
                         [0, 1, 0],
                         [0, 0, 1]])
             yield m
-    for m21 in range(p**(a2 - a1)):
+    for m21 in range(p ** (a2 - a1)):
         m = matrix([[1, 0, 0],
                     [m21, 1, 0],
                     [0, 0, 1]])
@@ -128,50 +128,50 @@ def __gl3_coset_gamma0_distinct(a1, a2, a3, p):
                    [0, 1, 0]])
 
     # w = 1
-    for m12 in range(p**(a2 - a1 - 1)):
-        for m13 in range(p**(a3 - a1 - 1)):
-            for m23 in range(p**(a3 - a2 - 1)):
+    for m12 in range(p ** (a2 - a1 - 1)):
+        for m13 in range(p ** (a3 - a1 - 1)):
+            for m23 in range(p ** (a3 - a2 - 1)):
                 yield matrix([[1, p * m12, p * m13],
                               [0, 1, p * m23],
                               [0, 0, 1]])
     # w = (12)
-    for m13 in range(p**(a3 - a2 - 1)):
-        for m21 in range(p**(a2 - a1)):
-            for m23 in range(p**(a3 - a1 - 1)):
+    for m13 in range(p ** (a3 - a2 - 1)):
+        for m21 in range(p ** (a2 - a1)):
+            for m23 in range(p ** (a3 - a1 - 1)):
                 m = matrix([[1, 0, p * m13],
                             [m21, 1, p * m23],
                             [0, 0, 1]])
                 yield w12 * m
     # w = (23)
-    for m12 in range(p**(a3 - a1 - 1)):
-        for m13 in range(p**(a2 - a1 - 1)):
-            for m32 in range(p**(a3 - a2)):
+    for m12 in range(p ** (a3 - a1 - 1)):
+        for m13 in range(p ** (a2 - a1 - 1)):
+            for m32 in range(p ** (a3 - a2)):
                 m = matrix([[1, p * m12, p * m13],
                             [0, 1, 0],
                             [0, m32, 1]])
                 yield w23 * m
 
     # w = (13)
-    for m21 in range(p**(a3 - a2)):
-        for m31 in range(p**(a3 - a1)):
-            for m32 in range(p**(a2 - a1)):
+    for m21 in range(p ** (a3 - a2)):
+        for m31 in range(p ** (a3 - a1)):
+            for m32 in range(p ** (a2 - a1)):
                 m = matrix([[1, 0, 0],
                             [m21, 1, 0],
                             [m31, m32, 1]])
                 yield w13 * m
 
     # w = (123)
-    for m21 in range(p**(a3 - a1)):
-        for m23 in range(p**(a2 - a1 - 1)):
-            for m31 in range(p**(a3 - a2)):
+    for m21 in range(p ** (a3 - a1)):
+        for m23 in range(p ** (a2 - a1 - 1)):
+            for m31 in range(p ** (a3 - a2)):
                 m = matrix([[1, 0, 0],
                             [m21, 1, p * m23],
                             [m31, 0, 1]])
                 yield w123 * m
     # w = (132)
-    for m12 in range(p**(a3 - a2 - 1)):
-        for m31 in range(p**(a2 - a1)):
-            for m32 in range(p**(a3 - a1)):
+    for m12 in range(p ** (a3 - a2 - 1)):
+        for m31 in range(p ** (a2 - a1)):
+            for m32 in range(p ** (a3 - a1)):
                 m = matrix([[1, p * m12, 0],
                             [0, 1, 0],
                             [m31, m32, 1]])
@@ -222,7 +222,7 @@ class HalfIntMatElement(object):
         Test if sum_{B mod D} exp(2pi T B D^(-1)) is zero, where D = diag(p^a1, p^a2, a^a3),
         a1, a2, a3 = alpha.
         '''
-        return (all(ZZ(self.T[i, i]) % p**alpha[i] == 0 for i in range(3)) and
+        return (all(ZZ(self.T[i, i]) % p ** alpha[i] == 0 for i in range(3)) and
                 all(ZZ(self.T[i, j] * 2) % p ** alpha[i] == 0
                     for i in range(3) for j in range(i + 1, 3)))
 
@@ -265,10 +265,17 @@ def tp_action_fourier_coeff(p, T, F):
 
 
 @cached_function
-def __tp_action_fc_alist(p, T):
+def tp_action_fc_alist(p, T):
+    '''
+    return a list of tuples (S, a, g) s.t.
+    S: an instance of HalfIntMatElement
+    a: integer
+    g: 3 by 3 matrix s.t.
+    F|T(p) = sum(a rho(g) F[S] | (a, g, S)).
+    '''
     res1 = []
     for alpha in alpha_list(1):
-        D = diagonal_matrix([p**a for a in alpha])
+        D = diagonal_matrix([p ** a for a in alpha])
         for V in _gl3_coset_gamma0(alpha, p):
             M = D * V
             S = T.right_action(M.transpose())
@@ -277,8 +284,8 @@ def __tp_action_fc_alist(p, T):
                 if S.satisfy_cong_condition_tp(p, alpha):
                     # p**(-6) and p in the third item are for normalization.
                     res1.append(
-                        (S, p**(-6) * mul(p**alpha[i] for i in range(3) for j in range(i, 3)),
-                         M**(-1) * p))
+                        (S, p ** (-6) * mul(p ** alpha[i] for i in range(3) for j in range(i, 3)),
+                         M ** (-1) * p))
     return __convert_reduced_nonisom_matrices(res1)
 
 
@@ -287,7 +294,7 @@ def __convert_reduced_nonisom_matrices(alst):
     for s, a, g in alst:
         u = _minkowski_reduction_transform_matrix(s.T)
         t = s.right_action(u)
-        red_res.append((t, a, g * u.transpose()**(-1)))
+        red_res.append((t, a, g * u.transpose() ** (-1)))
 
     non_isoms = []
 
@@ -301,25 +308,28 @@ def __convert_reduced_nonisom_matrices(alst):
                 if u:
                     break
         if u:
-            non_isoms.append((s.right_action(u), a, g * u.transpose()**(-1)))
+            non_isoms.append((s.right_action(u), a, g * u.transpose() ** (-1)))
         else:
             non_isoms.append((s, a, g))
     return non_isoms
 
 
 @cached_function
-def __tp2_action_fc_alist(p, T, i):
+def tp2_action_fc_alist(p, T, i):
+    '''
+    similar to tp_action_fc_alist for T_i(p^2) for i = 0, 1, 2, 3.
+    '''
     res1 = []
 
     for alpha in alpha_list(2):
-        D = diagonal_matrix([p**a for a in alpha])
+        D = diagonal_matrix([p ** a for a in alpha])
         for V in _gl3_coset_gamma0(alpha, p):
             M = D * V
             S = T.right_action(M.transpose())
-            if S.is_divisible_by(p**2):
-                S = S // (p**2)
-                res1.append((S, p**(-12) * _expt_sum(S, p, alpha, D, i),
-                             M**(-1) * p**2))
+            if S.is_divisible_by(p ** 2):
+                S = S // (p ** 2)
+                res1.append((S, p ** (-12) * _expt_sum(S, p, alpha, D, i),
+                             M ** (-1) * p ** 2))
 
     return __convert_reduced_nonisom_matrices([(a, b, c) for a, b, c in res1 if b != 0])
 
@@ -369,7 +379,7 @@ def _gen_gauss_sum_direct_way(N, p, r):
     zeta = K.gen()
     for S in _sym_mat_gen(p, N.ncols()):
         if S.change_ring(FiniteField(p)).rank() == r:
-            res += zeta**((N * S).trace())
+            res += zeta ** ((N * S).trace())
     try:
         return QQ(res)
     except TypeError:
@@ -407,7 +417,7 @@ def _gen_gauss_sum_non_dyadic(p, eps, n, t, r):
         if m == 0:
             return 1
         else:
-            return mul(1 - a * b**i for i in range(m))
+            return mul(1 - a * b ** i for i in range(m))
 
     if (n - t) % 2 == 0:
         m = (n - t) // 2
@@ -416,12 +426,12 @@ def _gen_gauss_sum_non_dyadic(p, eps, n, t, r):
 
     if n == r:
         if n % 2 == 1:
-            return ((-1) ** ((n - 2 * m + 1) // 2) * p**((n**2 + (2 * m)**2 - 1) // 4) *
-                    parenthesis_prod(p**(-1), p**(-2), m))
+            return ((-1) ** ((n - 2 * m + 1) // 2) * p ** ((n ** 2 + (2 * m) ** 2 - 1) // 4) *
+                    parenthesis_prod(p ** (-1), p ** (-2), m))
         elif n % 2 == t % 2 == 0:
             return ((-kronecker_symbol(-1, p)) ** ((n - 2 * m) // 2) *
-                    eps * p**((n**2 + (2 * m + 1)**2 - 1) // 4) *
-                    parenthesis_prod(p**(-1), p**(-2), m))
+                    eps * p ** ((n ** 2 + (2 * m + 1) ** 2 - 1) // 4) *
+                    parenthesis_prod(p ** (-1), p ** (-2), m))
         else:
             return 0
     else:
@@ -442,17 +452,17 @@ def _expt_sum(S, p, alpha, D, i):
     S22 = S.T.matrix_from_rows_and_columns(range(a, a + b), range(a, a + b))
     S32 = S.T.matrix_from_rows_and_columns(range(a + b, 3), range(a))
 
-    if c > 0 and not _half_int_mat_is_div_by(S33, p**2):
+    if c > 0 and not _half_int_mat_is_div_by(S33, p ** 2):
         return 0
     if c > 0 and b > 0 and any(x % p != 0 for x in (S32 * ZZ(2)).change_ring(ZZ).list()):
         return 0
 
     if b == 0 and a + c == 3 - i:
-        return p**(c * (c + 1))
+        return p ** (c * (c + 1))
     elif b == 0:
         return 0
     else:
-        return p**(c * (c + 1)) * p ** (b * c) * _generalized_gauss_sum(S22, p, b - i)
+        return p ** (c * (c + 1)) * p ** (b * c) * _generalized_gauss_sum(S22, p, b - i)
 
 
 def _minkowski_reduction(b1, b2, b3, S):
