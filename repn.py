@@ -19,25 +19,28 @@ class ReplSpaceElement(object):
     def __add__(self, other):
         if other == 0:
             return self
-        elif isinstance(other, ReplSpaceElement):
-            return ReplSpaceElement(self.vector + other.vector)
+        elif isinstance(other, self.__class__):
+            return self.__class__(self.vector + other.vector)
         else:
             raise NotImplementedError
 
     def __neg__(self):
-        return ReplSpaceElement(-self.vector)
+        return self.__class__(-self.vector)
 
     def __radd__(self, other):
         return self.__add__(other)
 
     def __mul__(self, other):
         if other in self.vector.base_ring():
-            return ReplSpaceElement(self.vector * other)
+            return self.__class__(self.vector * other)
         else:
             raise ValueError
 
     def __rmul__(self, other):
         return self * other
+
+    def __sub__(self, other):
+        return self + (-other)
 
     @abstractmethod
     def parent(self):
