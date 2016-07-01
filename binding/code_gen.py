@@ -257,6 +257,8 @@ class AddMul(object):
             cds.append(cur_sty.add_ui(tmp_var, tmp_var, a))
         elif a < 0:
             cds.append(cur_sty.sub_ui(tmp_var, tmp_var, -a))
+        else:
+            raise ValueError("a must be non zero")
         return cds
 
     def codes(self, tmp_vars):
