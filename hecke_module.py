@@ -313,7 +313,7 @@ def spinor_l_euler_factor(p, F, t=None, T=None):
     c[1] = tp
     c[2] = p * (tpp1 + (p**2 + 1) * tpp2 + (p**2 + 1)**2 * tpp3)
     c[3] = p**3 * tp * (tpp2 + tpp3)
-    c[4] = p**6 * (tp**2 + tpp3 + tpp2**2 - 2 * p * tpp1 * tpp3 -
+    c[4] = p**6 * (tp**2 * tpp3 + tpp2**2 - 2 * p * tpp1 * tpp3 -
                    2 * (p - 1) * tpp2 * tpp3 -
                    (p**6 + 2 * p**5 + 2 * p**3 + 2 * p - 1) * tpp3**2)
     c[5] = p**6 * tpp3 * c[3]
