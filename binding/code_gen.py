@@ -378,6 +378,14 @@ def _expr_to_pol(expr):
 
 
 def pol_to_fmpz_code_and_result_var(pl, name, res_var_name, algorithm=None, sep=";\n", indent=None):
+    '''
+    pl: polynomial
+    name: name for tmp vars
+    res_var_name: variable name for storing result
+    Return (code, tmp_var_names),
+    where code: string is a code for compute pl and tmp_var_names is a list of
+    used temp variable names.
+    '''
     if algorithm == "horner":
         n = pl.parent().ngens()
         vrs = [name + str(a) for a in range(n)]
