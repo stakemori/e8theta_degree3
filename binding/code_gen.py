@@ -441,18 +441,17 @@ def pol_factor_to_code_and_result_var(pl, name, res_var_name, algorithm=None):
     Similar to pol_to_fmpz_codes_and_result_var. But factor pl before computing code.
     '''
     pl = pl.change_ring(ZZ)
-    factors = [(f, e) for f, e in pl.factor()]
+    R = pl.parent()
+    factors = [(f, e) for f, e in pl.factor() if R(f).degree() > 0]
     if len(factors) == 1:
         return pol_to_fmpz_codes_and_result_var(pl, name, res_var_name, algorithm=algorithm)
 
-    _pl = mul(f for f, _ in factors)
+    _pl = mul(f**e for f, e in factors)
     if pl.parent().ngens() == 1:
-        a = ZZ(pl.leading_coefficient() / _pl.leading_coefficient())
+        const_cf = ZZ(pl.leading_coefficient() / _pl.leading_coefficient())
     else:
-        a = ZZ(pl.lc() / _pl.lc())
-    f0, e0 = factors[0]
-    factors[0] = (f0 * a, e0)
-    assert mul(f ** e for f, e in factors) == pl
+        const_cf = ZZ(pl.lc() / _pl.lc())
+    assert const_cf * _pl == pl
 
     # Compute tmp vars
     tvars = []
@@ -489,7 +488,9 @@ def pol_factor_to_code_and_result_var(pl, name, res_var_name, algorithm=None):
             if e > 1:
                 codes.append(cur_sty.pow_ui(tvar0, tvar0, e))
             # set res = res * tvar0
-            cur_sty.set_mul(res_var_name, res_var_name, tvar0)
+            codes.append(cur_sty.set_mul(res_var_name, res_var_name, tvar0))
+    if const_cf != 1:
+        codes.append(cur_sty.mul_si(res_var_name, res_var_name, const_cf))
     return (codes, tvars)
 
 
@@ -553,12 +554,12 @@ def _test():
             for alg in [None, 'horner']:
                 print alg, "factor"
                 for f in [f, f * g, f * g * h, f**2, f * g**2, f**2 * g**2 * h]:
-                    print f
-                    c = "; ".join(pol_factor_to_code_and_result_var(
-                        ZZ(10) * f, "a", "res", algorithm=alg)[0])
-                    ip.run_cell(c)
-                    res = globals()["res"]
-                    assert res == f
+                    for g in [f, ZZ(10) * f]:
+                        c = "; ".join(pol_factor_to_code_and_result_var(
+                            g, "a", "res", algorithm=alg)[0])
+                        ip.run_cell(c)
+                        res = globals()["res"]
+                        assert res == g, str(g)
 
     R1 = PolynomialRing(ZZ, names="x")
     R2 = PolynomialRing(ZZ, names="x, y")
