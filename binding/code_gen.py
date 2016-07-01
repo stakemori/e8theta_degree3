@@ -377,14 +377,45 @@ def _expr_to_pol(expr):
         return expr
 
 
-def pol_to_fmpz_code_and_result_var(pl, name, res_var_name, algorithm=None, sep=";\n", indent=None):
+def _pol_to_codes_and_res_var_pow(pl, name, res_var_name):
+    v = name + "0"
+    if pl.constant_coefficient() == 0:
+        codes = [cur_sty.zero_z(res_var_name)]
+    else:
+        codes = [cur_sty.set_si(res_var_name, pl.constant_coefficient())]
+    vrs = [v]
+    v1 = None
+    if pl.parent().ngens() == 1:
+        x = pl.parent().gen()
+        for e, cf in pl.dict().items():
+            if e > 1:
+                codes.append(cur_sty.pow_ui(v, x, e))
+                codes.append(_admul_code(res_var_name, v, cf))
+            elif e == 1:
+                codes.append(_admul_code(res_var_name, x, cf))
+    else:
+        gns = pl.parent().gens()
+        for t, cf in pl.dict().items():
+            if sum(t) > 1:
+                if any(a > 1 for a in t):
+                    v1 = name + "1"
+                codes.extend(_monom_codes(t, v, v1, gns))
+                codes.append(_admul_code(res_var_name, v, cf))
+            elif sum(t) == 1:
+                codes.append(_admul_code(res_var_name, _expt(t, gns), cf))
+        if v1 is not None:
+            vrs.append(v1)
+    return [codes, uniq(vrs)]
+
+
+def pol_to_fmpz_codes_and_result_var(pl, name, res_var_name, algorithm=None):
     '''
     pl: polynomial
     name: name for tmp vars
     res_var_name: variable name for storing result
-    Return (code, tmp_var_names),
-    where code: string is a code for compute pl and tmp_var_names is a list of
-    used temp variable names.
+    Return (codes, tmp_var_names),
+    where codes is a list of strings for computing pl and
+    tmp_var_names is a list of used temp variable names.
     '''
     if algorithm == "horner":
         n = pl.parent().ngens()
@@ -392,39 +423,67 @@ def pol_to_fmpz_code_and_result_var(pl, name, res_var_name, algorithm=None, sep=
         e = _to_expr(pl)
         codes, v, vrs = e.codes(vrs)
         codes.append(cur_sty.set_z(res_var_name, v))
+        return [codes, uniq(vrs)]
     elif algorithm is None:
-        v = name + "0"
-        if pl.constant_coefficient() == 0:
-            codes = [cur_sty.zero_z(res_var_name)]
-        else:
-            codes = [cur_sty.set_si(res_var_name, pl.constant_coefficient())]
-        vrs = [v]
-        v1 = None
-        if pl.parent().ngens() == 1:
-            x = pl.parent().gen()
-            for e, cf in pl.dict().items():
-                if e > 1:
-                    codes.append(cur_sty.pow_ui(v, x, e))
-                    codes.append(_admul_code(res_var_name, v, cf))
-                elif e == 1:
-                    codes.append(_admul_code(res_var_name, x, cf))
-        else:
-            gns = pl.parent().gens()
-            for t, cf in pl.dict().items():
-                if sum(t) > 1:
-                    if any(a > 1 for a in t):
-                        v1 = name + "1"
-                    codes.extend(_monom_codes(t, v, v1, gns))
-                    codes.append(_admul_code(res_var_name, v, cf))
-                elif sum(t) == 1:
-                    codes.append(_admul_code(res_var_name, _expt(t, gns), cf))
-            if v1 is not None:
-                vrs.append(v1)
+        return _pol_to_codes_and_res_var_pow(pl, name, res_var_name)
     else:
         raise ValueError
-    if indent is not None:
-        codes = [indent + c for c in codes]
-    return (sep.join(codes), uniq(vrs))
+
+
+def pol_factor_to_code_and_result_var(pl, name, res_var_name, algorithm=None):
+    '''
+    Similar to pol_to_fmpz_codes_and_result_var. But factor pl before computing code.
+    '''
+    pl = pl.change_ring(ZZ)
+    factors = [(f, e) for f, e in pl.factor()]
+    if len(factors) == 1:
+        return pol_to_fmpz_codes_and_result_var(pl, name, res_var_name, algorithm=algorithm)
+
+    _pl = mul(f for f, _ in factors)
+    if pl.parent().ngens() == 1:
+        a = ZZ(pl.leading_coefficient() / _pl.leading_coefficient())
+    else:
+        a = ZZ(pl.lc() / _pl.lc())
+    f0, e0 = factors[0]
+    factors[0] = (f0 * a, e0)
+
+    # Compute tmp vars
+    tvars = []
+    factor_codes_ls = []
+    for f, e in factors:
+        _cds, _tvars = pol_to_fmpz_codes_and_result_var(f, name, "{res}", algorithm=algorithm)
+        tvars.extend(_tvars)
+        factor_codes_ls.append(_cds)
+    tvars = uniq(tvars)
+    tvar0 = name + str(len(tvars))
+    assert tvar0 not in tvars
+    tvars.append(tvar0)
+
+    def _replace_res_in_codes(v, codes):
+        return [c.format(res=v) for c in codes]
+
+    codes = []
+    if all(e == 1 for _, e in factors):  # just multiplication
+        codes.extend(_replace_res_in_codes(res_var_name, factor_codes_ls[0]))
+        for factor_codes in factor_codes_ls[1:]:
+            codes.extend(_replace_res_in_codes(tvar0, factor_codes))
+            codes.append(cur_sty.set_mul(res_var_name, res_var_name, tvar0))
+    else:
+        fcodes0 = factor_codes_ls[0]
+        e0 = factors[0][1]
+        # set res = f0**e0
+        codes.extend(_replace_res_in_codes(res_var_name, fcodes0))
+        if e0 > 1:
+            codes.append(cur_sty.pow_ui(res_var_name, res_var_name, e0))
+
+        for (_, e), fcodes in zip(factors[1:], factor_codes_ls[1:]):
+            # set tvar0 = f**e
+            codes.extend(_replace_res_in_codes(tvar0, fcodes))
+            if e > 1:
+                codes.append(cur_sty.pow_ui(tvar0, tvar0, e))
+            # set res = res * tvar0
+            cur_sty.set_mul(res_var_name, res_var_name, tvar0)
+    return (codes, tvars)
 
 
 def fmpz_init_clear(vrs, sep=" "):
@@ -469,22 +528,35 @@ def _test():
         for _ in range(100):
             if R.ngens() == 1:
                 f = R.random_element(degree=(-1, 10))
+                h = R.random_element(degree=(-1, 10))
+                g = R.random_element(degree=(-1, 10))
             else:
                 f = R.random_element(degree=10)
-            c = pol_to_fmpz_code_and_result_var(
-                f, "a", "res", sep=";", algorithm="horner")[0]
-            ip.run_cell(c)
-            res = globals()["res"]
-            assert res == f
-            c = pol_to_fmpz_code_and_result_var(
-                f, "a", "res", sep=";", algorithm=None)[0]
-            ip.run_cell(c)
-            res = globals()["res"]
-            assert res == f
+                g = R.random_element(degree=10)
+                h = R.random_element(degree=10)
+
+            for alg in [None, 'horner']:
+                print alg
+                c = "; ".join(pol_to_fmpz_codes_and_result_var(
+                    f, "a", "res", algorithm=alg)[0])
+                ip.run_cell(c)
+                res = globals()["res"]
+                assert res == f
+
+            for alg in [None, 'horner']:
+                print alg, "factor"
+                for f in [f, f * g, f * g * h, f**2, f * g**2, f**2 * g**2 * h]:
+                    print f
+                    c = "; ".join(pol_factor_to_code_and_result_var(
+                        ZZ(10) * f, "a", "res", algorithm=alg)[0])
+                    ip.run_cell(c)
+                    res = globals()["res"]
+                    assert res == f
 
     R1 = PolynomialRing(ZZ, names="x")
     R2 = PolynomialRing(ZZ, names="x, y")
     R3 = PolynomialRing(ZZ, names="x, y, z")
+    ip.run_cell("cur_sty = PythonStyle()")
     print "check1"
     ip.run_cell("x = PolynomialRing(ZZ, names='x').gen()")
     check(R1)
