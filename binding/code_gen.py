@@ -535,13 +535,19 @@ def _test():
     def check(R):
         for _ in range(100):
             if R.ngens() == 1:
-                f = R.random_element(degree=(-1, 10))
-                h = R.random_element(degree=(-1, 10))
-                g = R.random_element(degree=(-1, 10))
+                while True:
+                    f = R.random_element(degree=(-1, 10))
+                    h = R.random_element(degree=(-1, 10))
+                    g = R.random_element(degree=(-1, 10))
+                    if all(a != 0 for a in [f, g, h]):
+                        break
             else:
-                f = R.random_element(degree=10)
-                g = R.random_element(degree=10)
-                h = R.random_element(degree=10)
+                while True:
+                    f = R.random_element(degree=10)
+                    g = R.random_element(degree=10)
+                    h = R.random_element(degree=10)
+                    if all(a != 0 for a in [f, g, h]):
+                        break
 
             for alg in [None, 'horner']:
                 print alg
