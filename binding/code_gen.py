@@ -296,14 +296,16 @@ class Deg1Pol(object):
         if pl.parent().ngens() == 1:
             x = pl.parent().gen()
             cd = _admul_code(v, x, pl[1])
-            codes.append(cd)
+            if cd:
+                codes.append(cd)
         else:
             gens = pl.parent().gens()
             for k, a in pl.dict().iteritems():
                 if sum(k) == 1:
                     x = _expt(k, gens)
                     cd = _admul_code(v, x, a)
-                    codes.append(cd)
+                    if cd:
+                        codes.append(cd)
         return (codes, v, [v])
 
     def codes1(self, tmp_var):
@@ -311,6 +313,10 @@ class Deg1Pol(object):
 
 
 def _admul_code(v, x, a):
+    '''
+    If a is 0, it return None
+    '''
+    res = None
     if a > 1:
         res = cur_sty.add_mul_ui(v, x, a)
     elif a == 1:
@@ -446,6 +452,7 @@ def pol_factor_to_code_and_result_var(pl, name, res_var_name, algorithm=None):
         a = ZZ(pl.lc() / _pl.lc())
     f0, e0 = factors[0]
     factors[0] = (f0 * a, e0)
+    assert mul(f ** e for f, e in factors) == pl
 
     # Compute tmp vars
     tvars = []
