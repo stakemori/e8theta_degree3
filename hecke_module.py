@@ -5,7 +5,7 @@ from sage.arith.all import kronecker_symbol
 from sage.matrix.all import (diagonal_matrix, matrix, block_diagonal_matrix,
                              identity_matrix, block_matrix)
 from sage.misc.all import cached_function
-from sage.rings.all import FiniteField, CyclotomicField, ZZ, QQ
+from sage.rings.all import FiniteField, CyclotomicField, ZZ, QQ, PolynomialRing
 from sage.quadratic_forms.all import least_quadratic_nonresidue, QuadraticForm
 from sage.functions.all import sgn, floor, ceil
 import itertools
@@ -295,6 +295,32 @@ def hecke_eigenvalue_tp2(p, i, F, T=None):
     Similar to hecke_eigenvalue_tp for T(p^2).
     '''
     return _hecke_eigenvalue_base(lambda s: tp2_action_fourier_coeff(p, i, s, F), F, T=T)
+
+
+def spinor_l_euler_factor(p, F, t=None, T=None):
+    '''
+    F: a dict or Siegel modular form of degree 3.
+    Return a polynomial G(t) of degree 8, s.t.
+    G(p^(-s))^(-1) is the p-Euler factor of the spinor L function of F.
+    '''
+    p = ZZ(p)
+    if t is None:
+        t = PolynomialRing(ZZ, names='t').gen()
+    c = {}
+    tp = hecke_eigenvalue_tp(p, F, T=T)
+    tpp1, tpp2, tpp3 = [hecke_eigenvalue_tp2(p, i, F, T=T) for i in [1, 2, 3]]
+    c[0] = ZZ(1)
+    c[1] = tp
+    c[2] = p * (tpp1 + (p**2 + 1) * tpp2 + (p**2 + 1)**2 * tpp3)
+    c[3] = p**3 * tp * (tpp2 + tpp3)
+    c[4] = p**6 * (tp**2 + tpp3 + tpp2**2 - 2 * p * tpp1 * tpp3 -
+                   2 * (p - 1) * tpp2 * tpp3 -
+                   (p**6 + 2 * p**5 + 2 * p**3 + 2 * p - 1) * tpp3**2)
+    c[5] = p**6 * tpp3 * c[3]
+    c[6] = p**12 * tpp3 ** 2 * c[2]
+    c[7] = p**18 * tpp3 ** 3 * c[1]
+    c[8] = p**24 * tpp3 ** 4
+    return sum((-1)**k * v * t**k for k, v in c.items())
 
 
 def _hecke_eigenvalue_base(fc_func, F, T=None):
