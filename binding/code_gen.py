@@ -294,16 +294,14 @@ class Deg1Pol(object):
         if pl.parent().ngens() == 1:
             x = pl.parent().gen()
             cd = _admul_code(v, x, pl[1])
-            if cd:
-                codes.append(cd)
+            codes.append(cd)
         else:
             gens = pl.parent().gens()
             for k, a in pl.dict().iteritems():
                 if sum(k) == 1:
                     x = _expt(k, gens)
                     cd = _admul_code(v, x, a)
-                    if cd:
-                        codes.append(cd)
+                    codes.append(cd)
         return (codes, v, [v])
 
     def codes1(self, tmp_var):
@@ -311,7 +309,6 @@ class Deg1Pol(object):
 
 
 def _admul_code(v, x, a):
-    res = None
     if a > 1:
         res = cur_sty.add_mul_ui(v, x, a)
     elif a == 1:
