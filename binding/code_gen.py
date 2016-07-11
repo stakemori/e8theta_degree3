@@ -1,4 +1,4 @@
-# -*- coding: utf-8; mode: sage -*-
+# -*- coding: utf-8 -*-
 from sage.all import PolynomialRing, mul, ZZ, uniq, SR, factor, is_prime_power
 from abc import ABCMeta, abstractmethod, abstractproperty
 
