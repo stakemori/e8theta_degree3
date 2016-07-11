@@ -13,7 +13,7 @@ from e8theta_degree3.utils import find_linearly_indep_indices
 @cached_function
 def matrix_var(base_field=QQ):
     R = PolynomialRing(base_field, names=[
-                       'x%s%s' % (i, j) for i in range(3) for j in range(3)])
+        'x%s%s' % (i, j) for i in range(3) for j in range(3)])
     return matrix(3, R.gens())
 
 
