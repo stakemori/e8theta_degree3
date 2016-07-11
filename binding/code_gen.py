@@ -207,8 +207,6 @@ class PythonStyle(CodeStyle):
     def mul_2exp(self, a, b, e):
         return "%s = %s * 2**(%s)" % (a, b, e)
 
-cur_sty = FmpzStyle()
-
 
 class Mul(object):
 
@@ -220,19 +218,19 @@ class Mul(object):
     def __repr__(self):
         return "Mul(%s, %s)" % (self.l, self.r)
 
-    def codes1(self, tmp_var):
-        cds = self.l.codes1(tmp_var)
-        cds.append(cur_sty.set_mul(tmp_var, tmp_var, self.r))
+    def codes1(self, tmp_var, sty):
+        cds = self.l.codes1(tmp_var, sty)
+        cds.append(sty.set_mul(tmp_var, tmp_var, self.r))
         return cds
 
-    def codes(self, tmp_vars):
+    def codes(self, tmp_vars, sty):
         '''
         Return list of codes, result tmp var and used tmp vars.
         '''
         if self.ngens == 1:
-            return (self.codes1(tmp_vars[0]), tmp_vars[0], [tmp_vars[0]])
-        cd, v, vrs = self.l.codes(tmp_vars)
-        cd.append(cur_sty.set_mul(v, v, self.r))
+            return (self.codes1(tmp_vars[0], sty), tmp_vars[0], [tmp_vars[0]])
+        cd, v, vrs = self.l.codes(tmp_vars, sty)
+        cd.append(sty.set_mul(v, v, self.r))
         vrs.append(v)
         return (cd, v, vrs)
 
@@ -249,25 +247,25 @@ class AddMul(object):
     def __repr__(self):
         return "AddMul(%s, %s, %s)" % (self.a, self.b, self.c)
 
-    def codes1(self, tmp_var):
+    def codes1(self, tmp_var, sty):
         m = Mul(self.b, self.c, 1)
-        cds = m.codes1(tmp_var)
+        cds = m.codes1(tmp_var, sty)
         a = ZZ(self.a.pl)
         if a > 0:
-            cds.append(cur_sty.add_ui(tmp_var, tmp_var, a))
+            cds.append(sty.add_ui(tmp_var, tmp_var, a))
         elif a < 0:
-            cds.append(cur_sty.sub_ui(tmp_var, tmp_var, -a))
+            cds.append(sty.sub_ui(tmp_var, tmp_var, -a))
         else:
             raise ValueError("a must be non zero")
         return cds
 
-    def codes(self, tmp_vars):
+    def codes(self, tmp_vars, sty):
         if self.ngens == 1:
-            return (self.codes1(tmp_vars[0]), tmp_vars[0], [tmp_vars[0]])
-        cds, v, vrs = self.b.codes(tmp_vars)
-        cds1, v1, vrs1 = self.a.codes([a for a in tmp_vars if a != v])
+            return (self.codes1(tmp_vars[0], sty), tmp_vars[0], [tmp_vars[0]])
+        cds, v, vrs = self.b.codes(tmp_vars, sty)
+        cds1, v1, vrs1 = self.a.codes([a for a in tmp_vars if a != v], sty)
         cds.extend(cds1)
-        cds.append(cur_sty.set_add_mul(v1, v, self.c))
+        cds.append(sty.set_add_mul(v1, v, self.c))
         vrs.extend(vrs1)
         vrs.extend([v, v1])
         return (cds, v1, vrs)
@@ -281,21 +279,21 @@ class Deg1Pol(object):
     def __repr__(self):
         return "Deg1Pol(%s)" % (self.pl, )
 
-    def codes(self, tmp_vars):
+    def codes(self, tmp_vars, sty):
         v = tmp_vars[0]
         pl = self.pl
         gens = pl.parent().gens()
 
         if pl.constant_coefficient() != 0:
-            codes = [cur_sty.set_si(v, self.pl.constant_coefficient())]
+            codes = [sty.set_si(v, self.pl.constant_coefficient())]
         else:
             _ls = list(pl.dict().items())
             _t, a = _ls[0]
-            codes = [cur_sty.mul_si(v, _expt(_t, gens), a)]
+            codes = [sty.mul_si(v, _expt(_t, gens), a)]
             pl = pl.parent()(sum(_expt(_t, gens) * a for _t, a in _ls[1:]))
         if pl.parent().ngens() == 1:
             x = pl.parent().gen()
-            cd = _admul_code(v, x, pl[1])
+            cd = _admul_code(v, x, pl[1], sty)
             if cd:
                 codes.append(cd)
         else:
@@ -303,28 +301,28 @@ class Deg1Pol(object):
             for k, a in pl.dict().iteritems():
                 if sum(k) == 1:
                     x = _expt(k, gens)
-                    cd = _admul_code(v, x, a)
+                    cd = _admul_code(v, x, a, sty)
                     if cd:
                         codes.append(cd)
         return (codes, v, [v])
 
-    def codes1(self, tmp_var):
-        return self.codes([tmp_var])[0]
+    def codes1(self, tmp_var, sty):
+        return self.codes([tmp_var], sty)[0]
 
 
-def _admul_code(v, x, a):
+def _admul_code(v, x, a, sty):
     '''
     If a is 0, it return None
     '''
     res = None
     if a > 1:
-        res = cur_sty.add_mul_ui(v, x, a)
+        res = sty.add_mul_ui(v, x, a)
     elif a == 1:
-        res = cur_sty.add_z(v, v, x)
+        res = sty.add_z(v, v, x)
     elif a == -1:
-        res = cur_sty.sub_z(v, v, x)
+        res = sty.sub_z(v, v, x)
     elif a < -1:
-        res = cur_sty.sub_mul_ui(v, x, -a)
+        res = sty.sub_mul_ui(v, x, -a)
     return res
 
 
@@ -383,38 +381,38 @@ def _expr_to_pol(expr):
         return expr
 
 
-def _pol_to_codes_and_res_var_pow(pl, name, res_var_name):
+def _pol_to_codes_and_res_var_pow(pl, name, res_var_name, sty):
     v = name + "0"
     if pl.constant_coefficient() == 0:
-        codes = [cur_sty.zero_z(res_var_name)]
+        codes = [sty.zero_z(res_var_name)]
     else:
-        codes = [cur_sty.set_si(res_var_name, pl.constant_coefficient())]
+        codes = [sty.set_si(res_var_name, pl.constant_coefficient())]
     vrs = [v]
     v1 = None
     if pl.parent().ngens() == 1:
         x = pl.parent().gen()
         for e, cf in pl.dict().items():
             if e > 1:
-                codes.append(cur_sty.pow_ui(v, x, e))
-                codes.append(_admul_code(res_var_name, v, cf))
+                codes.append(sty.pow_ui(v, x, e))
+                codes.append(_admul_code(res_var_name, v, cf, sty))
             elif e == 1:
-                codes.append(_admul_code(res_var_name, x, cf))
+                codes.append(_admul_code(res_var_name, x, cf, sty))
     else:
         gns = pl.parent().gens()
         for t, cf in pl.dict().items():
             if sum(t) > 1:
                 if any(a > 1 for a in t):
                     v1 = name + "1"
-                codes.extend(_monom_codes(t, v, v1, gns))
-                codes.append(_admul_code(res_var_name, v, cf))
+                codes.extend(_monom_codes(t, v, v1, gns, sty))
+                codes.append(_admul_code(res_var_name, v, cf, sty))
             elif sum(t) == 1:
-                codes.append(_admul_code(res_var_name, _expt(t, gns), cf))
+                codes.append(_admul_code(res_var_name, _expt(t, gns), cf, sty))
         if v1 is not None:
             vrs.append(v1)
     return [codes, uniq(vrs)]
 
 
-def pol_to_fmpz_codes_and_result_var(pl, name, res_var_name, algorithm=None):
+def pol_to_fmpz_codes_and_result_var(pl, name, res_var_name, sty=None, algorithm=None):
     '''
     pl: polynomial
     name: name for tmp vars
@@ -423,28 +421,33 @@ def pol_to_fmpz_codes_and_result_var(pl, name, res_var_name, algorithm=None):
     where codes is a list of strings for computing pl and
     tmp_var_names is a list of used temp variable names.
     '''
+    if sty is None:
+        sty = FmpzStyle()
     if algorithm == "horner":
         n = pl.parent().ngens()
         vrs = [name + str(a) for a in range(n)]
         e = _to_expr(pl)
-        codes, v, vrs = e.codes(vrs)
-        codes.append(cur_sty.set_z(res_var_name, v))
+        codes, v, vrs = e.codes(vrs, sty)
+        codes.append(sty.set_z(res_var_name, v))
         return [codes, uniq(vrs)]
     elif algorithm is None:
-        return _pol_to_codes_and_res_var_pow(pl, name, res_var_name)
+        return _pol_to_codes_and_res_var_pow(pl, name, res_var_name, sty)
     else:
         raise ValueError
 
 
-def pol_factor_to_code_and_result_var(pl, name, res_var_name, algorithm=None):
+def pol_factor_to_code_and_result_var(pl, name, res_var_name, sty=None, algorithm=None):
     '''
     Similar to pol_to_fmpz_codes_and_result_var. But factor pl before computing code.
     '''
+    if sty is None:
+        sty = FmpzStyle()
     pl = pl.change_ring(ZZ)
     R = pl.parent()
     factors = [(f, e) for f, e in pl.factor() if R(f).degree() > 0]
     if len(factors) == 1:
-        return pol_to_fmpz_codes_and_result_var(pl, name, res_var_name, algorithm=algorithm)
+        return pol_to_fmpz_codes_and_result_var(pl, name, res_var_name,
+                                                sty=sty, algorithm=algorithm)
 
     _pl = mul(f**e for f, e in factors)
     if pl.parent().ngens() == 1:
@@ -457,7 +460,8 @@ def pol_factor_to_code_and_result_var(pl, name, res_var_name, algorithm=None):
     tvars = []
     factor_codes_ls = []
     for f, e in factors:
-        _cds, _tvars = pol_to_fmpz_codes_and_result_var(f, name, "{res}", algorithm=algorithm)
+        _cds, _tvars = pol_to_fmpz_codes_and_result_var(
+            f, name, "{res}", sty=sty, algorithm=algorithm)
         tvars.extend(_tvars)
         factor_codes_ls.append(_cds)
     tvars = uniq(tvars)
@@ -473,24 +477,24 @@ def pol_factor_to_code_and_result_var(pl, name, res_var_name, algorithm=None):
         codes.extend(_replace_res_in_codes(res_var_name, factor_codes_ls[0]))
         for factor_codes in factor_codes_ls[1:]:
             codes.extend(_replace_res_in_codes(tvar0, factor_codes))
-            codes.append(cur_sty.set_mul(res_var_name, res_var_name, tvar0))
+            codes.append(sty.set_mul(res_var_name, res_var_name, tvar0))
     else:
         fcodes0 = factor_codes_ls[0]
         e0 = factors[0][1]
         # set res = f0**e0
         codes.extend(_replace_res_in_codes(res_var_name, fcodes0))
         if e0 > 1:
-            codes.append(cur_sty.pow_ui(res_var_name, res_var_name, e0))
+            codes.append(sty.pow_ui(res_var_name, res_var_name, e0))
 
         for (_, e), fcodes in zip(factors[1:], factor_codes_ls[1:]):
             # set tvar0 = f**e
             codes.extend(_replace_res_in_codes(tvar0, fcodes))
             if e > 1:
-                codes.append(cur_sty.pow_ui(tvar0, tvar0, e))
+                codes.append(sty.pow_ui(tvar0, tvar0, e))
             # set res = res * tvar0
-            codes.append(cur_sty.set_mul(res_var_name, res_var_name, tvar0))
+            codes.append(sty.set_mul(res_var_name, res_var_name, tvar0))
     if const_cf != 1:
-        codes.append(cur_sty.mul_si(res_var_name, res_var_name, const_cf))
+        codes.append(sty.mul_si(res_var_name, res_var_name, const_cf))
     return (codes, tvars)
 
 
@@ -504,7 +508,7 @@ def fmpz_init_clear(vrs, sep=" "):
     return res
 
 
-def _monom_codes(t, v, v1, gns):
+def _monom_codes(t, v, v1, gns, sty):
     '''t: monomial, v: variable name for result.
     v1: tmp var name.
     Return codes.
@@ -512,19 +516,19 @@ def _monom_codes(t, v, v1, gns):
     codes = []
     _tv = [(e, x) for e, x in zip(t, gns) if e > 0]
     if all(e == 1 for e, x in _tv):
-        codes.append(cur_sty.set_z(v, _tv[0][1]))
+        codes.append(sty.set_z(v, _tv[0][1]))
         for _, x in _tv[1:]:
-            codes.append(cur_sty.set_mul(v, v, x))
+            codes.append(sty.set_mul(v, v, x))
     else:
         _tv = list(sorted(_tv, key=lambda x: -x[1]))
         e0, x0 = _tv[0]
-        codes.append(cur_sty.pow_ui(v, x0, e0))
+        codes.append(sty.pow_ui(v, x0, e0))
         for e, x in _tv[1:]:
             if e == 1:
-                codes.append(cur_sty.set_mul(v, v, x))
+                codes.append(sty.set_mul(v, v, x))
             else:
-                codes.append(cur_sty.pow_ui(v1, x, e))
-                codes.append(cur_sty.set_mul(v, v, v1))
+                codes.append(sty.pow_ui(v1, x, e))
+                codes.append(sty.set_mul(v, v, v1))
     return codes
 
 
@@ -552,7 +556,7 @@ def _test():
             for alg in [None, 'horner']:
                 print alg
                 c = "; ".join(pol_to_fmpz_codes_and_result_var(
-                    f, "a", "res", algorithm=alg)[0])
+                    f, "a", "res", sty=PythonStyle(), algorithm=alg)[0])
                 ip.run_cell(c)
                 res = globals()["res"]
                 assert res == f
@@ -562,7 +566,7 @@ def _test():
                 for f in [f, f * g, f * g * h, f**2, f * g**2, f**2 * g**2 * h]:
                     for g in [f, ZZ(10) * f]:
                         c = "; ".join(pol_factor_to_code_and_result_var(
-                            g, "a", "res", algorithm=alg)[0])
+                            g, "a", "res", sty=PythonStyle(), algorithm=alg)[0])
                         ip.run_cell(c)
                         res = globals()["res"]
                         assert res == g, str(g)
@@ -570,7 +574,6 @@ def _test():
     R1 = PolynomialRing(ZZ, names="x")
     R2 = PolynomialRing(ZZ, names="x, y")
     R3 = PolynomialRing(ZZ, names="x, y, z")
-    ip.run_cell("cur_sty = PythonStyle()")
     print "check1"
     ip.run_cell("x = PolynomialRing(ZZ, names='x').gen()")
     check(R1)
