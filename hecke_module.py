@@ -403,7 +403,7 @@ def tp2_action_fc_alist(p, T, i):
             S = T.right_action(M.transpose())
             if S.is_divisible_by(p ** 2):
                 S = S // (p ** 2)
-                res1.append((S, p ** (-12) * _expt_sum(S, p, alpha, D, i),
+                res1.append((S, p ** (-12) * _expt_sum(S, p, alpha, i),
                              M ** (-1) * p ** 2))
 
     return __convert_reduced_nonisom_matrices([(a, b, c) for a, b, c in res1 if b != 0])
@@ -518,7 +518,7 @@ def _gen_gauss_sum_non_dyadic(p, eps, n, t, r):
         return _gen_gauss_sum_direct_way(N, p, r)
 
 
-def _expt_sum(S, p, alpha, D, i):
+def _expt_sum(S, p, alpha, i):
     '''
     Return the exponential sum in Miyawaki's paper, where alpha[-1] <= 2, for T_i(p^2).
     '''
