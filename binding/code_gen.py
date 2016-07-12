@@ -409,7 +409,7 @@ def _pol_to_codes_and_res_var_pow(pl, name, res_var_name, sty):
                 codes.append(_admul_code(res_var_name, _expt(t, gns), cf, sty))
         if v1 is not None:
             vrs.append(v1)
-    return [codes, uniq(vrs)]
+    return (codes, uniq(vrs))
 
 
 def pol_to_fmpz_codes_and_result_var(pl, name, res_var_name, sty=None, algorithm=None):
@@ -421,15 +421,21 @@ def pol_to_fmpz_codes_and_result_var(pl, name, res_var_name, sty=None, algorithm
     where codes is a list of strings for computing pl and
     tmp_var_names is a list of used temp variable names.
     '''
+    pl = pl.change_ring(ZZ)
     if sty is None:
         sty = FmpzStyle()
+
+    # If pl is equal to a single variable, just set the result
+    if pl.degree() == 1 and pl.dict().values()[0] == 1:
+        return ([sty.set_z(res_var_name, str(pl))], [])
+
     if algorithm == "horner":
         n = pl.parent().ngens()
         vrs = [name + str(a) for a in range(n)]
         e = _to_expr(pl)
         codes, v, vrs = e.codes(vrs, sty)
         codes.append(sty.set_z(res_var_name, v))
-        return [codes, uniq(vrs)]
+        return (codes, uniq(vrs))
     elif algorithm is None:
         return _pol_to_codes_and_res_var_pow(pl, name, res_var_name, sty)
     else:
@@ -440,6 +446,7 @@ def pol_factor_to_code_and_result_var(pl, name, res_var_name, sty=None, algorith
     '''
     Similar to pol_to_fmpz_codes_and_result_var. But factor pl before computing code.
     '''
+    pl = pl.change_ring(ZZ)
     if sty is None:
         sty = FmpzStyle()
     pl = pl.change_ring(ZZ)
