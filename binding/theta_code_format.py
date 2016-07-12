@@ -85,7 +85,7 @@ def _bideterminant_prime_factors_dict(mat, wt):
     return {a: (_rl_part(b), _im_part(b)) for a, b in d.items()}
 
 
-def _pol_basis_as_polof_factors(wt, imag_quad, names_base=('rl', 'im')):
+def _pol_basis_as_polof_factors(wt, imag_quad, names_base=('real_part', 'imag_part')):
     '''
     wt: weight of repn of GL3
     imag_quad: imaginary quadratic field
