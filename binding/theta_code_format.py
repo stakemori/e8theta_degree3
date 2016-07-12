@@ -38,7 +38,7 @@ def _pol_basis_factor_dct_and_ls(wt):
     Let M a corresponding repn of GL3.
     return a pair (d, l)
     l: a list of polynomials obtained from prime factors of M.basis_as_pol().
-    d: dict s.t whose keys are M.basis_as_pol() and
+    d: dict s.t whose keys are M.basis() and
     f => [const, (b1, t1), (b2, t2), ... ],
     where f = const b1^t1 * b2^t2 * ..., and b1, b2, ... in l.
     '''
@@ -94,7 +94,7 @@ def _pol_basis_as_polof_factors(wt, imag_quad, names_base=('rl', 'im')):
     Returns a pair of dicts (d, subs_dct).
     subs_dct is a dict s.t.
     a => rli + imi omega
-    where a is a prime factor of baisis_as_pol,
+    where a is a factorization of baisis_as_pol,
     rli, imi are variables and omega is the gen of imag_quad.
     The set of keys of d is basis of the corresponding representation.
     Its value at x is a pair (f, g) of polynomials of rl0, im0, rl1, im1, ... s.t.
