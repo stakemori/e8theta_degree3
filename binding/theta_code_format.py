@@ -92,7 +92,7 @@ def _pol_basis_as_polof_factors(wt, imag_quad, names_base=('real_part', 'imag_pa
     Returns a pair of dicts (d, subs_dct).
     subs_dct is a dict s.t.
     a => (rli, imi)
-    where a is a factorization of baisis_as_pol,
+    where a is a prime factor of baisis_as_pol,
     rli, imi are variables and omega is the gen of imag_quad.
     The set of keys of d is basis of the corresponding representation.
     Its value at x is a pair (f, g) of polynomials of rl0, im0, rl1, im1, ... s.t.
