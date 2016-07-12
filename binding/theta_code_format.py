@@ -91,12 +91,12 @@ def _pol_basis_as_polof_factors(wt, imag_quad, names_base=('rl', 'im')):
     imag_quad: imaginary quadratic field
     Returns a pair of dicts (d, subs_dct).
     subs_dct is a dict s.t.
-    a => rli + imi omega
+    a => (rli, imi)
     where a is a factorization of baisis_as_pol,
     rli, imi are variables and omega is the gen of imag_quad.
     The set of keys of d is basis of the corresponding representation.
     Its value at x is a pair (f, g) of polynomials of rl0, im0, rl1, im1, ... s.t.
-    x.subs(subs_dct) = f + g * omega.
+    x.subs({a => rli + omega * imi}) = f + g * omega.
     '''
     d, l = _pol_basis_factor_dct_and_ls(wt)
     n = len(l)
@@ -113,8 +113,26 @@ def _pol_basis_as_polof_factors(wt, imag_quad, names_base=('rl', 'im')):
 
     res = {k: _subs(v) for k, v in d.items()}
     return ({k: (_rl_part(v), _im_part(v)) for k, v in res.items()},
-            subs_dct)
-HEADER = '''
+            {k: (_rl_part(v), _im_part(v)) for k, v in subs_dct.items()})
+
+
+def _init_code(wt, mat):
+    pass
+
+
+def code_format(wt, mat, real_part=True):
+    '''
+    wt: non-increasing list/tuple of non-negative integers of length 3.
+    mat: 3 * 8 matrix with mat * mat.transpose() = 0 with coefficients in
+    an imaginary quadratic field.
+    real_part: boolian. If False, the imaginary part of the Fourier coefficient
+    will be computed.
+    Here for alpha = a + b * omega in K (an imaginary quadratic field with the
+    generator omega), the real part and imaginary part of alpha are
+    a and b respectively.
+    '''
+
+    header = '''
 #include "e8vectors.h"
 
 inline int inner_prod(int s[8], int t[8])
