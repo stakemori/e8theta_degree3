@@ -22,13 +22,11 @@ def _conj(pol):
 
 
 def _rl_part(pol):
-    return ((pol + _conj(pol)) / QQ(2)).change_ring(QQ)
+    return pol.map_coefficients(lambda x: x.list()[0]).change_ring(QQ)
 
 
 def _im_part(pol):
-    K = pol.base_ring()
-    i = K.gen()
-    return ((pol - _conj(pol)) / (QQ(2) * i)).change_ring(QQ)
+    return pol.map_coefficients(lambda x: x.list()[1]).change_ring(QQ)
 
 
 @cached_function
