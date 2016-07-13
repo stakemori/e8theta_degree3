@@ -4,6 +4,8 @@ from sage.matrix.all import matrix
 from sage.rings.all import QQ, PolynomialRing
 from e8theta_degree3.gl3_repn import gl3_repn_module, matrix_var
 from sage.modules.all import vector
+from sage.arith.all import lcm
+from e8theta_degree3.binding.code_gen import pol_to_fmpz_codes_and_result_var, FmpzStyle
 
 
 @cached_function
@@ -116,8 +118,41 @@ def _pol_basis_as_polof_factors(wt, imag_quad, names_base=('real_part', 'imag_pa
             {k: (_rl_part(v), _im_part(v)) for k, v in subs_dct.items()})
 
 
-def _init_code(wt, mat):
-    pass
+def _init_code(tmp_vars, res_vars):
+    vrs = (tmp_vars + res_vars +
+           list(itertools.chain(*[[s + str(i) for i in range(7)] for s in ["s", "t", "u"]])))
+    indent = "  "
+    res = " ".join([indent + "fmpz_t %s;" % v for v in vrs])
+    res = res + "\n"
+    res = res + " ".join([indent + "fmpz_init(%s);" % v for v in vrs])
+
+    return res
+
+
+def _bi_det_factors_code(rl_alst, im_alst, denom_lcm, var_dct):
+    indent = " " * 26
+    lines_format = ("{indent}/* Computation of {var}" +
+                    " = {part} part of {lcm} * ({bi_det}) */\n{indent}{code}")
+
+    def _code(alst, idx, part):
+        return (";\n\n").join([lines_format.format(indent=indent, var=var_dct[k][idx],
+                                                   bi_det=k,
+                                                   lcm=denom_lcm,
+                                                   code=(";\n" + indent).join(codes),
+                                                   part=part) for k, codes in alst])
+    rl_code = _code(rl_alst, 0, "real")
+    im_code = _code(im_alst, 1, "imaginary")
+    return rl_code + ";\n\n\n" + im_code + ";"
+
+
+def _coeffs_code(pol_code_alst, res_vars):
+    indent = " " * 26
+    comment_line = "{indent}/* Computation of {var} = {pol} */\n{indent}"
+
+    code_blocks = [(comment_line.format(var=v, pol=str(pl), indent=indent) +
+                    (";\n" + indent).join(codes))
+                   for (pl, codes), v in zip(pol_code_alst, res_vars)]
+    return "\n\n".join(code_blocks)
 
 
 def code_format(wt, mat, real_part=True):
@@ -131,6 +166,65 @@ def code_format(wt, mat, real_part=True):
     generator omega), the real part and imaginary part of alpha are
     a and b respectively.
     '''
+    tmp_var_name = "a"
+    sum_tmp_var_name = "tmp"
+    res_str_name = "res_str"
+    sty = FmpzStyle()
+
+    bdt_facs = _bideterminant_prime_factors_dict(mat, wt)
+    _facs_pols = itertools.chain(*([a, b] for a, b in bdt_facs.values()))
+    _facs_pols_lcm = lcm([b.denominator()
+                          for b in itertools.chain(*(a.dict().values() for a in _facs_pols))])
+    # Remove denominators
+    bdt_facs = {k: (a * _facs_pols_lcm, b * _facs_pols_lcm) for k, (a, b) in bdt_facs.items()}
+
+    Vrho = gl3_repn_module(wt)
+    bs_pl_dct, bdt_var_dct = _pol_basis_as_polof_factors(wt, mat.base_ring())
+    coef_pol_pairs = [bs_pl_dct[b] for b in Vrho.basis()]
+
+    if real_part:
+        coef_pols = [a for a, _ in coef_pol_pairs]
+    else:
+        coef_pols = [a for _, a in coef_pol_pairs]
+
+    def _facs_pols_code_and_vars(i):
+        return {k: pol_to_fmpz_codes_and_result_var(v[i], tmp_var_name, bdt_var_dct[k][i])
+                for k, v in bdt_facs.items()}
+
+    facs_pols_code_rl_dct = _facs_pols_code_and_vars(0)
+    facs_pols_code_im_dct = _facs_pols_code_and_vars(1)
+
+    res_vars = ["res" + str(i) for i, _ in enumerate(coef_pols)]
+
+    coefs_pol_code_alst = [(pl, pol_to_fmpz_codes_and_result_var(pl, tmp_var_name,
+                                                                 sum_tmp_var_name))
+                           for pl in coef_pols]
+
+    tmp_vars = list(set(list(itertools.chain(*(l for _, l in facs_pols_code_rl_dct.values()))) +
+                        list(itertools.chain(*(l for _, l in facs_pols_code_im_dct.values()))) +
+                        list(itertools.chain(*(l for _, (_, l) in coefs_pol_code_alst)))))
+    tmp_vars = sorted(tmp_vars)
+    tmp_vars.append(sum_tmp_var_name)
+
+    def _key_fun(x):
+        return str(bdt_var_dct[x[0]])
+
+    facs_pols_code_rl_alst = sorted([(k, codes) for k, (codes, _) in facs_pols_code_rl_dct.items()],
+                                    key=_key_fun)
+    facs_pols_code_im_alst = sorted([(k, codes) for k, (codes, _) in facs_pols_code_im_dct.items()],
+                                    key=_key_fun)
+
+    # Remove tmp vars and add summing
+    coefs_pol_code_alst1 = [(pl, codes + [sty.add_z(v, v, sum_tmp_var_name)])
+                            for (pl, (codes, _)), v in zip(coefs_pol_code_alst, res_vars)]
+
+    init_code_str = _init_code(tmp_vars, res_vars)
+
+    bi_det_factors_code_str = _bi_det_factors_code(facs_pols_code_rl_alst,
+                                                   facs_pols_code_im_alst, _facs_pols_lcm,
+                                                   bdt_var_dct)
+    coeffs_code_str = _coeffs_code(coefs_pol_code_alst1, res_vars)
+    return coeffs_code_str
 
     header = '''
 #include "e8vectors.h"
@@ -149,9 +243,73 @@ inline int inner_prod(int s[8], int t[8])
 
 '''
 
+    code = '''
+{header}
 
-def code_format(wt, mat):
-    '''
-    mat: 3 * 8 matrix with mat * mat.transpose() = 0 with coefficients in
-    an imaginary quadratic field.
+char * {func_name}(int a, int b, int c, int d, int e, int f)
+{{
+  cache_vectors();
+  /* Use static to avoid segmentation fault */
+  static int vs1[MAX_NM_OF_VECTORS][8];
+  static int vs2[MAX_NM_OF_VECTORS][8];
+  static int vs3[MAX_NM_OF_VECTORS][8];
+
+  _set_vs3(vs1, vs2, vs3, a, b, c);
+
+  {init_code}
+
+  for (int i = 0; i < num_of_vectors[a]; i++)
+    {{
+      for (int j = 0; j < num_of_vectors[b]; j++)
+        {{
+          for (int k = 0; k < num_of_vectors[c]; k++)
+            {{
+              if (inner_prod(vs1[i], vs2[j]) == f)
+                {{
+                  if (inner_prod(vs1[i], vs3[k]) == e)
+                    {{
+                      if (inner_prod(vs2[j], vs3[k]) == d)
+                        {{
+                          fmpz_set_si(s0, vs1[i][0]);
+                          fmpz_set_si(s1, vs1[i][1]);
+                          fmpz_set_si(s2, vs1[i][2]);
+                          fmpz_set_si(s3, vs1[i][3]);
+                          fmpz_set_si(s4, vs1[i][4]);
+                          fmpz_set_si(s5, vs1[i][5]);
+                          fmpz_set_si(s6, vs1[i][6]);
+                          fmpz_set_si(s7, vs1[i][7]);
+
+                          fmpz_set_si(t0, vs2[j][0]);
+                          fmpz_set_si(t1, vs2[j][1]);
+                          fmpz_set_si(t2, vs2[j][2]);
+                          fmpz_set_si(t3, vs2[j][3]);
+                          fmpz_set_si(t4, vs2[j][4]);
+                          fmpz_set_si(t5, vs2[j][5]);
+                          fmpz_set_si(t6, vs2[j][6]);
+                          fmpz_set_si(t7, vs2[j][7]);
+
+                          fmpz_set_si(u0, vs3[k][0]);
+                          fmpz_set_si(u1, vs3[k][1]);
+                          fmpz_set_si(u2, vs3[k][2]);
+                          fmpz_set_si(u3, vs3[k][3]);
+                          fmpz_set_si(u4, vs3[k][4]);
+                          fmpz_set_si(u5, vs3[k][5]);
+                          fmpz_set_si(u6, vs3[k][6]);
+                          fmpz_set_si(u7, vs3[k][7]);
+
+                          {bi_det_factors_code}
+
+                          {coeffs_code}
+
+                        }}
+                    }}
+                }}
+            }}
+        }}
+    }}
+
+  {str_concat_code}
+  {cleanup_code}
+  return {res_str_name};
+}}
     '''
