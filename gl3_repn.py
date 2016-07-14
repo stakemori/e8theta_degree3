@@ -80,18 +80,6 @@ class BiDeterminant(object):
             return False
 
 
-def _bideterminant(a, b):
-    '''
-    a, b: an instance of young_tableau.YoungTableu
-    '''
-    m = matrix_var()
-    res = 1
-    for l1, l2 in zip(a.col_numbers, b.col_numbers):
-        res *= m.matrix_from_rows_and_columns(
-            [i - 1 for i in l1], [j - 1 for j in l2]).det()
-    return res
-
-
 def _t_lambda(wt):
     return YoungTableu(n=3, row_numbers=[[i + 1 for _ in range(a)]
                                          for i, a in enumerate(wt)])
