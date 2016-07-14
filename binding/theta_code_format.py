@@ -118,13 +118,12 @@ def _pol_basis_as_polof_factors(wt, imag_quad, names_base=('real_part', 'imag_pa
             {k: (_rl_part(v), _im_part(v)) for k, v in subs_dct.items()})
 
 
-def _init_code(tmp_vars, res_vars):
-    vrs = (tmp_vars + res_vars +
-           list(itertools.chain(*[[s + str(i) for i in range(7)] for s in ["s", "t", "u"]])))
+def _init_code(variables, res_str):
     indent = "  "
-    res = " ".join([indent + "fmpz_t %s;" % v for v in vrs])
+    res = ";\n".join([indent + "fmpz_t %s" % v for v in variables]) + ";\n"
     res = res + "\n"
-    res = res + " ".join([indent + "fmpz_init(%s);" % v for v in vrs])
+    res = res + ";\n".join([indent + "fmpz_init(%s)" % v for v in variables]) + ";\n"
+    res = res + "\n" + indent + "char * {res_str};".format(res_str=res_str)
 
     return res
 
@@ -150,12 +149,32 @@ def _coeffs_code(pol_code_alst, res_vars):
     comment_line = "{indent}/* Computation of {var} = {pol} */\n{indent}"
 
     code_blocks = [(comment_line.format(var=v, pol=str(pl), indent=indent) +
-                    (";\n" + indent).join(codes))
+                    (";\n" + indent).join(codes) + ";")
                    for (pl, codes), v in zip(pol_code_alst, res_vars)]
     return "\n\n".join(code_blocks)
 
 
-def code_format(wt, mat, real_part=True):
+def _str_concat_code(res_vars, res_str):
+    indent = " " * 2
+    _format_str = '"' + ",".join(['%s' for _ in range(len(res_vars))]) + '"'
+    get_str_code = ", ".join(["fmpz_get_str(NULL, 10, %s)" % (v, ) for v in res_vars])
+
+    _code = '''
+int buf_size = asprintf(&{res_str}, {_format_str}, {get_str_code});
+
+if (buf_size == -1) {{
+  exit(1);
+}}
+    '''.format(get_str_code=get_str_code, _format_str=_format_str, res_str=res_str)
+    return indent + _code.replace("\n", "\n" + indent)
+
+
+def _cleanup_code(variables):
+    indent = "  "
+    return ";\n".join(indent + "fmpz_clear(%s)" % (v,) for v in variables) + ";"
+
+
+def code_format(func_name, wt, mat, real_part=True):
     '''
     wt: non-increasing list/tuple of non-negative integers of length 3.
     mat: 3 * 8 matrix with mat * mat.transpose() = 0 with coefficients in
@@ -218,15 +237,23 @@ def code_format(wt, mat, real_part=True):
     coefs_pol_code_alst1 = [(pl, codes + [sty.add_z(v, v, sum_tmp_var_name)])
                             for (pl, (codes, _)), v in zip(coefs_pol_code_alst, res_vars)]
 
-    init_code_str = _init_code(tmp_vars, res_vars)
+    _vrs = (tmp_vars + res_vars + sorted([str(r) for r, _ in bdt_var_dct.values()]) +
+            sorted([str(im) for _, im in bdt_var_dct.values()]) +
+            list(itertools.chain(*[[s + str(i) for i in range(8)] for s in ["s", "t", "u"]])))
+
+    init_code_str = _init_code(_vrs, res_str_name)
 
     bi_det_factors_code_str = _bi_det_factors_code(facs_pols_code_rl_alst,
                                                    facs_pols_code_im_alst, _facs_pols_lcm,
                                                    bdt_var_dct)
     coeffs_code_str = _coeffs_code(coefs_pol_code_alst1, res_vars)
-    return coeffs_code_str
 
-    header = '''
+    str_concat_code_str = _str_concat_code(res_vars, res_str_name)
+
+    cleanup_code_str = _cleanup_code(_vrs)
+
+    header = '''#define _GNU_SOURCE             /* for asprintf */
+#include <stdio.h>
 #include "e8vectors.h"
 
 inline int inner_prod(int s[8], int t[8])
@@ -243,8 +270,7 @@ inline int inner_prod(int s[8], int t[8])
 
 '''
 
-    code = '''
-{header}
+    code = '''{header}
 
 char * {func_name}(int a, int b, int c, int d, int e, int f)
 {{
@@ -256,7 +282,7 @@ char * {func_name}(int a, int b, int c, int d, int e, int f)
 
   _set_vs3(vs1, vs2, vs3, a, b, c);
 
-  {init_code}
+{init_code}
 
   for (int i = 0; i < num_of_vectors[a]; i++)
     {{
@@ -297,9 +323,9 @@ char * {func_name}(int a, int b, int c, int d, int e, int f)
                           fmpz_set_si(u6, vs3[k][6]);
                           fmpz_set_si(u7, vs3[k][7]);
 
-                          {bi_det_factors_code}
+{bi_det_factors_code}
 
-                          {coeffs_code}
+{coeffs_code}
 
                         }}
                     }}
@@ -308,8 +334,17 @@ char * {func_name}(int a, int b, int c, int d, int e, int f)
         }}
     }}
 
-  {str_concat_code}
-  {cleanup_code}
+{str_concat_code}
+{cleanup_code}
+
+  /* {res_str_name} must be freed later. */
   return {res_str_name};
 }}
-    '''
+    '''.format(init_code=init_code_str,
+               bi_det_factors_code=bi_det_factors_code_str,
+               coeffs_code=coeffs_code_str,
+               str_concat_code=str_concat_code_str,
+               cleanup_code=cleanup_code_str,
+               res_str_name=res_str_name,
+               header=header, func_name=func_name)
+    return code
