@@ -2,9 +2,9 @@ import itertools
 from sage.misc.all import cached_function, mul
 from sage.matrix.all import matrix
 from sage.rings.all import QQ, PolynomialRing
-from e8theta_degree3.gl3_repn import gl3_repn_module, matrix_var
 from sage.modules.all import vector
 from sage.arith.all import lcm
+from e8theta_degree3.gl3_repn import gl3_repn_module, matrix_var
 from e8theta_degree3.binding.code_gen import pol_to_fmpz_codes_and_result_var, FmpzStyle
 
 
