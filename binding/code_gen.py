@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
-from sage.all import PolynomialRing, mul, ZZ, uniq, SR, factor, is_prime_power
 from abc import ABCMeta, abstractmethod, abstractproperty
+
+from sage.all import SR, ZZ, PolynomialRing, factor, is_prime_power, mul, uniq
 
 
 class CodeStyle(object):

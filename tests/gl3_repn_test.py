@@ -1,7 +1,8 @@
 import unittest
+
+from sage.matrix.all import random_matrix
 from sage.modules.all import random_vector
 from sage.rings.all import QQ
-from sage.matrix.all import random_matrix
 
 from ..gl3_repn import GL3RepnModule
 

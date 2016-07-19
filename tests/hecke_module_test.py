@@ -1,7 +1,9 @@
 import unittest
-# from unittest import skip
-from ..hecke_module import _index_of_gamma_0_gl_n, _gl3_coset_gamma0
+
 from sage.rings.integer_ring import ZZ
+
+# from unittest import skip
+from ..hecke_module import _gl3_coset_gamma0, _index_of_gamma_0_gl_n
 
 
 def alphas_ls():

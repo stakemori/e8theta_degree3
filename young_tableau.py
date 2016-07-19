@@ -1,5 +1,6 @@
-from sage.all import PolynomialRing, QQ, matrix, cached_function
 from itertools import combinations, takewhile
+
+from sage.all import QQ, PolynomialRing, cached_function, matrix
 
 
 def poly_repn_dim(wt):

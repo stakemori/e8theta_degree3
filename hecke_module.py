@@ -1,14 +1,15 @@
 # -*- coding: utf-8 -*-
+import itertools
 from itertools import groupby
+
 from sage.all import mul
 from sage.arith.all import kronecker_symbol
-from sage.matrix.all import (diagonal_matrix, matrix, block_diagonal_matrix,
-                             identity_matrix, block_matrix)
+from sage.functions.all import ceil, floor, sgn
+from sage.matrix.all import (block_diagonal_matrix, block_matrix,
+                             diagonal_matrix, identity_matrix, matrix)
 from sage.misc.all import cached_function
-from sage.rings.all import FiniteField, CyclotomicField, ZZ, QQ, PolynomialRing
-from sage.quadratic_forms.all import least_quadratic_nonresidue, QuadraticForm
-from sage.functions.all import sgn, floor, ceil
-import itertools
+from sage.quadratic_forms.all import QuadraticForm, least_quadratic_nonresidue
+from sage.rings.all import QQ, ZZ, CyclotomicField, FiniteField, PolynomialRing
 
 
 def _index_of_gamma_0_gl_n(alpha, p):

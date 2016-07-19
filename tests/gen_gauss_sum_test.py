@@ -1,6 +1,8 @@
 import unittest
+
 from sage.matrix.all import diagonal_matrix
-from sage.rings.all import FiniteField, ZZ
+from sage.rings.all import ZZ, FiniteField
+
 from ..hecke_module import _gen_gauss_sum_direct_way, _generalized_gauss_sum
 
 

@@ -1,13 +1,14 @@
-import operator
 import itertools
+import operator
 
-from sage.rings.all import PolynomialRing, QQ
+from e8theta_degree3.repn import ReplSpaceElement
+from e8theta_degree3.utils import find_linearly_indep_indices
+from e8theta_degree3.young_tableau import (YoungTableu, poly_repn_dim,
+                                           semistandard_young_tableaux)
 from sage.matrix.all import matrix
 from sage.misc.all import cached_function, cached_method, mul
 from sage.modules.all import vector
-from e8theta_degree3.young_tableau import YoungTableu, semistandard_young_tableaux, poly_repn_dim
-from e8theta_degree3.repn import ReplSpaceElement
-from e8theta_degree3.utils import find_linearly_indep_indices
+from sage.rings.all import QQ, PolynomialRing
 
 
 @cached_function

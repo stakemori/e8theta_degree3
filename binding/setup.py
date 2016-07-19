@@ -1,8 +1,9 @@
 # -*- compile-command: "sage -c 'sh.eval(\"python setup.py build_ext -i\")'"-*-
 import os
 from distutils.core import setup
-from Cython.Build import cythonize
 from distutils.extension import Extension
+
+from Cython.Build import cythonize
 
 setup(
     name="E8Theta",

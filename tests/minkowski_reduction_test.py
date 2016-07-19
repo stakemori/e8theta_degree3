@@ -1,8 +1,10 @@
 import unittest
 
-from sage.quadratic_forms.all import random_quadraticform_with_conditions, QuadraticForm
-from sage.rings.all import ZZ, QQ
 from sage.matrix.all import identity_matrix
+from sage.quadratic_forms.all import (QuadraticForm,
+                                      random_quadraticform_with_conditions)
+from sage.rings.all import QQ, ZZ
+
 from ..hecke_module import _minkowski_reduction
 
 
