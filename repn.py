@@ -14,26 +14,31 @@ class ReplSpaceElement(object):
     def __repr__(self):
         return repr(self.vector)
 
-    def __init__(self, v):
+    def __init__(self, v, wt):
         self._v = vector((a for a in v))
+        self._wt = wt
+
+    @property
+    def weight(self):
+        return self._wt
 
     def __add__(self, other):
         if other == 0:
             return self
         elif isinstance(other, self.__class__):
-            return self.__class__(self.vector + other.vector)
+            return self.__class__(self.vector + other.vector, self.weight)
         else:
             raise NotImplementedError
 
     def __neg__(self):
-        return self.__class__(-self.vector)
+        return self.__class__(-self.vector, self.weight)
 
     def __radd__(self, other):
         return self.__add__(other)
 
     def __mul__(self, other):
         if other in self.vector.base_ring():
-            return self.__class__(self.vector * other)
+            return self.__class__(self.vector * other, self.weight)
         else:
             raise ValueError
 

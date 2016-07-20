@@ -147,38 +147,26 @@ class GL3RepnModule(object):
         return matrix([self.to_vector(a) for a in bs_acted]).transpose()
 
 
-def element_constructor(wt):
-    '''
-    wt: a list/tuple of non-increasing integers of length 3.
-    Returns a sub class of ReplSpaceElement of given wt.
-    Used for Hecke operators.
-    '''
+class GL3RepnElement(ReplSpaceElement):
 
-    M = GL3RepnModule(wt)
+    def __init__(self, v, wt):
+        super(GL3RepnElement, self).__init__(v, wt)
+        self._parent = gl3_repn_module(wt)
 
-    class GL3RepnElement(ReplSpaceElement):
+    def left_action(self, g):
+        det_wt = self.weight[-1]
+        non_det_wt = tuple([a - det_wt for a in self.weight])
+        M = gl3_repn_module(non_det_wt)
+        fcs = [b.factor() for b in M.basis()]
+        pols = [f.const * mul(left_action_as_pol(pl, g) ** e for pl, e in f.pols) for f in fcs]
+        pol = sum(a * b for a, b in zip(self.vector, pols))
+        return GL3RepnElement(M.to_vector(pol) * g.det()**det_wt, self.weight)
 
-        def left_action(self, g):
-            pol = M.to_pol(self.vector)
-            pol1 = left_action_as_pol(pol, g)
-            return GL3RepnElement(M.to_vector(pol1))
+    def parent(self):
+        return self._parent
 
-        def parent(self):
-            return M
-
-        @classmethod
-        def dimension(cls):
-            return M.dimension()
-
-        @classmethod
-        def weight(cls):
-            return M.wt
-
-        @classmethod
-        def zero(cls):
-            return cls(vector([QQ(0) for _ in range(M.dimension())]))
-
-    return GL3RepnElement
+    def dimension(self):
+        return self.parent().dimension()
 
 
 class NormFactorELt(object):
