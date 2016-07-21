@@ -11,6 +11,9 @@ class ReplSpaceElement(object):
     def vector(self):
         return self._v
 
+    def __getitem__(self, i):
+        return self.vector[i]
+
     def __repr__(self):
         return repr(self.vector)
 
