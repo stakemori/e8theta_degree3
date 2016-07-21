@@ -274,7 +274,7 @@ def tp2_action_fourier_coeff(p, i, T, F):
 def _action_fc_base(ls, F, T):
     if not isinstance(T, HalfIntMatElement):
         T = HalfIntMatElement(T)
-    res = F[T].zero()
+    res = 0
     for s, a, g in ls:
         res = a * F[s].left_action(g) + res
     return res
