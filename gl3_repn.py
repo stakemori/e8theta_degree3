@@ -153,6 +153,15 @@ class GL3RepnModule(object):
         bs_acted = [a.subs(d) for a in self.basis_as_pol()]
         return matrix([self.to_vector(a) for a in bs_acted]).transpose()
 
+    def __call__(self, v):
+        '''
+        v: vector with length self.dimension()
+        Create an element which corresponds to GL3RepnElement
+        '''
+        if len(v) != self.dimension():
+            raise ValueError
+        return GL3RepnElement(v, self.wt)
+
 
 class GL3RepnElement(ReplSpaceElement):
 
