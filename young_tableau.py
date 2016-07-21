@@ -97,7 +97,9 @@ def semistandard_young_tableaux(n, wt):
         lambda x, y: x + y, [[l] * a for l, a in zip(reversed(range(1, n + 1)), wt_df)])
 
     def _prod(col_lngs):
-        if len(col_lngs) == 1:
+        if not col_lngs:        # in case when weight = (0, 0, ... ,0)
+            yield [[]]
+        elif len(col_lngs) == 1:
             for a in _increasing_nums(n, col_lngs[0]):
                 yield [a]
         else:

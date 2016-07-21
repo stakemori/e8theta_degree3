@@ -54,8 +54,12 @@ class BiDeterminant(object):
         m = matrix_var()
         res = []
         for l1, l2 in zip(self.a.col_numbers, self.b.col_numbers):
-            res.append(m.matrix_from_rows_and_columns(
-                [i - 1 for i in l1], [j - 1 for j in l2]).det())
+            if l1 and l2:
+                res.append(m.matrix_from_rows_and_columns(
+                    [i - 1 for i in l1], [j - 1 for j in l2]).det())
+            else:
+                # empty matrix
+                res.append(matrix(QQ, []))
         return res
 
     def factor(self):
@@ -106,7 +110,8 @@ class GL3RepnModule(object):
 
     @cached_method
     def basis_as_pol(self):
-        return [b.as_pol() for b in self.basis()]
+        R = matrix_var().base_ring()
+        return [R(b.as_pol()) for b in self.basis()]
 
     @cached_method
     def basis(self):
@@ -130,6 +135,8 @@ class GL3RepnModule(object):
         an element of the parent of matrix_var().
         Return vector corresponding a.
         '''
+        R = matrix_var().base_ring()
+        a = R(a)
         v = vector([a[t] for t in self.linearly_indep_tpls()])
         m = self._transform_mat()
         return v * m ** (-1)
