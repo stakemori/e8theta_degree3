@@ -118,8 +118,11 @@ class GL3RepnModule(object):
         t = _t_lambda(self.wt)
         d = {i + 1: v for i, v in enumerate(identity_matrix(QQ, 3).columns())}
         ssyt = list(semistandard_young_tableaux(3, self.wt))
-        ssyt = sorted(ssyt, key=lambda x: tuple(sum(d[a] for a in flatten(x.col_numbers))))
-        return [BiDeterminant(t, a) for a in semistandard_young_tableaux(3, self.wt)]
+        if self.wt[0] != 0:
+            ssyt = list(reversed(
+                sorted(ssyt,
+                       key=lambda x: tuple(sum(d[a] for a in flatten(x.col_numbers))))))
+        return [BiDeterminant(t, a) for a in ssyt]
 
     @cached_method
     def linearly_indep_tpls(self):
