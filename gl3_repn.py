@@ -5,8 +5,8 @@ from e8theta_degree3.repn import ReplSpaceElement
 from e8theta_degree3.utils import find_linearly_indep_indices
 from e8theta_degree3.young_tableau import (YoungTableu, poly_repn_dim,
                                            semistandard_young_tableaux)
-from sage.matrix.all import matrix
-from sage.misc.all import cached_function, cached_method, mul
+from sage.matrix.all import identity_matrix, matrix
+from sage.misc.all import cached_function, cached_method, flatten, mul
 from sage.modules.all import vector
 from sage.rings.all import QQ, PolynomialRing
 
@@ -116,6 +116,9 @@ class GL3RepnModule(object):
     @cached_method
     def basis(self):
         t = _t_lambda(self.wt)
+        d = {i + 1: v for i, v in enumerate(identity_matrix(QQ, 3).columns())}
+        ssyt = list(semistandard_young_tableaux(3, self.wt))
+        ssyt = sorted(ssyt, key=lambda x: tuple(sum(d[a] for a in flatten(x.col_numbers))))
         return [BiDeterminant(t, a) for a in semistandard_young_tableaux(3, self.wt)]
 
     @cached_method
