@@ -306,7 +306,7 @@ def spinor_l_euler_factor(p, F, t=None, T=None):
     '''
     p = ZZ(p)
     if t is None:
-        t = PolynomialRing(ZZ, names='t').gen()
+        t = PolynomialRing(QQ, 1, names='t', order="neglex").gens()[0]
     c = {}
     tp = hecke_eigenvalue_tp(p, F, T=T)
     tpp1, tpp2, tpp3 = [hecke_eigenvalue_tp2(p, i, F, T=T) for i in [1, 2, 3]]
