@@ -306,6 +306,8 @@ inline int inner_prod(int s[8], int t[8])
 
 char * {func_name}(int a, int b, int c, int d, int e, int f)
 {{
+  /* mat: {mat_info}, quad_field: {quad_field_info} */
+
   cache_vectors();
   /* Use static to avoid segmentation fault */
   static int vs1[MAX_NM_OF_VECTORS][8];
@@ -378,5 +380,7 @@ char * {func_name}(int a, int b, int c, int d, int e, int f)
            str_concat_code=str_concat_code_str,
            cleanup_code=cleanup_code_str,
            res_str_name=res_str_name,
-           header=header, func_name=func_name)
+           header=header, func_name=func_name,
+           mat_info=str(mat.list()),
+           quad_field_info=str(mat.base_ring().polynomial()))
     return code
