@@ -17,5 +17,5 @@ def miyawaki_theta_dict(Ts, verbose=False):
     for T in Ts:
         if verbose:
             print T
-        res[T] = GL3RepnElement([miyawaki_theta(T.T)], (12, 12, 12))
+        res[T] = GL3RepnElement(miyawaki_theta(T.T), (12, 12, 12))
     return res
