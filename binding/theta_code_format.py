@@ -218,21 +218,24 @@ def code_format(func_name, wt, mat, real_part=True):
     Here for alpha = a + b * omega in K (an imaginary quadratic field with the
     generator omega), the real part and imaginary part of alpha are
     a and b respectively.
+    Return code for computing the theta series of weight wt associated to the
+    E8 series and the matrix.
     '''
     tmp_var_name = "a"
     sum_tmp_var_name = "tmp"
     res_str_name = "res_str"
     sty = FmpzStyle()
+    wtm4 = tuple([a - 4 for a in wt])
 
-    bdt_facs = _bideterminant_prime_factors_dict(mat, wt)
+    bdt_facs = _bideterminant_prime_factors_dict(mat, wtm4)
     _facs_pols = itertools.chain(*([a, b] for a, b in bdt_facs.values()))
     _facs_pols_lcm = lcm([b.denominator()
                           for b in itertools.chain(*(a.dict().values() for a in _facs_pols))])
     # Remove denominators
     bdt_facs = {k: (a * _facs_pols_lcm, b * _facs_pols_lcm) for k, (a, b) in bdt_facs.items()}
 
-    Vrho = gl3_repn_module(wt)
-    bs_pl_dct, bdt_var_dct = _pol_basis_as_polof_factors(wt, mat.base_ring())
+    Vrho = gl3_repn_module(wtm4)
+    bs_pl_dct, bdt_var_dct = _pol_basis_as_polof_factors(wtm4, mat.base_ring())
     coef_pol_pairs = [bs_pl_dct[b] for b in Vrho.basis()]
 
     if real_part:
