@@ -179,6 +179,33 @@ def _cleanup_code(variables):
     return ";\n".join(indent + "fmpz_clear(%s)" % (v,) for v in variables) + ";"
 
 
+def save_code_to_file(fname_base, func_name, wt, mat, real_part=True):
+    '''
+    fname: string
+    This save code for theta series to fname.h and fname.c
+    '''
+    hf = header_format(func_name)
+    cf = code_format(func_name, wt, mat, real_part=real_part)
+    fnameh = fname_base + ".h"
+    fnamec = fname_base + ".c"
+    with open(fnameh, "w") as fp:
+        fp.write(hf)
+
+    with open(fnamec, "w") as fp:
+        fp.write(cf)
+
+
+def header_format(func_name):
+    res = '''#ifdef _{func_name_upp}_
+#define _{func_name_upp}_
+
+char * {func_name}(int a, int b, int c, int d, int e, int f);
+
+#endif /* _{func_name_upp}_ */
+'''.format(func_name=func_name, func_name_upp=func_name.upper())
+    return res
+
+
 def code_format(func_name, wt, mat, real_part=True):
     '''
     wt: non-increasing list/tuple of non-negative integers of length 3.
