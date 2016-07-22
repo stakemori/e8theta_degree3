@@ -15,6 +15,4 @@ void _set_vs3(int vs1[MAX_NM_OF_VECTORS][8],
 
 void cache_vectors(void);
 
-char * _store_fmpz_str_using_malloc(fmpz_t x);
-
 #endif /* _E8VECTORS_H_ */
