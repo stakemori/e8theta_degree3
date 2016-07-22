@@ -1,5 +1,6 @@
-import re
 import itertools
+import os
+import re
 
 from e8theta_degree3.binding.code_gen import (FmpzStyle,
                                               pol_to_fmpz_codes_and_result_var)
@@ -184,7 +185,7 @@ def save_code_to_file(fname_base, func_name, wt, mat, real_part=True):
     fname: string
     This save code for theta series to fname.h and fname.c
     '''
-    hf = header_format(func_name)
+    hf = header_format(fname_base, func_name)
     cf = code_format(func_name, wt, mat, real_part=real_part)
     fnameh = fname_base + ".h"
     fnamec = fname_base + ".c"
@@ -195,14 +196,15 @@ def save_code_to_file(fname_base, func_name, wt, mat, real_part=True):
         fp.write(cf)
 
 
-def header_format(func_name):
-    res = '''#ifdef _{func_name_upp}_
-#define _{func_name_upp}_
+def header_format(fname, func_name):
+    res = '''#ifndef _{filename_name_upp_base}_H_
+#define _{filename_name_upp_base}_H_
 
 char * {func_name}(int a, int b, int c, int d, int e, int f);
 
-#endif /* _{func_name_upp}_ */
-'''.format(func_name=func_name, func_name_upp=func_name.upper())
+#endif /* _{filename_name_upp_base}_H_ */
+'''.format(func_name=func_name,
+           filename_name_upp_base=os.path.basename(fname.upper()))
     return res
 
 
