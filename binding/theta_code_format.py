@@ -1,3 +1,4 @@
+import re
 import itertools
 
 from e8theta_degree3.binding.code_gen import (FmpzStyle,
@@ -161,14 +162,16 @@ def _str_concat_code(res_vars, res_str):
     _format_str = '"' + ",".join(['%s' for _ in range(len(res_vars))]) + '"'
     get_str_code = ", ".join(["fmpz_get_str(NULL, 10, %s)" % (v, ) for v in res_vars])
 
-    _code = '''
-int buf_size = asprintf(&{res_str}, {_format_str}, {get_str_code});
+    _code = '''int buf_size = asprintf(&{res_str}, {_format_str}, {get_str_code});
 
 if (buf_size == -1) {{
   exit(1);
 }}
-    '''.format(get_str_code=get_str_code, _format_str=_format_str, res_str=res_str)
-    return indent + _code.replace("\n", "\n" + indent)
+'''.format(get_str_code=get_str_code, _format_str=_format_str, res_str=res_str)
+    _code = _code.replace("\n", "\n" + indent)
+    regexp = re.compile(r"^\s*$")
+    _code = indent + _code
+    return "\n".join(["" if regexp.match(c) else c for c in _code.split("\n")])
 
 
 def _cleanup_code(variables):
@@ -342,11 +345,11 @@ char * {func_name}(int a, int b, int c, int d, int e, int f)
   /* {res_str_name} must be freed later. */
   return {res_str_name};
 }}
-    '''.format(init_code=init_code_str,
-               bi_det_factors_code=bi_det_factors_code_str,
-               coeffs_code=coeffs_code_str,
-               str_concat_code=str_concat_code_str,
-               cleanup_code=cleanup_code_str,
-               res_str_name=res_str_name,
-               header=header, func_name=func_name)
+'''.format(init_code=init_code_str,
+           bi_det_factors_code=bi_det_factors_code_str,
+           coeffs_code=coeffs_code_str,
+           str_concat_code=str_concat_code_str,
+           cleanup_code=cleanup_code_str,
+           res_str_name=res_str_name,
+           header=header, func_name=func_name)
     return code
