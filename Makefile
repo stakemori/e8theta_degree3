@@ -1,19 +1,17 @@
 current_dir = $(shell pwd)
 parent_dir = $(shell dirname "$(current_dir)")
 DEBUGOPT = -Wall -g -Og -std=c11
-PATHOPT = -L$(current_dir)/binding -I/usr/local/include/flint/ -I$(current_dir)/binding
+PATHOPT = -L$(current_dir)/binding/lib -I/usr/local/include/flint/ -I$(current_dir)/binding/
 LIBOPTBASE = -lm -lflint -lmpfr -lgmp -lpthread
 OPT = -O2 -std=c11
 SHARED = -shared -fPIC
 CC = gcc
 
 compile-e8vector:
-	$(CC) binding/e8vectors.c -o binding/libe8vectors.so $(PATHOPT) $(OPT) $(LIBOPTBASE) $(SHARED)
+	$(CC) binding/e8vectors.c -o binding/lib/libe8vectors.so $(PATHOPT) $(OPT) $(LIBOPTBASE) $(SHARED)
 
 compile-miyawaki-theta:
-	$(CC) binding/miyawaki_theta.c -o binding/libmiyawaki_theta.so $(PATHOPT) $(OPT) -le8vectors $(LIBOPTBASE) $(SHARED)
-compile:
-	$(CC) binding/miyawaki_theta.c -o binding/miyawaki $(PATHOPT) $(OPT) -le8vectors $(LIBOPTBASE)
+	$(CC) binding/miyawaki_theta.c -o binding/lib/libmiyawaki_theta.so $(PATHOPT) $(OPT) -le8vectors $(LIBOPTBASE) $(SHARED)
 
 compile-cython: compile-e8vector compile-miyawaki-theta
 	sage -c 'sh.eval("cd binding; python setup.py build_ext -i")'

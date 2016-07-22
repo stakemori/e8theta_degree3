@@ -1,5 +1,5 @@
 # -*- compile-command: "sage -c 'sh.eval(\"python setup.py build_ext -i\")'"-*-
-import os
+from os.path import abspath, curdir, join
 from distutils.core import setup
 from distutils.extension import Extension
 
@@ -10,8 +10,8 @@ setup(
     ext_modules=cythonize(
         Extension("e8theta",
                   sources=["e8theta.pyx"],
-                  include_dirs=[os.path.abspath(os.path.curdir)],
-                  library_dirs=[os.path.abspath(os.path.curdir)],
+                  include_dirs=[abspath(curdir)],
+                  library_dirs=[join(abspath(curdir), "lib")],
                   libraries=["miyawaki_theta", "e8vectors"]),
     ),
 )
