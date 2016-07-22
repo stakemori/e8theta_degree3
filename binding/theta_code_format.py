@@ -12,6 +12,22 @@ from sage.modules.all import vector
 from sage.rings.all import QQ, PolynomialRing
 
 
+def save_code_to_file(directory, fname_base, func_name, wt, mat, real_part=True):
+    '''
+    fname_base: string
+    This save code for theta series to fname.h and fname.c
+    '''
+    hf = header_format(fname_base, func_name)
+    cf = code_format(func_name, wt, mat, real_part=real_part)
+    fnameh = os.path.join(directory, fname_base + ".h")
+    fnamec = os.path.join(directory, fname_base + ".c")
+    with open(fnameh, "w") as fp:
+        fp.write(hf)
+
+    with open(fnamec, "w") as fp:
+        fp.write(cf)
+
+
 @cached_function
 def _s_t_u_ring(base_ring=None):
     if base_ring is None:
@@ -178,22 +194,6 @@ if (buf_size == -1) {{
 def _cleanup_code(variables):
     indent = "  "
     return ";\n".join(indent + "fmpz_clear(%s)" % (v,) for v in variables) + ";"
-
-
-def save_code_to_file(fname_base, func_name, wt, mat, real_part=True):
-    '''
-    fname: string
-    This save code for theta series to fname.h and fname.c
-    '''
-    hf = header_format(fname_base, func_name)
-    cf = code_format(func_name, wt, mat, real_part=real_part)
-    fnameh = fname_base + ".h"
-    fnamec = fname_base + ".c"
-    with open(fnameh, "w") as fp:
-        fp.write(hf)
-
-    with open(fnamec, "w") as fp:
-        fp.write(cf)
 
 
 def header_format(fname, func_name):
