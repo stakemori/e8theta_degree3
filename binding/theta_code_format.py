@@ -47,15 +47,17 @@ def generate_cython_and_build_scripts(directory, fname_base,
     save_code_to_file(directory, c_fname, c_func_name, wt, mat,
                       real_part=real_part, overwrite=overwrite)
 
-    def _fname(f, ext):
-        return os.path.join(directory, f + ext)
+    def _fname(f):
+        return os.path.join(directory, f)
 
-    cython_file = _fname(fname_base, ".pyx")
-    setup_file = _fname("setup", ".py")
-    make_file = _fname("Makefile", "")
+    cython_file = _fname(fname_base + ".pyx")
+    setup_file = _fname("setup.py")
+    make_file = _fname("Makefile")
+    _init_file = _fname("__init__.py")
     file_code_alst = [(cython_file, _cython_code),
                       (setup_file, _setup_py_code),
-                      (make_file, _makefile_code)]
+                      (make_file, _makefile_code),
+                      (_init_file, "\n")]
     if (not overwrite) and any(os.path.exists(a) for a, _ in file_code_alst):
         raise IOError("file already exists.")
     for f, c in file_code_alst:
