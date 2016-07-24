@@ -12,7 +12,8 @@ from sage.modules.all import vector
 from sage.rings.all import QQ, PolynomialRing
 
 
-def save_code_to_file(directory, fname_base, func_name, wt, mat, real_part=True):
+def save_code_to_file(directory, fname_base, func_name, wt, mat, real_part=True,
+                      overwrite=False):
     '''
     fname_base: string
     This save code for theta series to fname.h and fname.c
@@ -21,11 +22,127 @@ def save_code_to_file(directory, fname_base, func_name, wt, mat, real_part=True)
     cf = code_format(func_name, wt, mat, real_part=real_part)
     fnameh = os.path.join(directory, fname_base + ".h")
     fnamec = os.path.join(directory, fname_base + ".c")
+    if (not overwrite) and (os.path.exists(fnameh) or os.path.exists(fnamec)):
+        raise IOError("file aleadly exists.")
     with open(fnameh, "w") as fp:
         fp.write(hf)
 
     with open(fnamec, "w") as fp:
         fp.write(cf)
+
+
+def generate_cython_and_build_scripts(directory, fname_base,
+                                      func_name,
+                                      c_func_name, wt, mat, real_part=True,
+                                      overwrite=False):
+    '''
+    directory(string): must be a subdirectory of binding
+    Generate c source, cython source ,build scripts and a makefile in directory.
+    Can compile by "make compile-cython" in that directory if e8vector is compiled.
+    '''
+    c_fname = fname_base + "_c"
+    _cython_code = _cython_format(c_fname, c_func_name, fname_base)
+    _setup_py_code = _setup_py_format(fname_base, c_fname)
+    _makefile_code = _makefile_format(c_fname)
+    save_code_to_file(directory, c_fname, c_func_name, wt, mat,
+                      real_part=real_part, overwrite=overwrite)
+
+    def _fname(f, ext):
+        return os.path.join(directory, f + ext)
+
+    cython_file = _fname(fname_base, ".pyx")
+    setup_file = _fname("setup", ".py")
+    make_file = _fname("Makefile", "")
+    file_code_alst = [(cython_file, _cython_code),
+                      (setup_file, _setup_py_code),
+                      (make_file, _makefile_code)]
+    if (not overwrite) and any(os.path.exists(a) for a, _ in file_code_alst):
+        raise IOError("file already exists.")
+    for f, c in file_code_alst:
+        with open(f, "w") as fp:
+            fp.write(c)
+
+
+def _setup_py_format(cython_src_file, c_lib_name):
+    fmt = '''from os.path import abspath, curdir, join, pardir
+from distutils.core import setup
+from distutils.extension import Extension
+
+from Cython.Build import cythonize
+
+setup(
+    name="{cython_src_file_upp}",
+    ext_modules=cythonize(
+        Extension("{cython_src_file}",
+                  sources=["{cython_src_file}.pyx"],
+                  include_dirs=[abspath(curdir), abspath(pardir)],
+                  library_dirs=[join(abspath(pardir), "lib")],
+                  libraries=["{c_lib_name}", "e8vectors"]),
+    ),
+)
+'''.format(cython_src_file=cython_src_file,
+           cython_src_file_upp=cython_src_file.upper(),
+           c_lib_name=c_lib_name)
+    return fmt
+
+
+def _makefile_format(c_src_file):
+    _fmt = '''current_dir = $(shell pwd)
+parent_dir = $(shell dirname "$(current_dir)")
+DEBUGOPT = -Wall -g -Og -std=c11
+PATHOPT = -L$(parent_dir)/lib -I/usr/local/include/flint/ -I$(current_dir) -I$(parent_dir)
+LIBOPTBASE = -lm -lflint -lmpfr -lgmp -lpthread
+OPT = -O2 -std=c11
+SHARED = -shared -fPIC
+CC = gcc
+
+compile-c-lib:
+\t$(CC) {c_src_file}.c -o $(parent_dir)/lib/lib{c_src_file}.so $(PATHOPT) $(OPT) \\
+\t-le8vectors $(LIBOPTBASE) $(SHARED)
+
+compile-cython: compile-c-lib
+\tsage -c 'sh.eval("python setup.py build_ext -i")'
+'''.format(c_src_file=c_src_file)
+    return _fmt
+
+
+def _cython_format(c_header_file, c_func_name, cython_func_name):
+    _fmt = '''from sage.rings.all import Integer, QQ, ZZ
+from sage.misc.all import cached_function
+from sage.modules.all import vector
+from sage.matrix.all import MatrixSpace
+from libc.stdlib cimport free
+from e8theta_degree3.gl3_repn import GL3RepnElement
+include "cysignals/signals.pxi"
+
+
+cdef extern from "{c_header_file}.h":
+    cpdef char * {c_func_name}(int, int, int, int, int, int)
+
+
+@cached_function
+def {cython_func_name}(m):
+    if not (m in MatrixSpace(QQ, 3) and (2 * m in MatrixSpace(ZZ, 3)) and
+            (m[a, a] in ZZ for a in range(3)) and m.transpose() == m):
+        raise ValueError("m must be a half integral matrix of size 3.")
+    l = [m[i, i] for i in range(3)] + [2*m[t] for t in [(1, 2), (0, 2), (0, 1)]]
+    a, b, c, d, e, f = [int(x) for x in l]
+    if max([a, b, c]) > 7:
+        raise ValueError("Diagonal elements are too large.")
+    sig_on()
+    cdef char* c_str = {c_func_name}(a, b, c, d, e, f)
+    cdef bytes py_str;
+    try:
+        py_str = c_str
+    finally:
+        free(c_str)
+    sig_off()
+    py_strs = py_str.split(",")
+    res = [Integer(a) for a in py_strs]
+    return vector(res)
+'''.format(c_header_file=c_header_file, c_func_name=c_func_name,
+           cython_func_name=cython_func_name)
+    return _fmt
 
 
 @cached_function
