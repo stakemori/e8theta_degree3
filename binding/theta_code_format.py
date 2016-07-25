@@ -433,7 +433,7 @@ inline int inner_prod(int s[8], int t[8])
 char * {func_name}(int a, int b, int c, int d, int e, int f)
 {{
   /* mat: {mat_info}, quad_field: {quad_field_info}, real_part: {real_part} */
-  /* young  tableaux of the basis: {young_tableaux} */
+  /* young tableaux of the basis: {young_tableaux} */
 
   cache_vectors();
   /* Use static to avoid segmentation fault */
