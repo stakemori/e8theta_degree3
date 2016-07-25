@@ -431,7 +431,8 @@ inline int inner_prod(int s[8], int t[8])
 
 char * {func_name}(int a, int b, int c, int d, int e, int f)
 {{
-  /* mat: {mat_info}, quad_field: {quad_field_info} */
+  /* mat: {mat_info}, quad_field: {quad_field_info}, real_part: {real_part} */
+  /* young  tableaux of the basis: {young_tableaux} */
 
   cache_vectors();
   /* Use static to avoid segmentation fault */
@@ -507,5 +508,7 @@ char * {func_name}(int a, int b, int c, int d, int e, int f)
            res_str_name=res_str_name,
            header=header, func_name=func_name,
            mat_info=str(mat.list()),
-           quad_field_info=str(mat.base_ring().polynomial()))
+           quad_field_info=str(mat.base_ring().polynomial()),
+           real_part=str(real_part),
+           young_tableaux=str([x.b.row_numbers for x in Vrho.basis()]))
     return code
