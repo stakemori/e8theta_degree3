@@ -31,7 +31,9 @@ def save_code_to_file(directory, fname_base, func_name, wt, mat, real_part=True,
         fp.write(cf)
 
 
-def generate_cython_and_build_scripts(directory, fname_base,
+def generate_cython_and_build_scripts(directory,
+                                      cython_fname_base,
+                                      c_fname_base,
                                       func_name,
                                       c_func_name, wt, mat, real_part=True,
                                       overwrite=False):
@@ -40,9 +42,9 @@ def generate_cython_and_build_scripts(directory, fname_base,
     Generate c source, cython source ,build scripts and a makefile in directory.
     Can compile by "make compile-cython" in that directory if e8vector is compiled.
     '''
-    c_fname = fname_base + "_c"
+    c_fname = c_fname_base + "_c"
     _cython_code = _cython_format(c_fname, c_func_name, func_name)
-    _setup_py_code = _setup_py_format(fname_base, c_fname)
+    _setup_py_code = _setup_py_format(cython_fname_base, c_fname)
     _makefile_code = _makefile_format(c_fname)
     save_code_to_file(directory, c_fname, c_func_name, wt, mat,
                       real_part=real_part, overwrite=overwrite)
@@ -50,7 +52,7 @@ def generate_cython_and_build_scripts(directory, fname_base,
     def _fname(f):
         return os.path.join(directory, f)
 
-    cython_file = _fname(fname_base + ".pyx")
+    cython_file = _fname(cython_fname_base + ".pyx")
     setup_file = _fname("setup.py")
     make_file = _fname("Makefile")
     _init_file = _fname("__init__.py")
