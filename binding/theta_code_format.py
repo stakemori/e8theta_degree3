@@ -41,7 +41,7 @@ def generate_cython_and_build_scripts(directory, fname_base,
     Can compile by "make compile-cython" in that directory if e8vector is compiled.
     '''
     c_fname = fname_base + "_c"
-    _cython_code = _cython_format(c_fname, c_func_name, fname_base)
+    _cython_code = _cython_format(c_fname, c_func_name, func_name)
     _setup_py_code = _setup_py_format(fname_base, c_fname)
     _makefile_code = _makefile_format(c_fname)
     save_code_to_file(directory, c_fname, c_func_name, wt, mat,
