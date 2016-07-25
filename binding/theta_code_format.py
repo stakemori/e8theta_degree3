@@ -363,7 +363,8 @@ def code_format(func_name, wt, mat, real_part=True, factor_pol=False):
         coef_pols = [a for _, a in coef_pol_pairs]
 
     def _facs_pols_code_and_vars(i):
-        return {k: pol_to_fmpz_codes_and_result_var(v[i], tmp_var_name, bdt_var_dct[k][i])
+        return {k: pol_to_fmpz_codes_and_result_var(v[i], tmp_var_name, bdt_var_dct[k][i],
+                                                    algorithm='horner')
                 for k, v in bdt_facs.items()}
 
     facs_pols_code_rl_dct = _facs_pols_code_and_vars(0)
