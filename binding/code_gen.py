@@ -427,7 +427,7 @@ def pol_to_fmpz_codes_and_result_var(pl, name, res_var_name, sty=None, algorithm
         sty = FmpzStyle()
 
     # If pl is equal to a single variable, just set the result
-    if pl.degree() == 1 and pl.dict().values()[0] == 1:
+    if pl.degree() == 1 and pl.dict().values()[0] and len(pl.dict()) == 1:
         return ([sty.set_z(res_var_name, str(pl))], [])
 
     if algorithm == "horner":
