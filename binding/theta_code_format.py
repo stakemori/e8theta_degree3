@@ -373,7 +373,8 @@ def code_format(func_name, wt, mat, real_part=True, factor_pol=False):
     res_vars = ["res" + str(i) for i, _ in enumerate(coef_pols)]
 
     coefs_pol_code_alst = [(pl, pol_to_fmpz_codes_and_result_var(pl, tmp_var_name,
-                                                                 sum_tmp_var_name))
+                                                                 sum_tmp_var_name,
+                                                                 factor_pol=factor_pol))
                            for pl in coef_pols]
 
     tmp_vars = list(set(list(itertools.chain(*(l for _, l in facs_pols_code_rl_dct.values()))) +
