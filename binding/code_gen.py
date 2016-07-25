@@ -413,7 +413,8 @@ def _pol_to_codes_and_res_var_pow(pl, name, res_var_name, sty):
     return (codes, uniq(vrs))
 
 
-def pol_to_fmpz_codes_and_result_var(pl, name, res_var_name, sty=None, algorithm=None):
+def pol_to_fmpz_codes_and_result_var(pl, name, res_var_name,
+                                     sty=None, algorithm=None, factor_pol=False):
     '''
     pl: polynomial
     name: name for tmp vars
@@ -422,6 +423,15 @@ def pol_to_fmpz_codes_and_result_var(pl, name, res_var_name, sty=None, algorithm
     where codes is a list of strings for computing pl and
     tmp_var_names is a list of used temp variable names.
     '''
+    if not factor_pol:
+        return _pol_to_fmpz_codes_and_result_var(pl, name,
+                                                 res_var_name, sty=sty, algorithm=algorithm)
+    else:
+        return pol_factor_to_code_and_result_var(pl, name,
+                                                 res_var_name, sty=sty, algorithm=algorithm)
+
+
+def _pol_to_fmpz_codes_and_result_var(pl, name, res_var_name, sty=None, algorithm=None):
     pl = pl.change_ring(ZZ)
     if sty is None:
         sty = FmpzStyle()
@@ -445,14 +455,23 @@ def pol_to_fmpz_codes_and_result_var(pl, name, res_var_name, sty=None, algorithm
 
 def pol_factor_to_code_and_result_var(pl, name, res_var_name, sty=None, algorithm=None):
     '''
-    Similar to pol_to_fmpz_codes_and_result_var. But factor pl before computing code.
+    Similar to _pol_to_fmpz_codes_and_result_var. But factor pl before computing code.
     '''
     pl = pl.change_ring(ZZ)
     if sty is None:
         sty = FmpzStyle()
     pl = pl.change_ring(ZZ)
     R = pl.parent()
-    factors = [(f, e) for f, e in pl.factor() if R(f).degree() > 0]
+
+    # There is a bug of coercion in Sage 7.1.
+    def _coercion_to_R(x):
+        try:
+            return R(x)
+        except:
+            return R(sum(R.monomial(*k) * v for k, v in x.dict().iteritems()))
+
+    factors = [(_coercion_to_R(f), e) for f, e in pl.factor()
+               if _coercion_to_R(f).degree() > 0]
     if len(factors) == 1:
         return pol_to_fmpz_codes_and_result_var(pl, name, res_var_name,
                                                 sty=sty, algorithm=algorithm)
@@ -573,8 +592,8 @@ def _test():
                 print alg, "factor"
                 for f in [f, f * g, f * g * h, f**2, f * g**2, f**2 * g**2 * h]:
                     for g in [f, ZZ(10) * f]:
-                        c = "; ".join(pol_factor_to_code_and_result_var(
-                            g, "a", "res", sty=PythonStyle(), algorithm=alg)[0])
+                        c = "; ".join(pol_to_fmpz_codes_and_result_var(
+                            g, "a", "res", sty=PythonStyle(), algorithm=alg, factor_pol=True)[0])
                         ip.run_cell(c)
                         res = globals()["res"]
                         assert res == g, str(g)

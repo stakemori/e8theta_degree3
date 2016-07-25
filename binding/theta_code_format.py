@@ -327,7 +327,7 @@ char * {func_name}(int a, int b, int c, int d, int e, int f);
     return res
 
 
-def code_format(func_name, wt, mat, real_part=True):
+def code_format(func_name, wt, mat, real_part=True, factor_pol=False):
     '''
     wt: non-increasing list/tuple of non-negative integers of length 3.
     mat: 3 * 8 matrix with mat * mat.transpose() = 0 with coefficients in
