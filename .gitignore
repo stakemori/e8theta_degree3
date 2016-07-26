@@ -70,3 +70,4 @@ TAGS
 /binding/e8theta.c
 
 /binding/lib/*.so
+/binding/wt*/theta*cython.c
