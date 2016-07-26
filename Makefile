@@ -10,12 +10,6 @@ CC = gcc
 compile-e8vector:
 	$(CC) binding/e8vectors.c -o binding/lib/libe8vectors.so $(PATHOPT) $(OPT) $(LIBOPTBASE) $(SHARED)
 
-compile-miyawaki-theta:
-	$(CC) binding/miyawaki_theta.c -o binding/lib/libmiyawaki_theta.so $(PATHOPT) $(OPT) -le8vectors $(LIBOPTBASE) $(SHARED)
-
-compile-cython: compile-e8vector compile-miyawaki-theta
-	sage -c 'sh.eval("cd binding; python setup.py build_ext -i")'
-
 debug:
 	$(CC) $(TARGET) -o $(OUT) $(DEBUGOPT) $(PATHOPT) $(LIBOPT)
 clean:
