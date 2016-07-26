@@ -1,6 +1,7 @@
 try:
     # pylint: disable=no-name-in-module
-    from e8theta_degree3.binding.e8theta import miyawaki_theta
+    from e8theta_degree3.binding.wt12_12_12.theta12_12_12_cython import theta as \
+        miyawaki_theta
 except:
     raise
 from e8theta_degree3.gl3_repn import GL3RepnElement
