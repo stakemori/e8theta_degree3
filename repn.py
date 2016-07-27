@@ -11,6 +11,12 @@ class ReplSpaceElement(object):
     def vector(self):
         return self._v
 
+    def __eq__(self, other):
+        if isinstance(other, self.__class__) and self.weight == other.weight:
+            return self.vector == other.vector
+        else:
+            raise NotImplementedError
+
     def __getitem__(self, i):
         return self.vector[i]
 
