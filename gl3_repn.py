@@ -138,8 +138,8 @@ class GL3RepnModule(object):
 
     def to_vector(self, a):
         '''
-        an element of the parent of matrix_var().
-        Return vector corresponding a.
+        a: an element of the parent of matrix_var().
+        Return vector corresponding to a.
         '''
         R = matrix_var().base_ring()
         a = R(a)
