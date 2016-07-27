@@ -133,8 +133,9 @@ class GL3RepnModule(object):
         return [kys[i] for i in find_linearly_indep_indices(vecs, self.dimension())]
 
     @cached_method
-    def _transform_mat(self):
-        return matrix([[b[t] for t in self.linearly_indep_tpls()] for b in self.basis_as_pol()])
+    def _transform_mat_inv(self):
+        m = matrix([[b[t] for t in self.linearly_indep_tpls()] for b in self.basis_as_pol()])
+        return m**(-1)
 
     def to_vector(self, a):
         '''
@@ -144,8 +145,8 @@ class GL3RepnModule(object):
         R = matrix_var().base_ring()
         a = R(a)
         v = vector([a[t] for t in self.linearly_indep_tpls()])
-        m = self._transform_mat()
-        return v * m ** (-1)
+        m = self._transform_mat_inv()
+        return v * m
 
     def to_pol(self, v):
         return sum(a * b for a, b in zip(v, self.basis_as_pol()))
@@ -154,10 +155,14 @@ class GL3RepnModule(object):
         '''
         g: matrix of size 3.
         Return matrix representation of the left action of g by self.basis_as_pol().
+        Here we take the matrix representation rho(g) so that
+        (b1(Xg), ..., bm(Xg)) = (b1(X), ..., bm(X)) rho(g.transpose()).transpose(),
+        where b1, ..., bm are basis as polynomials.
         '''
-        d = matrix_var_right_mul_dict(g)
+        d = matrix_var_right_mul_dict(g.transpose())
         bs_acted = [a.subs(d) for a in self.basis_as_pol()]
-        return matrix([self.to_vector(a) for a in bs_acted]).transpose()
+        m = matrix([[a[t] for t in self.linearly_indep_tpls()] for a in bs_acted])
+        return m * self._transform_mat_inv()
 
     def __call__(self, v):
         '''
@@ -179,10 +184,8 @@ class GL3RepnElement(ReplSpaceElement):
         det_wt = self.weight[-1]
         non_det_wt = tuple([a - det_wt for a in self.weight])
         M = gl3_repn_module(non_det_wt)
-        fcs = [b.factor() for b in M.basis()]
-        pols = [f.const * mul(left_action_as_pol(pl, g) ** e for pl, e in f.pols) for f in fcs]
-        pol = sum(a * b for a, b in zip(self.vector, pols))
-        return GL3RepnElement(M.to_vector(pol) * g.det()**det_wt, self.weight)
+        m = M.matrix_representaion(g)
+        return GL3RepnElement(m * self.vector * g.det()**det_wt, self.weight)
 
     def parent(self):
         return self._parent
