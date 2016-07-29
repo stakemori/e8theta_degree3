@@ -12,7 +12,9 @@ class ReplSpaceElement(object):
         return self._v
 
     def __eq__(self, other):
-        if isinstance(other, self.__class__) and self.weight == other.weight:
+        if other == 0:
+            return self.vector == 0
+        elif isinstance(other, self.__class__) and self.weight == other.weight:
             return self.vector == other.vector
         else:
             raise NotImplementedError
