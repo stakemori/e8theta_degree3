@@ -324,6 +324,23 @@ def spinor_l_euler_factor(p, F, t=None, T=None):
     return sum((-1)**k * v * t**k for k, v in c.items())
 
 
+def rankin_convolution_degree1(f, g, p, name=None):
+    u'''
+    f, g: primitive forms of degree 1 and level 1.
+    Return p-euler factor of the Rankin convolution of f and g as
+    a polynomial.
+    '''
+    k1 = f.weight()
+    k2 = g.weight()
+    ap = f[p]
+    bp = g[p]
+    t = PolynomialRing(QQ, 1, names='t' if name is None else name,
+                       order="neglex").gens()[0]
+    return (1 - ap * bp * t +
+            (ap**2 * p**(k2 - 1) + bp**2 * p**(k1 - 1) - 2 * p**(k1 + k2 - 2)) * t**2 -
+            ap * bp * p**(k1 + k2 - 2) * t**3 + p**(2 * (k1 + k2 - 2)) * t**4)
+
+
 def _hecke_eigenvalue_base(fc_func, F, T=None):
     if T is None:
         T = HalfIntMatElement(matrix([[ZZ(1), ZZ(1) / ZZ(2), ZZ(1) / ZZ(2)],
