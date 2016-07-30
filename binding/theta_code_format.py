@@ -261,7 +261,7 @@ def _pol_basis_as_polof_factors(wt, imag_quad, names_base=('real_part', 'imag_pa
 
 def _init_code(variables, res_str, sty=None):
     indent = "  "
-    res = ";\n".join([indent + sty.typ_decl(v) for v in variables]) + ";\n"
+    res = ";\n".join([indent + sty.z_type_decl(v) for v in variables]) + ";\n"
     res = res + "\n"
     res = res + ";\n".join([indent + sty.init(str(v)) for v in variables]) + ";\n"
     res = res + "\n" + indent + "char * {res_str};".format(res_str=res_str)
