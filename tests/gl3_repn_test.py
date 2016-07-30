@@ -1,6 +1,6 @@
 import unittest
 
-from sage.matrix.all import random_matrix, diagonal_matrix
+from sage.matrix.all import diagonal_matrix, random_matrix
 from sage.modules.all import random_vector
 from sage.rings.all import QQ
 
@@ -41,6 +41,18 @@ class Gl3RepnTest(unittest.TestCase):
         self.assertEqual(list(v1.left_action(diagonal_matrix([5, 7, 11])).vector),
                          [5, 2 * 7, 3 * 11])
 
+    def test_sort_basis(self):
+
+        def assert_sort(wt):
+            M = gl3_repn_module(wt)
+            M1 = gl3_repn_module(tuple([a - wt[-1] for a in wt]))
+            for b1, b2 in zip(M.basis(), M1.basis()):
+                self.assertTrue(all(a1[wt[-1]:] == a2 for a1, a2 in
+                                    zip(b1.right_tableau.row_numbers,
+                                        b2.right_tableau.row_numbers)))
+        assert_sort((10, 8, 6))
+        assert_sort((23, 4, 3))
+        assert_sort((12, 8, 2))
 
 suite = unittest.TestLoader().loadTestsFromTestCase(Gl3RepnTest)
 unittest.TextTestRunner(verbosity=2).run(suite)
