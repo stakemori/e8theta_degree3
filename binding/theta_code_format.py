@@ -2,7 +2,7 @@ import itertools
 import os
 import re
 
-from e8theta_degree3.binding.code_gen import (FmpzStyle,
+from e8theta_degree3.binding.code_gen import (MpirStyle,
                                               pol_to_mpz_codes_and_result_var)
 from e8theta_degree3.gl3_repn import gl3_repn_module, matrix_var
 from sage.arith.all import lcm
@@ -346,7 +346,7 @@ def code_format(func_name, wt, mat, real_part=True, factor_pol=False, sty=None):
     sum_tmp_var_name = "tmp"
     res_str_name = "res_str"
     if sty is None:
-        sty = FmpzStyle()
+        sty = MpirStyle()
     wtm4 = tuple([a - 4 for a in wt])
 
     bdt_facs = _bideterminant_prime_factors_dict(mat, wtm4)
@@ -417,6 +417,8 @@ def code_format(func_name, wt, mat, real_part=True, factor_pol=False, sty=None):
     header = '''#define _GNU_SOURCE             /* for asprintf */
 #include <stdio.h>
 #include "e8vectors.h"
+#include <stdlib.h>
+
 
 inline int inner_prod(int s[8], int t[8])
 {

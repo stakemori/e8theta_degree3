@@ -1,7 +1,7 @@
 #ifndef _E8VECTORS_H_
 #define _E8VECTORS_H_
 
-#include <fmpz.h>
+#include <mpir.h>
 
 #define MAX_NORM 6
 #define MAX_NM_OF_VECTORS 60480

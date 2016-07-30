@@ -1,8 +1,8 @@
 current_dir = $(shell pwd)
 parent_dir = $(shell dirname "$(current_dir)")
 DEBUGOPT = -Wall -g -Og -std=c11
-PATHOPT = -L$(parent_dir)/lib -I/usr/local/include/flint/ -I$(current_dir) -I$(parent_dir)
-LIBOPTBASE = -lm -lflint -lmpfr -lgmp -lpthread
+PATHOPT = -L$(parent_dir)/lib -I$(current_dir) -I$(parent_dir)
+LIBOPTBASE = -lmpir
 OPT = -O2 -std=c11
 SHARED = -shared -fPIC
 CC = gcc
