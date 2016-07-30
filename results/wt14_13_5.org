@@ -2,11 +2,11 @@
   import os
   from e8theta_degree3.hecke_module import HalfIntMatElement, spinor_l_euler_factor, rankin_convolution_degree1
   from e8theta_degree3.gl3_repn import GL3RepnElement
-  import e8theta_degree3
+  from e8theta_degree3.results.data.data_utils import data_dir
 
   @cached_function
   def _wt_14_13_5_ls():
-      l = load(os.path.join(os.path.dirname(e8theta_degree3.__file__), "results", "data", "wt14_13_5.sobj"))
+      l = load(os.path.join(data_dir(), "wt14_13_5.sobj"))
       return [(HalfIntMatElement(t), GL3RepnElement(v, (14, 13, 5))) for t, v in l]
 
 
