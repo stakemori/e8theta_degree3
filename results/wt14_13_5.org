@@ -385,6 +385,7 @@ Here SSYT of weight (9, 8, 0) are sorted as follows.
 #+RESULTS:
 
 2-Euler factor of the Rankin convolution of =f12= and =f16=.
+Here =f12= (resp. =f16=) is the primitive form of weight =12= (resp. =16=) and level 1.
 #+BEGIN_SRC sage :exports results
   rankin_convolution_degree1(f12, f16, 2)
 #+END_SRC
@@ -393,7 +394,6 @@ Here SSYT of weight (9, 8, 0) are sorted as follows.
 : 1 + 5184*t - 19791872*t^2 + 347892350976*t^3 + 4503599627370496*t^4
 
 2-Euler factor of the Rankin convolution of =f12= and =f12= substituted =t= by =4*t=.
-Here =f12= (resp. =f16=) is the primitive form of weight =12= (resp. =16=) and level 1.
 
 #+BEGIN_SRC sage :exports results
   rankin_convolution_degree1(f12, f12, 2).subs({t: 2^2 * t}).factor()
