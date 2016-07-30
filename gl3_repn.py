@@ -121,7 +121,8 @@ class GL3RepnModule(object):
         if self.wt[0] != 0:
             ssyt = list(reversed(
                 sorted(ssyt,
-                       key=lambda x: tuple(sum(d[a] for a in flatten(x.col_numbers))))))
+                       key=lambda x: (list(sum(d[a] for a in flatten(x.col_numbers))) +
+                                      sum([a[self.wt[-1]:] for a in x.row_numbers], [])))))
         return [BiDeterminant(t, a) for a in ssyt]
 
     @cached_method
