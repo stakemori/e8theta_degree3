@@ -3,7 +3,7 @@ import os
 import re
 
 from e8theta_degree3.binding.code_gen import (FmpzStyle,
-                                              pol_to_fmpz_codes_and_result_var)
+                                              pol_to_mpz_codes_and_result_var)
 from e8theta_degree3.gl3_repn import gl3_repn_module, matrix_var
 from sage.arith.all import lcm
 from sage.matrix.all import matrix
@@ -366,8 +366,8 @@ def code_format(func_name, wt, mat, real_part=True, factor_pol=False, sty=None):
         coef_pols = [a for _, a in coef_pol_pairs]
 
     def _facs_pols_code_and_vars(i):
-        return {k: pol_to_fmpz_codes_and_result_var(v[i], tmp_var_name, bdt_var_dct[k][i],
-                                                    algorithm='horner', sty=sty)
+        return {k: pol_to_mpz_codes_and_result_var(v[i], tmp_var_name, bdt_var_dct[k][i],
+                                                   algorithm='horner', sty=sty)
                 for k, v in bdt_facs.items()}
 
     facs_pols_code_rl_dct = _facs_pols_code_and_vars(0)
@@ -375,10 +375,10 @@ def code_format(func_name, wt, mat, real_part=True, factor_pol=False, sty=None):
 
     res_vars = ["res" + str(i) for i, _ in enumerate(coef_pols)]
 
-    coefs_pol_code_alst = [(pl, pol_to_fmpz_codes_and_result_var(pl, tmp_var_name,
-                                                                 sum_tmp_var_name,
-                                                                 factor_pol=factor_pol,
-                                                                 sty=sty))
+    coefs_pol_code_alst = [(pl, pol_to_mpz_codes_and_result_var(pl, tmp_var_name,
+                                                                sum_tmp_var_name,
+                                                                factor_pol=factor_pol,
+                                                                sty=sty))
                            for pl in coef_pols]
 
     tmp_vars = list(set(list(itertools.chain(*(l for _, l in facs_pols_code_rl_dct.values()))) +
