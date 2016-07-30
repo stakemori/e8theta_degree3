@@ -513,5 +513,5 @@ char * {func_name}(int a, int b, int c, int d, int e, int f)
            mat_info=str(mat.list()),
            quad_field_info=str(mat.base_ring().polynomial()),
            real_part=str(real_part),
-           young_tableaux=str([x.b.row_numbers for x in Vrho.basis()]))
+           young_tableaux=str([x.right_tableau.row_numbers for x in Vrho.basis()]))
     return code

@@ -42,18 +42,18 @@ class BiDeterminant(object):
         return repr(self.factor())
 
     @property
-    def a(self):
+    def left_tableau(self):
         return self._a
 
     @property
-    def b(self):
+    def right_tableau(self):
         return self._b
 
     @cached_method
     def determinants(self):
         m = matrix_var()
         res = []
-        for l1, l2 in zip(self.a.col_numbers, self.b.col_numbers):
+        for l1, l2 in zip(self.left_tableau.col_numbers, self.right_tableau.col_numbers):
             if l1 and l2:
                 res.append(m.matrix_from_rows_and_columns(
                     [i - 1 for i in l1], [j - 1 for j in l2]).det())
