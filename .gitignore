@@ -71,3 +71,4 @@ TAGS
 
 /binding/lib/*.so
 /binding/wt*/theta*cython.c
+/results/wt*.html
