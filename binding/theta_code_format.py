@@ -13,13 +13,13 @@ from sage.rings.all import QQ, PolynomialRing
 
 
 def save_code_to_file(directory, fname_base, func_name, wt, mat, real_part=True,
-                      overwrite=False):
+                      overwrite=False, sty=None):
     '''
     fname_base: string
     This save code for theta series to fname.h and fname.c
     '''
     hf = header_format(fname_base, func_name)
-    cf = code_format(func_name, wt, mat, real_part=real_part)
+    cf = code_format(func_name, wt, mat, real_part=real_part, sty=sty)
     fnameh = os.path.join(directory, fname_base + ".h")
     fnamec = os.path.join(directory, fname_base + ".c")
     if (not overwrite) and (os.path.exists(fnameh) or os.path.exists(fnamec)):
@@ -36,7 +36,7 @@ def generate_cython_and_build_scripts(directory,
                                       c_fname_base,
                                       func_name,
                                       c_func_name, wt, mat, real_part=True,
-                                      overwrite=False):
+                                      overwrite=False, sty=None):
     '''
     directory(string): must be a subdirectory of binding
     Generate c source, cython source ,build scripts and a makefile in directory.
@@ -47,7 +47,7 @@ def generate_cython_and_build_scripts(directory,
     _setup_py_code = _setup_py_format(cython_fname_base, c_fname)
     _makefile_code = _makefile_format(c_fname)
     save_code_to_file(directory, c_fname, c_func_name, wt, mat,
-                      real_part=real_part, overwrite=overwrite)
+                      real_part=real_part, overwrite=overwrite, sty=sty)
 
     def _fname(f):
         return os.path.join(directory, f)
@@ -94,8 +94,8 @@ def _makefile_format(c_src_file):
     _fmt = '''current_dir = $(shell pwd)
 parent_dir = $(shell dirname "$(current_dir)")
 DEBUGOPT = -Wall -g -Og -std=c11
-PATHOPT = -L$(parent_dir)/lib -I/usr/local/include/flint/ -I$(current_dir) -I$(parent_dir)
-LIBOPTBASE = -lm -lflint -lmpfr -lgmp -lpthread
+PATHOPT = -L$(parent_dir)/lib -I$(current_dir) -I$(parent_dir)
+LIBOPTBASE = -lmpir
 OPT = -O2 -std=c11
 SHARED = -shared -fPIC
 CC = gcc
