@@ -259,11 +259,11 @@ def _pol_basis_as_polof_factors(wt, imag_quad, names_base=('real_part', 'imag_pa
             {k: (_rl_part(v), _im_part(v)) for k, v in subs_dct.items()})
 
 
-def _init_code(variables, res_str):
+def _init_code(variables, res_str, sty=None):
     indent = "  "
-    res = ";\n".join([indent + "fmpz_t %s" % v for v in variables]) + ";\n"
+    res = ";\n".join([indent + sty.typ_decl(v) for v in variables]) + ";\n"
     res = res + "\n"
-    res = res + ";\n".join([indent + "fmpz_init(%s)" % v for v in variables]) + ";\n"
+    res = res + ";\n".join([indent + sty.init(str(v)) for v in variables]) + ";\n"
     res = res + "\n" + indent + "char * {res_str};".format(res_str=res_str)
 
     return res
@@ -295,10 +295,10 @@ def _coeffs_code(pol_code_alst, res_vars):
     return "\n\n".join(code_blocks)
 
 
-def _str_concat_code(res_vars, res_str):
+def _str_concat_code(res_vars, res_str, sty=None):
     indent = " " * 2
     _format_str = '"' + ",".join(['%s' for _ in range(len(res_vars))]) + '"'
-    get_str_code = ", ".join(["fmpz_get_str(NULL, 10, %s)" % (v, ) for v in res_vars])
+    get_str_code = ", ".join([sty.get_str("NULL", "10", str(v)) for v in res_vars])
 
     _code = '''int buf_size = asprintf(&{res_str}, {_format_str}, {get_str_code});
 
@@ -312,9 +312,9 @@ if (buf_size == -1) {{
     return "\n".join(["" if regexp.match(c) else c for c in _code.split("\n")])
 
 
-def _cleanup_code(variables):
+def _cleanup_code(variables, sty=None):
     indent = "  "
-    return ";\n".join(indent + "fmpz_clear(%s)" % (v,) for v in variables) + ";"
+    return ";\n".join(indent + sty.clear(str(v)) for v in variables) + ";"
 
 
 def header_format(fname, func_name):
@@ -329,7 +329,7 @@ char * {func_name}(int a, int b, int c, int d, int e, int f);
     return res
 
 
-def code_format(func_name, wt, mat, real_part=True, factor_pol=False):
+def code_format(func_name, wt, mat, real_part=True, factor_pol=False, sty=None):
     '''
     wt: non-increasing list/tuple of non-negative integers of length 3.
     mat: 3 * 8 matrix with mat * mat.transpose() = 0 with coefficients in
@@ -345,7 +345,8 @@ def code_format(func_name, wt, mat, real_part=True, factor_pol=False):
     tmp_var_name = "a"
     sum_tmp_var_name = "tmp"
     res_str_name = "res_str"
-    sty = FmpzStyle()
+    if sty is None:
+        sty = FmpzStyle()
     wtm4 = tuple([a - 4 for a in wt])
 
     bdt_facs = _bideterminant_prime_factors_dict(mat, wtm4)
@@ -366,7 +367,7 @@ def code_format(func_name, wt, mat, real_part=True, factor_pol=False):
 
     def _facs_pols_code_and_vars(i):
         return {k: pol_to_fmpz_codes_and_result_var(v[i], tmp_var_name, bdt_var_dct[k][i],
-                                                    algorithm='horner')
+                                                    algorithm='horner', sty=sty)
                 for k, v in bdt_facs.items()}
 
     facs_pols_code_rl_dct = _facs_pols_code_and_vars(0)
@@ -376,7 +377,8 @@ def code_format(func_name, wt, mat, real_part=True, factor_pol=False):
 
     coefs_pol_code_alst = [(pl, pol_to_fmpz_codes_and_result_var(pl, tmp_var_name,
                                                                  sum_tmp_var_name,
-                                                                 factor_pol=factor_pol))
+                                                                 factor_pol=factor_pol,
+                                                                 sty=sty))
                            for pl in coef_pols]
 
     tmp_vars = list(set(list(itertools.chain(*(l for _, l in facs_pols_code_rl_dct.values()))) +
@@ -401,16 +403,16 @@ def code_format(func_name, wt, mat, real_part=True, factor_pol=False):
             sorted([str(im) for _, im in bdt_var_dct.values()]) +
             list(itertools.chain(*[[s + str(i) for i in range(8)] for s in ["s", "t", "u"]])))
 
-    init_code_str = _init_code(_vrs, res_str_name)
+    init_code_str = _init_code(_vrs, res_str_name, sty=sty)
 
     bi_det_factors_code_str = _bi_det_factors_code(facs_pols_code_rl_alst,
                                                    facs_pols_code_im_alst, _facs_pols_lcm,
                                                    bdt_var_dct)
     coeffs_code_str = _coeffs_code(coefs_pol_code_alst1, res_vars)
 
-    str_concat_code_str = _str_concat_code(res_vars, res_str_name)
+    str_concat_code_str = _str_concat_code(res_vars, res_str_name, sty=sty)
 
-    cleanup_code_str = _cleanup_code(_vrs)
+    cleanup_code_str = _cleanup_code(_vrs, sty=sty)
 
     header = '''#define _GNU_SOURCE             /* for asprintf */
 #include <stdio.h>
@@ -459,32 +461,32 @@ char * {func_name}(int a, int b, int c, int d, int e, int f)
                     {{
                       if (inner_prod(vs2[j], vs3[k]) == d)
                         {{
-                          fmpz_set_si(s0, vs1[i][0]);
-                          fmpz_set_si(s1, vs1[i][1]);
-                          fmpz_set_si(s2, vs1[i][2]);
-                          fmpz_set_si(s3, vs1[i][3]);
-                          fmpz_set_si(s4, vs1[i][4]);
-                          fmpz_set_si(s5, vs1[i][5]);
-                          fmpz_set_si(s6, vs1[i][6]);
-                          fmpz_set_si(s7, vs1[i][7]);
+                          {set_si_func}(s0, vs1[i][0]);
+                          {set_si_func}(s1, vs1[i][1]);
+                          {set_si_func}(s2, vs1[i][2]);
+                          {set_si_func}(s3, vs1[i][3]);
+                          {set_si_func}(s4, vs1[i][4]);
+                          {set_si_func}(s5, vs1[i][5]);
+                          {set_si_func}(s6, vs1[i][6]);
+                          {set_si_func}(s7, vs1[i][7]);
 
-                          fmpz_set_si(t0, vs2[j][0]);
-                          fmpz_set_si(t1, vs2[j][1]);
-                          fmpz_set_si(t2, vs2[j][2]);
-                          fmpz_set_si(t3, vs2[j][3]);
-                          fmpz_set_si(t4, vs2[j][4]);
-                          fmpz_set_si(t5, vs2[j][5]);
-                          fmpz_set_si(t6, vs2[j][6]);
-                          fmpz_set_si(t7, vs2[j][7]);
+                          {set_si_func}(t0, vs2[j][0]);
+                          {set_si_func}(t1, vs2[j][1]);
+                          {set_si_func}(t2, vs2[j][2]);
+                          {set_si_func}(t3, vs2[j][3]);
+                          {set_si_func}(t4, vs2[j][4]);
+                          {set_si_func}(t5, vs2[j][5]);
+                          {set_si_func}(t6, vs2[j][6]);
+                          {set_si_func}(t7, vs2[j][7]);
 
-                          fmpz_set_si(u0, vs3[k][0]);
-                          fmpz_set_si(u1, vs3[k][1]);
-                          fmpz_set_si(u2, vs3[k][2]);
-                          fmpz_set_si(u3, vs3[k][3]);
-                          fmpz_set_si(u4, vs3[k][4]);
-                          fmpz_set_si(u5, vs3[k][5]);
-                          fmpz_set_si(u6, vs3[k][6]);
-                          fmpz_set_si(u7, vs3[k][7]);
+                          {set_si_func}(u0, vs3[k][0]);
+                          {set_si_func}(u1, vs3[k][1]);
+                          {set_si_func}(u2, vs3[k][2]);
+                          {set_si_func}(u3, vs3[k][3]);
+                          {set_si_func}(u4, vs3[k][4]);
+                          {set_si_func}(u5, vs3[k][5]);
+                          {set_si_func}(u6, vs3[k][6]);
+                          {set_si_func}(u7, vs3[k][7]);
 
 {bi_det_factors_code}
 
@@ -513,5 +515,6 @@ char * {func_name}(int a, int b, int c, int d, int e, int f)
            mat_info=str(mat.list()),
            quad_field_info=str(mat.base_ring().polynomial()),
            real_part=str(real_part),
-           young_tableaux=str([x.right_tableau.row_numbers for x in Vrho.basis()]))
+           young_tableaux=str([x.right_tableau.row_numbers for x in Vrho.basis()]),
+           set_si_func=sty.set_si_func)
     return code

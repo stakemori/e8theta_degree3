@@ -105,7 +105,106 @@ class CodeStyle(object):
             return self.mul_ui(a, b, c)
 
 
-class FmpzStyle(CodeStyle):
+class CCodeStyle(CodeStyle):
+    __metaclass__ = ABCMeta
+
+    @abstractmethod
+    def init(self, var):
+        pass
+
+    @abstractmethod
+    def clear(self, var):
+        pass
+
+    @abstractmethod
+    def get_str(self, s, base, op):
+        pass
+
+    @abstractmethod
+    def z_type_decl(self, a):
+        pass
+
+    @abstractproperty
+    def set_si_func(self):
+        pass
+
+
+class MpirStyle(CCodeStyle):
+
+    @property
+    def set_si_func(self):
+        return "mpz_set_si"
+
+    def z_type_decl(self, a):
+        return "mpz_t %s" % (a, )
+
+    @property
+    def sep(self):
+        return ";"
+
+    def zero_z(self, a):
+        return self.set_si(a, "0")
+
+    def set_mul(self, a, b, c):
+        return "mpz_mul(%s, %s, %s)" % (a, b, c)
+
+    def set_add_mul(self, a, b, c):
+        return "mpz_addmul(%s, %s, %s)" % (a, b, c)
+
+    def set_si(self, a, b):
+        return "%s(%s, %s)" % (self.set_si_func, a, b)
+
+    def set_z(self, a, b):
+        return "mpz_set(%s, %s)" % (a, b)
+
+    def add_ui(self, a, b, c):
+        return "mpz_add_ui(%s, %s, %s)" % (a, b, c)
+
+    def sub_ui(self, a, b, c):
+        return "mpz_sub_ui(%s, %s, %s)" % (a, b, c)
+
+    def pow_ui(self, a, b, c):
+        return "mpz_pow_ui(%s, %s, %s)" % (a, b, c)
+
+    def add_mul_ui(self, a, b, c):
+        return "mpz_addmul_ui(%s, %s, %s)" % (a, b, c)
+
+    def add_z(self, a, b, c):
+        return "mpz_add(%s, %s, %s)" % (a, b, c)
+
+    def sub_mul_ui(self, a, b, c):
+        return "mpz_submul_ui(%s, %s, %s)" % (a, b, c)
+
+    def sub_z(self, a, b, c):
+        return "mpz_sub(%s, %s, %s)" % (a, b, c)
+
+    def neg(self, a, b):
+        return "mpz_neg(%s, %s)" % (a, b)
+
+    def mul_2exp(self, a, b, e):
+        return "mpz_mul_2exp(%s, %s, %s)" % (a, b, e)
+
+    def mul_ui(self, a, b, c):
+        return "mpz_mul_ui(%s, %s, %s)" % (a, b, c)
+
+    def init(self, a):
+        return "mpz_init(%s)" % a
+
+    def clear(self, a):
+        return "mpz_clear(%s)" % a
+
+    def get_str(self, s, base, op):
+        return "mpz_get_str(%s, %s, %s)" % (s, base, op)
+
+
+class FmpzStyle(CCodeStyle):
+
+    def z_type_decl(self, a):
+        return "fmpz_t %s" % a
+
+    @property
+    def set_si_func(self):
+        return "fmpz_set_si"
 
     @property
     def sep(self):
@@ -121,7 +220,7 @@ class FmpzStyle(CodeStyle):
         return "fmpz_addmul(%s, %s, %s)" % (a, b, c)
 
     def set_si(self, a, b):
-        return "fmpz_set_si(%s, %s)" % (a, b)
+        return "%s(%s, %s)" % (self.set_si_func, a, b)
 
     def set_z(self, a, b):
         return "fmpz_set(%s, %s)" % (a, b)
@@ -155,6 +254,15 @@ class FmpzStyle(CodeStyle):
 
     def mul_ui(self, a, b, c):
         return "fmpz_mul_ui(%s, %s, %s)" % (a, b, c)
+
+    def init(self, a):
+        return "fmpz_init(%s)" % a
+
+    def clear(self, a):
+        return "fmpz_clear(%s)" % a
+
+    def get_str(self, s, base, op):
+        return "fmpz_get_str(%s, %s, %s)" % (s, base, op)
 
 
 class PythonStyle(CodeStyle):
