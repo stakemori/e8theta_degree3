@@ -398,7 +398,7 @@ def __convert_reduced_nonisom_matrices(alst):
             q1 = QuadraticForm(ZZ, 2 * t.T)
             if q.det() == q1.det():
                 u = q.is_globally_equivalent_to(q1, return_matrix=True)
-                if u:
+                if u and u.transpose() * q.Gram_matrix_rational() * u == q1.Gram_matrix_rational():
                     break
         if u:
             non_isoms.append((s.right_action(u), a, g * u.transpose() ** (-1)))
