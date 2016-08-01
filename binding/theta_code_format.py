@@ -13,13 +13,13 @@ from sage.rings.all import QQ, PolynomialRing
 
 
 def save_code_to_file(directory, fname_base, func_name, wt, mat, real_part=True,
-                      overwrite=False, sty=None):
+                      overwrite=False, sty=None, num_of_procs=None):
     '''
     fname_base: string
     This save code for theta series to fname.h and fname.c
     '''
     hf = header_format(fname_base, func_name)
-    cf = code_format(func_name, wt, mat, real_part=real_part, sty=sty)
+    cf = code_format(func_name, wt, mat, real_part=real_part, sty=sty, num_of_procs=num_of_procs)
     fnameh = os.path.join(directory, fname_base + ".h")
     fnamec = os.path.join(directory, fname_base + ".c")
     if (not overwrite) and (os.path.exists(fnameh) or os.path.exists(fnamec)):
@@ -36,18 +36,19 @@ def generate_cython_and_build_scripts(directory,
                                       c_fname_base,
                                       func_name,
                                       c_func_name, wt, mat, real_part=True,
-                                      overwrite=False, sty=None):
+                                      overwrite=False, sty=None, num_of_procs=1):
     '''
     directory(string): must be a subdirectory of binding
     Generate c source, cython source ,build scripts and a makefile in directory.
     Can compile by "make compile-cython" in that directory if e8vector is compiled.
     '''
     c_fname = c_fname_base + "_c"
-    _cython_code = _cython_format(c_fname, c_func_name, func_name)
+    _cython_code = _cython_format(c_fname, c_func_name, func_name, num_of_procs)
     _setup_py_code = _setup_py_format(cython_fname_base, c_fname)
     _makefile_code = _makefile_format(c_fname)
     save_code_to_file(directory, c_fname, c_func_name, wt, mat,
-                      real_part=real_part, overwrite=overwrite, sty=sty)
+                      real_part=real_part, overwrite=overwrite, sty=sty,
+                      num_of_procs=num_of_procs)
 
     def _fname(f):
         return os.path.join(directory, f)
@@ -110,8 +111,21 @@ compile-cython: compile-c-lib
     return _fmt
 
 
-def _cython_format(c_header_file, c_func_name, cython_func_name):
-    _fmt = '''from sage.rings.all import Integer, QQ, ZZ
+def _cython_format(c_header_file, c_func_name, cython_func_name, num_of_procs):
+    if num_of_procs == 1:
+        theta_body = 'return {cfn}_part((0, m)))\n'.format(cfn=cython_func_name)
+    else:
+        theta_body = '''p = Pool(processes={npcs})
+    try:
+        res = sum(p.map({cfn}_part, zip(range({npcs}), itertools.repeat(m, {npcs}))))
+    except KeyboardInterrupt:
+        p.terminate()
+        p.join()
+    return res
+'''.format(cfn=cython_func_name, npcs=num_of_procs)
+    _fmt = '''import itertools
+from multiprocessing import Pool
+from sage.rings.all import Integer, QQ, ZZ
 from sage.misc.all import cached_function
 from sage.modules.all import vector
 from sage.matrix.all import MatrixSpace
@@ -121,11 +135,12 @@ include "cysignals/signals.pxi"
 
 
 cdef extern from "{c_header_file}.h":
-    cpdef char * {c_func_name}(int, int, int, int, int, int)
+    cpdef char * {c_func_name}(int, int, int, int, int, int, int)
 
 
-@cached_function
-def {cython_func_name}(m):
+def {cfn}_part(i_red_m):
+    i_red, m = i_red_m
+
     if not (m in MatrixSpace(QQ, 3) and (2 * m in MatrixSpace(ZZ, 3)) and
             (m[a, a] in ZZ for a in range(3)) and m.transpose() == m):
         raise ValueError("m must be a half integral matrix of size 3.")
@@ -134,8 +149,8 @@ def {cython_func_name}(m):
     if max([a, b, c]) > 7:
         raise ValueError("Diagonal elements are too large.")
     sig_on()
-    cdef char* c_str = {c_func_name}(a, b, c, d, e, f)
-    cdef bytes py_str;
+    cdef char* c_str = {c_func_name}(i_red, a, b, c, d, e, f)
+    cdef bytes py_str
     try:
         py_str = c_str
     finally:
@@ -144,8 +159,13 @@ def {cython_func_name}(m):
     py_strs = py_str.split(",")
     res = [Integer(a) for a in py_strs]
     return vector(res)
+
+
+@cached_function
+def {cfn}(m):
+    {theta_body}
 '''.format(c_header_file=c_header_file, c_func_name=c_func_name,
-           cython_func_name=cython_func_name)
+           cfn=cython_func_name, theta_body=theta_body)
     return _fmt
 
 
@@ -321,7 +341,7 @@ def header_format(fname, func_name):
     res = '''#ifndef _{filename_name_upp_base}_H_
 #define _{filename_name_upp_base}_H_
 
-char * {func_name}(int a, int b, int c, int d, int e, int f);
+char * {func_name}(int i_red, int a, int b, int c, int d, int e, int f);
 
 #endif /* _{filename_name_upp_base}_H_ */
 '''.format(func_name=func_name,
@@ -329,7 +349,8 @@ char * {func_name}(int a, int b, int c, int d, int e, int f);
     return res
 
 
-def code_format(func_name, wt, mat, real_part=True, factor_pol=False, sty=None):
+def code_format(func_name, wt, mat, real_part=True, factor_pol=False, sty=None,
+                num_of_procs=1):
     '''
     wt: non-increasing list/tuple of non-negative integers of length 3.
     mat: 3 * 8 matrix with mat * mat.transpose() = 0 with coefficients in
@@ -341,6 +362,8 @@ def code_format(func_name, wt, mat, real_part=True, factor_pol=False, sty=None):
     a and b respectively.
     Return code for computing the theta series of weight wt associated to the
     E8 series and the matrix.
+    num_of_procs: a positive integer. If it is greather than one, then it tries to
+    compute by using multiple processes.
     '''
     tmp_var_name = "a"
     sum_tmp_var_name = "tmp"
@@ -414,6 +437,11 @@ def code_format(func_name, wt, mat, real_part=True, factor_pol=False, sty=None):
 
     cleanup_code_str = _cleanup_code(_vrs, sty=sty)
 
+    if num_of_procs == 1:
+        i_inc_code = "i++"
+    else:
+        i_inc_code = "i += %s" % (num_of_procs,)
+
     header = '''#define _GNU_SOURCE             /* for asprintf */
 #include <stdio.h>
 #include "e8vectors.h"
@@ -436,7 +464,7 @@ inline int inner_prod(int s[8], int t[8])
 
     code = '''{header}
 
-char * {func_name}(int a, int b, int c, int d, int e, int f)
+char * {func_name}(int i_red, int a, int b, int c, int d, int e, int f)
 {{
   /* mat: {mat_info}, quad_field: {quad_field_info}, real_part: {real_part} */
   /* young tableaux of the basis: {young_tableaux} */
@@ -451,7 +479,7 @@ char * {func_name}(int a, int b, int c, int d, int e, int f)
 
 {init_code}
 
-  for (int i = 0; i < num_of_vectors[a]; i++)
+  for (int i = i_red; i < num_of_vectors[a]; {i_inc_code})
     {{
       for (int j = 0; j < num_of_vectors[b]; j++)
         {{
@@ -518,5 +546,6 @@ char * {func_name}(int a, int b, int c, int d, int e, int f)
            quad_field_info=str(mat.base_ring().polynomial()),
            real_part=str(real_part),
            young_tableaux=str([x.right_tableau.row_numbers for x in Vrho.basis()]),
-           set_si_func=sty.set_si_func)
+           set_si_func=sty.set_si_func,
+           i_inc_code=i_inc_code)
     return code

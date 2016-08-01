@@ -1,3 +1,5 @@
+import itertools
+from multiprocessing import Pool
 from sage.rings.all import Integer, QQ, ZZ
 from sage.misc.all import cached_function
 from sage.modules.all import vector
@@ -8,11 +10,12 @@ include "cysignals/signals.pxi"
 
 
 cdef extern from "theta14_13_5_c.h":
-    cpdef char * theta_c_14_13_5(int, int, int, int, int, int)
+    cpdef char * theta_c_14_13_5(int, int, int, int, int, int, int)
 
 
-@cached_function
-def theta(m):
+def theta_part(i_red_m):
+    i_red, m = i_red_m
+
     if not (m in MatrixSpace(QQ, 3) and (2 * m in MatrixSpace(ZZ, 3)) and
             (m[a, a] in ZZ for a in range(3)) and m.transpose() == m):
         raise ValueError("m must be a half integral matrix of size 3.")
@@ -21,8 +24,8 @@ def theta(m):
     if max([a, b, c]) > 7:
         raise ValueError("Diagonal elements are too large.")
     sig_on()
-    cdef char* c_str = theta_c_14_13_5(a, b, c, d, e, f)
-    cdef bytes py_str;
+    cdef char* c_str = theta_c_14_13_5(i_red, a, b, c, d, e, f)
+    cdef bytes py_str
     try:
         py_str = c_str
     finally:
@@ -31,3 +34,15 @@ def theta(m):
     py_strs = py_str.split(",")
     res = [Integer(a) for a in py_strs]
     return vector(res)
+
+
+@cached_function
+def theta(m):
+    p = Pool(processes=8)
+    try:
+        res = sum(p.map(theta_part, zip(range(8), itertools.repeat(m, 8))))
+    except KeyboardInterrupt:
+        p.terminate()
+        p.join()
+    return res
+
