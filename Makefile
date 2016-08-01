@@ -1,14 +1,13 @@
 current_dir = $(shell pwd)
 parent_dir = $(shell dirname "$(current_dir)")
 DEBUGOPT = -Wall -g -Og -std=c11
-PATHOPT = -L$(current_dir)/binding/lib -I/usr/local/include/flint/ -I$(current_dir)/binding/
-LIBOPTBASE = -lm -lflint -lmpfr -lgmp -lpthread
+PATHOPT = -L$(current_dir)/binding/lib -I$(current_dir)/binding/
 OPT = -O2 -std=c11
 SHARED = -shared -fPIC
 CC = gcc
 
 compile-e8vector:
-	$(CC) binding/e8vectors.c -o binding/lib/libe8vectors.so $(PATHOPT) $(OPT) $(LIBOPTBASE) $(SHARED)
+	$(CC) binding/e8vectors.c -o binding/lib/libe8vectors.so $(PATHOPT) $(OPT) $(SHARED)
 
 debug:
 	$(CC) $(TARGET) -o $(OUT) $(DEBUGOPT) $(PATHOPT) $(LIBOPT)
