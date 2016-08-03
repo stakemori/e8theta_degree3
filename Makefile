@@ -6,8 +6,9 @@ OPT = -O2 -std=c11
 SHARED = -shared -fPIC
 CC = gcc
 
-compile-e8vector:
+compile-theta_vectors:
 	$(CC) binding/e8vectors.c -o binding/lib/libe8vectors.so $(PATHOPT) $(OPT) $(SHARED)
+	$(CC) binding/rank16_vectors.c -o binding/lib/librank16_vectors.so $(PATHOPT) $(OPT) $(SHARED)
 
 debug:
 	$(CC) $(TARGET) -o $(OUT) $(DEBUGOPT) $(PATHOPT) $(LIBOPT)
