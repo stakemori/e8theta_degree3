@@ -15,4 +15,6 @@ void _set_vs3(int vs1[MAX_NM_OF_VECTORS][8],
 
 void cache_vectors(void);
 
+void _set_vs(int vs[MAX_NM_OF_VECTORS][8], int a);
+
 #endif /* _E8VECTORS_H_ */
