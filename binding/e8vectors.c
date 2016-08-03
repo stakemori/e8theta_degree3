@@ -38,9 +38,9 @@ int num_of_vectors[100] =
    251657280, 219041760, 254864880, 241997760};
 
 static int cached_vectors[MAX_NORM + 1][MAX_NM_OF_VECTORS][8];
-int cached_idx[MAX_NORM + 1] = {0};
+static int cached_idx[MAX_NORM + 1] = {0};
 
-void _cache_vectors(void)
+static void _cache_vectors(void)
 {
 
   double m = sqrt(2 * MAX_NORM);
