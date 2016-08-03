@@ -5,7 +5,7 @@
 /* Fourier coefficients of Eisenstein series of weight 8 */
 int num_of_vectors_rk16[8] = {1, 480, 61920, 1050240, 7926240, 37500480, 135480960, 395301120};
 
-static short cached_vectors[MAX_NORM_RK16 + 1][MAX_NM_OF_VECTORS_RK16][16];
+short cached_vectors_rk16[MAX_NORM_RK16 + 1][MAX_NM_OF_VECTORS_RK16][16];
 static int cached_idx[MAX_NORM_RK16 + 1] = {0};
 
 static void _cache_vectors(void)
@@ -116,7 +116,7 @@ static void _cache_vectors(void)
                                                                                                                               int idx = cached_idx[_nm]++;
                                                                                                                               for (int i = 0; i < 16; i++)
                                                                                                                                 {
-                                                                                                                                  cached_vectors[_nm][idx][i] = v[i];
+                                                                                                                                  cached_vectors_rk16[_nm][idx][i] = v[i];
                                                                                                                                 }
                                                                                                                             }
                                                                                                                         }
@@ -156,22 +156,10 @@ void cache_vectors_rk16(void)
   int b = 1;
   for (int i = 0; i < 16; i++)
     {
-      b = (! cached_vectors[1][0][i]) & b;
+      b = (! cached_vectors_rk16[1][0][i]) & b;
     }
   if (b)
     {
       _cache_vectors();
-    }
-}
-
-void _set_vs_rk16(short vs[MAX_NM_OF_VECTORS_RK16][16], int a)
-{
-  int n = num_of_vectors_rk16[a];
-  for (int i = 0; i < n; i++)
-    {
-      for (int j = 0; j < 16; j++)
-        {
-          vs[i][j] = cached_vectors[a][i][j];
-        }
     }
 }

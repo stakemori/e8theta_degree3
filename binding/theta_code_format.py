@@ -475,7 +475,9 @@ char * {func_name}(int i_red, int a, int b, int c, int d, int e, int f)
   static int vs2[MAX_NM_OF_VECTORS][8];
   static int vs3[MAX_NM_OF_VECTORS][8];
 
-  _set_vs3(vs1, vs2, vs3, a, b, c);
+  _set_vs(vs1, a);
+  _set_vs(vs2, b);
+  _set_vs(vs3, c);
 
 {init_code}
 

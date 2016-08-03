@@ -37,7 +37,7 @@ int num_of_vectors[100] =
    181466880, 213183360, 200202240, 224259840, 207446400,
    251657280, 219041760, 254864880, 241997760};
 
-static int cached_vectors[MAX_NORM + 1][MAX_NM_OF_VECTORS][8];
+int cached_vectors[MAX_NORM + 1][MAX_NM_OF_VECTORS][8];
 static int cached_idx[MAX_NORM + 1] = {0};
 
 static void _cache_vectors(void)
@@ -103,6 +103,7 @@ void cache_vectors(void)
 
 void _set_vs(int vs[MAX_NM_OF_VECTORS][8], int a)
 {
+  cache_vectors();
   int n = num_of_vectors[a];
   for (int i = 0; i < n; i++)
     {
@@ -111,16 +112,6 @@ void _set_vs(int vs[MAX_NM_OF_VECTORS][8], int a)
           vs[i][j] = cached_vectors[a][i][j];
         }
     }
-}
-
-void _set_vs3(int vs1[MAX_NM_OF_VECTORS][8],
-              int vs2[MAX_NM_OF_VECTORS][8],
-              int vs3[MAX_NM_OF_VECTORS][8],
-              int a, int b, int c)
-{
-  _set_vs(vs1, a);
-  _set_vs(vs2, b);
-  _set_vs(vs3, c);
 }
 
 /* Local Variables: */
