@@ -36,10 +36,10 @@ def _names(wt, suffix):
     Return cython file name, c file name, cython function name, c function name.
     '''
     wt_s = "_".join(str(a) for a in wt)
-    return ("theta{wt}_{sfx}_cython".format(wt=wt_s, sfx=suffix),
-            "theta{wt}_{sfx}".format(wt=wt_s, sfx=suffix),
-            "theta_{sfx}".format(sfx=suffix),
-            "theta_c_{wt}_{sfx}".format(wt=wt_s, sfx=suffix))
+    return ("theta{wt}{sfx}_cython".format(wt=wt_s, sfx=suffix),
+            "theta{wt}{sfx}".format(wt=wt_s, sfx=suffix),
+            "theta{sfx}".format(sfx=suffix),
+            "theta_c_{wt}{sfx}".format(wt=wt_s, sfx=suffix))
 
 
 def gen_wt12():
