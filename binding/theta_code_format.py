@@ -97,7 +97,7 @@ parent_dir = $(shell dirname "$(current_dir)")
 DEBUGOPT = -Wall -g -Og -std=c11
 PATHOPT = -L$(parent_dir)/lib -I$(current_dir) -I$(parent_dir)
 LIBOPTBASE = -lmpir
-OPT = -O2 -std=c11
+OPT = -O3 -std=c11
 SHARED = -shared -fPIC
 CC = gcc
 
