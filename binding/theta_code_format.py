@@ -18,7 +18,7 @@ def save_code_to_file(directory, fname_base, func_name, wt, mat, real_part=True,
     fname_base: string
     This save code for theta series to fname.h and fname.c
     '''
-    hf = header_format(fname_base, func_name)
+    hf = header_file_format(fname_base, func_name)
     cf = code_format(func_name, wt, mat, real_part=real_part, sty=sty, num_of_procs=num_of_procs)
     fnameh = os.path.join(directory, fname_base + ".h")
     fnamec = os.path.join(directory, fname_base + ".c")
@@ -82,7 +82,7 @@ setup(
                   sources=["{cython_src_file}.pyx"],
                   include_dirs=[abspath(curdir), abspath(pardir)],
                   library_dirs=[join(abspath(pardir), "lib")],
-                  libraries=["{c_lib_name}", "e8vectors"]),
+                  libraries=["{c_lib_name}", "e8vectors", "rank16_vectors"]),
     ),
 )
 '''.format(cython_src_file=cython_src_file,
@@ -138,8 +138,8 @@ cdef extern from "{c_header_file}.h":
     cpdef char * {c_func_name}(int, int, int, int, int, int, int)
 
 
-def {cfn}_part(i_red_m):
-    i_red, m = i_red_m
+def {cfn}_part(j_red_m):
+    j_red, m = j_red_m
 
     if not (m in MatrixSpace(QQ, 3) and (2 * m in MatrixSpace(ZZ, 3)) and
             (m[a, a] in ZZ for a in range(3)) and m.transpose() == m):
@@ -149,7 +149,7 @@ def {cfn}_part(i_red_m):
     if max([a, b, c]) > 7:
         raise ValueError("Diagonal elements are too large.")
     sig_on()
-    cdef char* c_str = {c_func_name}(i_red, a, b, c, d, e, f)
+    cdef char* c_str = {c_func_name}(j_red, a, b, c, d, e, f)
     cdef bytes py_str
     try:
         py_str = c_str
@@ -170,13 +170,13 @@ def {cfn}(m):
 
 
 @cached_function
-def _s_t_u_ring(base_ring=None):
+def _s_t_u_ring(base_ring=None, vec_len=8):
     if base_ring is None:
         base_ring = QQ
     R = PolynomialRing(
-        base_ring, names=("s0, s1, s2, s3, s4, s5, s6, s7,"
-                          "t0, t1, t2, t3, t4, t5, t6, t7,"
-                          "u0, u1, u2, u3, u4, u5, u6, u7"))
+        base_ring, names=(["s" + str(i) for i in range(vec_len)] +
+                          ["t" + str(i) for i in range(vec_len)] +
+                          ["u" + str(i) for i in range(vec_len)]))
     return R
 
 
@@ -212,36 +212,54 @@ def _pol_basis_factor_dct_and_ls(wt):
 
 
 @cached_function
-def euclidean_basis():
-    basis_vecs = [(QQ(1) / QQ(2), QQ(1) / QQ(2), QQ(1) / QQ(2),
-                   QQ(1) / QQ(2), QQ(1) / QQ(2), QQ(1) / QQ(2),
-                   QQ(1) / QQ(2), QQ(1) / QQ(2)),
-                  (0, 1, 0, 0, 0, 0, 0, 1),
-                  (0, 0, 1, 0, 0, 0, 0, 1),
-                  (0, 0, 0, 1, 0, 0, 0, 1),
-                  (0, 0, 0, 0, 1, 0, 0, 1),
-                  (0, 0, 0, 0, 0, 1, 0, 1),
-                  (0, 0, 0, 0, 0, 0, 1, 1),
-                  (0, 0, 0, 0, 0, 0, 0, 2)]
+def euclidean_basis(vec_len):
+    if vec_len == 8:
+        basis_vecs = [tuple([QQ(1) / QQ(2) for _ in range(8)]),
+                      (0, 1, 0, 0, 0, 0, 0, 1),
+                      (0, 0, 1, 0, 0, 0, 0, 1),
+                      (0, 0, 0, 1, 0, 0, 0, 1),
+                      (0, 0, 0, 0, 1, 0, 0, 1),
+                      (0, 0, 0, 0, 0, 1, 0, 1),
+                      (0, 0, 0, 0, 0, 0, 1, 1),
+                      (0, 0, 0, 0, 0, 0, 0, 2)]
+    else:
+        basis_vecs = [tuple([QQ(1) / QQ(2) for _ in range(16)]),
+                      (0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1),
+                      (0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1),
+                      (0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1),
+                      (0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1),
+                      (0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1),
+                      (0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1),
+                      (0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1),
+                      (0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1),
+                      (0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1),
+                      (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1),
+                      (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1),
+                      (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1),
+                      (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1),
+                      (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1),
+                      (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2)]
     return [vector([QQ(a) for a in v1]) for v1 in basis_vecs]
 
 
-def to_eulidian_vec(t):
-    return sum([a * b for a, b in zip(t, euclidean_basis())])
+def to_eulidian_vec(t, vec_len=8):
+    return sum([a * b for a, b in zip(t, euclidean_basis(vec_len))])
 
 
 def _bideterminant_prime_factors_dict(mat, wt):
     '''
     wt: a list/tuple of non-increasing integers of length 3
-    mat: 3 * 8 matrix with mat * mat.transpose() = 0 with coefficients in
+    mat: 3 * 8 or (3 * 16) matrix with mat * mat.transpose() = 0 with coefficients in
     an imaginary quadratic field.
     Return a dict
     a: (real_part, imag_part) as polynomials of _s_t_u_ring(QQ),
     where a is a prime factor of polynomial basis
     '''
-    R = _s_t_u_ring()
+    vec_len = mat.ncols()
+    R = _s_t_u_ring(vec_len=vec_len)
     stu_mt = matrix(R, 3, R.gens())
-    stu_mt = matrix([to_eulidian_vec(v) for v in stu_mt.rows()]).transpose()
+    stu_mt = matrix([to_eulidian_vec(v, vec_len=vec_len)
+                     for v in stu_mt.rows()]).transpose()
     subs_dct = dict(zip(matrix_var().list(), (mat * stu_mt).list()))
     _, l = _pol_basis_factor_dct_and_ls(wt)
     d = {a: a.subs(subs_dct) for a in l}
@@ -337,23 +355,71 @@ def _cleanup_code(variables, sty=None):
     return ";\n".join(indent + sty.clear(str(v)) for v in variables) + ";"
 
 
-def header_format(fname, func_name):
+def header_file_format(fname, func_name):
     res = '''#ifndef _{filename_name_upp_base}_H_
-#define _{filename_name_upp_base}_H_
+# define _{filename_name_upp_base}_H_
 
-char * {func_name}(int i_red, int a, int b, int c, int d, int e, int f);
+char * {func_name}(int j_red, int a, int b, int c, int d, int e, int f);
 
-#endif /* _{filename_name_upp_base}_H_ */
+# endif /* _{filename_name_upp_base}_H_ */
 '''.format(func_name=func_name,
            filename_name_upp_base=os.path.basename(fname.upper()))
     return res
+
+
+def _inner_prod_code(vec_len):
+    code8 = '''inline int inner_prod(int s[8], int t[8])
+{
+  return ((2*s[0] + s[1] + s[2] + s[3] + s[4] + s[5] + s[6] + s[7]) * t[0] +
+          (s[0] + 2*s[1] + s[2] + s[3] + s[4] + s[5] + s[6] + 2*s[7]) * t[1] +
+          (s[0] + s[1] + 2*s[2] + s[3] + s[4] + s[5] + s[6] + 2*s[7]) * t[2] +
+          (s[0] + s[1] + s[2] + 2*s[3] + s[4] + s[5] + s[6] + 2*s[7]) * t[3] +
+          (s[0] + s[1] + s[2] + s[3] + 2*s[4] + s[5] + s[6] + 2*s[7]) * t[4] +
+          (s[0] + s[1] + s[2] + s[3] + s[4] + 2*s[5] + s[6] + 2*s[7]) * t[5] +
+          (s[0] + s[1] + s[2] + s[3] + s[4] + s[5] + 2*s[6] + 2*s[7]) * t[6] +
+          (s[0] + 2*s[1] + 2*s[2] + 2*s[3] + 2*s[4] + 2*s[5] + 2*s[6] + 4*s[7]) * t[7]);
+}
+'''
+    code16 = '''short inner_prod(short s[16], short t[16])
+{
+  int a = (s[0] + s[1] + s[2] + s[3] + s[4] + s[5] + s[6] + s[7] +
+           s[8] + s[9] + s[10] + s[11] + s[12] + s[13] + s[14] + 2 * s[15]);
+  return ((3 * s[0] + a - s[15]) * t[0] + (a + s[1]) * t[1] + (a + s[2]) * t[2] +(a + s[3]) * t[3] +
+          (a + s[4]) * t[4] + (a + s[5]) * t[5] + (a + s[6]) * t[6] + (a + s[7]) * t[7] +
+          (a + s[8]) * t[8] + (a + s[9]) * t[9] + (a + s[10]) * t[10] + (a + s[11]) * t[11] +
+          (a + s[12]) * t[12] + (a + s[13]) * t[13] + (a + s[14]) * t[14] +
+          (-s[0] + 2 * a) * t[15]);
+}
+'''
+    if vec_len == 8:
+        return code8
+    else:
+        return code16
+
+
+def _set_s_code(vec_len, set_si_func):
+    indent = " " * 26
+    if vec_len == 8:
+        vecs = "cached_vectors"
+    else:
+        vecs = "cached_vectors_rk16"
+
+    def _set_s_code_each(s_name, loop_vname, vecs_name, a):
+        return "\n".join([indent +
+                          "{set_si_func}({s_name}{n}, {vecs}[{a}][{loop_vname}][{n}]);".format(
+                              set_si_func=set_si_func, vecs=vecs_name, n=str(n),
+                              loop_vname=loop_vname, s_name=s_name, a=a)
+                          for n in range(vec_len)])
+
+    return "\n\n".join(_set_s_code_each(s, i, vecs, a)
+                       for s, i, a in zip(["s", "t", "u"], ["i", "j", "k"], ["a", "b", "c"]))
 
 
 def code_format(func_name, wt, mat, real_part=True, factor_pol=False, sty=None,
                 num_of_procs=1):
     '''
     wt: non-increasing list/tuple of non-negative integers of length 3.
-    mat: 3 * 8 matrix with mat * mat.transpose() = 0 with coefficients in
+    mat: 3 * 8 (or 3 * 16) matrix with mat * mat.transpose() = 0 with coefficients in
     an imaginary quadratic field.
     real_part: boolian. If False, the imaginary part of the Fourier coefficient
     will be computed.
@@ -361,7 +427,7 @@ def code_format(func_name, wt, mat, real_part=True, factor_pol=False, sty=None,
     generator omega), the real part and imaginary part of alpha are
     a and b respectively.
     Return code for computing the theta series of weight wt associated to the
-    E8 series and the matrix.
+    theta series and the matrix.
     num_of_procs: a positive integer. If it is greather than one, then it tries to
     compute by using multiple processes.
     '''
@@ -370,17 +436,28 @@ def code_format(func_name, wt, mat, real_part=True, factor_pol=False, sty=None,
     res_str_name = "res_str"
     if sty is None:
         sty = MpirStyle()
-    wtm4 = tuple([a - 4 for a in wt])
+    vec_len = mat.ncols()
 
-    bdt_facs = _bideterminant_prime_factors_dict(mat, wtm4)
+    if vec_len == 8:
+        wt_small = tuple([a - 4 for a in wt])
+        cached_vectors = "cached_vectors"
+        cache_vectors = "cache_vectors"
+        num_of_vectors = "num_of_vectors"
+    else:
+        wt_small = tuple([a - 8 for a in wt])
+        cached_vectors = "cached_vectors_rk16"
+        cache_vectors = "cache_vectors_rk16"
+        num_of_vectors = "num_of_vectors_rk16"
+
+    bdt_facs = _bideterminant_prime_factors_dict(mat, wt_small)
     _facs_pols = itertools.chain(*([a, b] for a, b in bdt_facs.values()))
     _facs_pols_lcm = lcm([b.denominator()
                           for b in itertools.chain(*(a.dict().values() for a in _facs_pols))])
     # Remove denominators
     bdt_facs = {k: (a * _facs_pols_lcm, b * _facs_pols_lcm) for k, (a, b) in bdt_facs.items()}
 
-    Vrho = gl3_repn_module(wtm4)
-    bs_pl_dct, bdt_var_dct = _pol_basis_as_polof_factors(wtm4, mat.base_ring())
+    Vrho = gl3_repn_module(wt_small)
+    bs_pl_dct, bdt_var_dct = _pol_basis_as_polof_factors(wt_small, mat.base_ring())
     coef_pol_pairs = [bs_pl_dct[b] for b in Vrho.basis()]
 
     if real_part:
@@ -422,9 +499,10 @@ def code_format(func_name, wt, mat, real_part=True, factor_pol=False, sty=None,
     coefs_pol_code_alst1 = [(pl, codes + [sty.add_z(v, v, sum_tmp_var_name)])
                             for (pl, (codes, _)), v in zip(coefs_pol_code_alst, res_vars)]
 
-    _vrs = (tmp_vars + res_vars + sorted([str(r) for r, _ in bdt_var_dct.values()]) +
+    _vrs = (tmp_vars + res_vars +
+            sorted([str(r) for r, _ in bdt_var_dct.values()]) +
             sorted([str(im) for _, im in bdt_var_dct.values()]) +
-            list(itertools.chain(*[[s + str(i) for i in range(8)] for s in ["s", "t", "u"]])))
+            [str(a) for a in _s_t_u_ring(vec_len=vec_len).gens()])
 
     init_code_str = _init_code(_vrs, res_str_name, sty=sty)
 
@@ -438,87 +516,44 @@ def code_format(func_name, wt, mat, real_part=True, factor_pol=False, sty=None,
     cleanup_code_str = _cleanup_code(_vrs, sty=sty)
 
     if num_of_procs == 1:
-        i_inc_code = "i++"
+        j_inc_code = "j++"
     else:
-        i_inc_code = "i += %s" % (num_of_procs,)
+        j_inc_code = "j += %s" % (num_of_procs,)
 
     header = '''#define _GNU_SOURCE             /* for asprintf */
-#include <stdio.h>
-#include "e8vectors.h"
-#include <stdlib.h>
-
-
-inline int inner_prod(int s[8], int t[8])
-{
-  return ((2*s[0] + s[1] + s[2] + s[3] + s[4] + s[5] + s[6] + s[7]) * t[0] +
-          (s[0] + 2*s[1] + s[2] + s[3] + s[4] + s[5] + s[6] + 2*s[7]) * t[1] +
-          (s[0] + s[1] + 2*s[2] + s[3] + s[4] + s[5] + s[6] + 2*s[7]) * t[2] +
-          (s[0] + s[1] + s[2] + 2*s[3] + s[4] + s[5] + s[6] + 2*s[7]) * t[3] +
-          (s[0] + s[1] + s[2] + s[3] + 2*s[4] + s[5] + s[6] + 2*s[7]) * t[4] +
-          (s[0] + s[1] + s[2] + s[3] + s[4] + 2*s[5] + s[6] + 2*s[7]) * t[5] +
-          (s[0] + s[1] + s[2] + s[3] + s[4] + s[5] + 2*s[6] + 2*s[7]) * t[6] +
-          (s[0] + 2*s[1] + 2*s[2] + 2*s[3] + 2*s[4] + 2*s[5] + 2*s[6] + 4*s[7]) * t[7]);
-}
-
-'''
+# include <stdio.h>
+# include "{header_file}.h"
+# include <stdlib.h>
+#include <mpir.h>
+'''.format(header_file="e8vectors" if vec_len == 8 else "rank16_vectors")
 
     code = '''{header}
 
-char * {func_name}(int i_red, int a, int b, int c, int d, int e, int f)
+{inner_prod}
+
+char * {func_name}(int j_red, int a, int b, int c, int d, int e, int f)
 {{
   /* mat: {mat_info}, quad_field: {quad_field_info}, real_part: {real_part} */
   /* young tableaux of the basis: {young_tableaux} */
 
-  cache_vectors();
-  /* Use static to avoid segmentation fault */
-  static int vs1[MAX_NM_OF_VECTORS][8];
-  static int vs2[MAX_NM_OF_VECTORS][8];
-  static int vs3[MAX_NM_OF_VECTORS][8];
-
-  _set_vs(vs1, a);
-  _set_vs(vs2, b);
-  _set_vs(vs3, c);
+  {cache_vectors}();
 
 {init_code}
 
-  for (int i = i_red; i < num_of_vectors[a]; {i_inc_code})
+  for (int i = 0; i < {num_of_vectors}[a]; i++)
     {{
-      for (int j = 0; j < num_of_vectors[b]; j++)
+      for (int j = j_red; j < {num_of_vectors}[b]; {j_inc_code})
         {{
-          for (int k = 0; k < num_of_vectors[c]; k++)
+          for (int k = 0; k < {num_of_vectors}[c]; k++)
             {{
-              if (inner_prod(vs1[i], vs2[j]) == f)
+              if (inner_prod({cached_vectors}[a][i], {cached_vectors}[b][j]) == f)
                 {{
-                  if (inner_prod(vs1[i], vs3[k]) == e)
+                  if (inner_prod({cached_vectors}[a][i], {cached_vectors}[c][k]) == e)
                     {{
-                      if (inner_prod(vs2[j], vs3[k]) == d)
+                      if (inner_prod({cached_vectors}[b][j], {cached_vectors}[c][k]) == d)
                         {{
-                          {set_si_func}(s0, vs1[i][0]);
-                          {set_si_func}(s1, vs1[i][1]);
-                          {set_si_func}(s2, vs1[i][2]);
-                          {set_si_func}(s3, vs1[i][3]);
-                          {set_si_func}(s4, vs1[i][4]);
-                          {set_si_func}(s5, vs1[i][5]);
-                          {set_si_func}(s6, vs1[i][6]);
-                          {set_si_func}(s7, vs1[i][7]);
 
-                          {set_si_func}(t0, vs2[j][0]);
-                          {set_si_func}(t1, vs2[j][1]);
-                          {set_si_func}(t2, vs2[j][2]);
-                          {set_si_func}(t3, vs2[j][3]);
-                          {set_si_func}(t4, vs2[j][4]);
-                          {set_si_func}(t5, vs2[j][5]);
-                          {set_si_func}(t6, vs2[j][6]);
-                          {set_si_func}(t7, vs2[j][7]);
-
-                          {set_si_func}(u0, vs3[k][0]);
-                          {set_si_func}(u1, vs3[k][1]);
-                          {set_si_func}(u2, vs3[k][2]);
-                          {set_si_func}(u3, vs3[k][3]);
-                          {set_si_func}(u4, vs3[k][4]);
-                          {set_si_func}(u5, vs3[k][5]);
-                          {set_si_func}(u6, vs3[k][6]);
-                          {set_si_func}(u7, vs3[k][7]);
+{set_s_code}
 
 {bi_det_factors_code}
 
@@ -548,6 +583,10 @@ char * {func_name}(int i_red, int a, int b, int c, int d, int e, int f)
            quad_field_info=str(mat.base_ring().polynomial()),
            real_part=str(real_part),
            young_tableaux=str([x.right_tableau.row_numbers for x in Vrho.basis()]),
-           set_si_func=sty.set_si_func,
-           i_inc_code=i_inc_code)
+           cache_vectors=cache_vectors,
+           cached_vectors=cached_vectors,
+           num_of_vectors=num_of_vectors,
+           inner_prod=_inner_prod_code(vec_len),
+           set_s_code=_set_s_code(vec_len, sty.set_si_func),
+           j_inc_code=j_inc_code)
     return code
