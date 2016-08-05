@@ -82,8 +82,7 @@ def _find_mat_wt(wt, mats, suffix=""):
     ln = len(mats)
     while True:
         mat = mats[floor(random() * ln)]
-        mat = matrix(3, mat)
-        print(mat)
+        print(mat.list())
         wt_str = "_".join([str(a) for a in wt])
         for real_part in [True, False]:
             _gen_base(wt, mat, suffix=suffix, real_part=real_part)
@@ -96,6 +95,6 @@ def _find_mat_wt(wt, mats, suffix=""):
             print(a)
             zero_vec_str = "(" + ", ".join(itertools.repeat("0", poly_repn_dim(wt))) + ")"
             if a != zero_vec_str:
-                print(mat)
+                print(mat.list())
                 print("found")
-                break
+                return
