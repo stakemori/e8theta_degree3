@@ -12,14 +12,15 @@ from sage.modules.all import vector
 from sage.rings.all import QQ, PolynomialRing
 
 
-def save_code_to_file(directory, fname_base, func_name, wt, mat, real_part=True,
+def save_code_to_file(directory, fname_base, func_names, wt, mats, real_parts=None,
                       overwrite=False, sty=None, num_of_procs=None):
     '''
     fname_base: string
     This save code for theta series to fname.h and fname.c
     '''
-    hf = header_file_format(fname_base, func_name)
-    cf = code_format(func_name, wt, mat, real_part=real_part, sty=sty, num_of_procs=num_of_procs)
+    hf = header_file_format(fname_base, func_names)
+    cf = code_format(func_names, wt, mats, real_parts=real_parts,
+                     sty=sty, num_of_procs=num_of_procs)
     fnameh = os.path.join(directory, fname_base + ".h")
     fnamec = os.path.join(directory, fname_base + ".c")
     if (not overwrite) and (os.path.exists(fnameh) or os.path.exists(fnamec)):
@@ -34,8 +35,8 @@ def save_code_to_file(directory, fname_base, func_name, wt, mat, real_part=True,
 def generate_cython_and_build_scripts(directory,
                                       cython_fname_base,
                                       c_fname_base,
-                                      func_name,
-                                      c_func_name, wt, mat, real_part=True,
+                                      func_names,
+                                      c_func_names, wt, mats, real_parts=None,
                                       overwrite=False, sty=None, num_of_procs=1):
     '''
     directory(string): must be a subdirectory of binding
@@ -43,11 +44,11 @@ def generate_cython_and_build_scripts(directory,
     Can compile by "make compile-cython" in that directory if e8vector is compiled.
     '''
     c_fname = c_fname_base + "_c"
-    _cython_code = _cython_format(c_fname, c_func_name, func_name, num_of_procs)
+    _cython_code = _cython_format(c_fname, c_func_names, func_names, num_of_procs)
     _setup_py_code = _setup_py_format(cython_fname_base, c_fname)
     _makefile_code = _makefile_format(c_fname)
-    save_code_to_file(directory, c_fname, c_func_name, wt, mat,
-                      real_part=real_part, overwrite=overwrite, sty=sty,
+    save_code_to_file(directory, c_fname, c_func_names, wt, mats,
+                      real_parts=real_parts, overwrite=overwrite, sty=sty,
                       num_of_procs=num_of_procs)
 
     def _fname(f):
@@ -111,19 +112,15 @@ compile-cython: compile-c-lib
     return _fmt
 
 
-def _cython_format(c_header_file, c_func_name, cython_func_name, num_of_procs):
-    if num_of_procs == 1:
-        theta_body = 'return {cfn}_part((0, m)))\n'.format(cfn=cython_func_name)
-    else:
-        theta_body = '''p = Pool(processes={npcs})
-    try:
-        res = sum(p.map({cfn}_part, zip(range({npcs}), itertools.repeat(m, {npcs}))))
-    except KeyboardInterrupt:
-        p.terminate()
-        p.join()
-    return res
-'''.format(cfn=cython_func_name, npcs=num_of_procs)
-    _fmt = '''import itertools
+def _cython_format(c_header_file, c_func_names, cython_func_names, num_of_procs):
+    ext_fmt = "    cpdef char * {c_func_name}(int, int, int, int, int, int, int)"
+    ext_code = "\n".join([ext_fmt.format(c_func_name=c_func_name) for c_func_name in c_func_names])
+    ext_code = ('cdef extern from "{c_header_file}.h":\n'.format(
+        c_header_file=c_header_file) + ext_code)
+    funcs_code = "\n".join([_cython_format_each(c_header_file, c_fcn, cy_fcn, num_of_procs)
+                            for c_fcn, cy_fcn in zip(c_func_names, cython_func_names)])
+
+    code = '''import itertools
 from multiprocessing import Pool
 from sage.rings.all import Integer, QQ, ZZ
 from sage.misc.all import cached_function
@@ -133,11 +130,25 @@ from libc.stdlib cimport free
 from e8theta_degree3.gl3_repn import GL3RepnElement
 include "cysignals/signals.pxi"
 
+{ext_code}
 
-cdef extern from "{c_header_file}.h":
-    cpdef char * {c_func_name}(int, int, int, int, int, int, int)
+{funcs_code}
+'''.format(ext_code=ext_code, funcs_code=funcs_code)
+    return code
 
 
+def _cython_format_each(c_header_file, c_func_name, cython_func_name, num_of_procs):
+    if num_of_procs == 1:
+        theta_body = 'return {cfn}_part((0, m)))\n'.format(cfn=cython_func_name)
+    else:
+        theta_body = '''p = Pool(processes={npcs})
+    try:
+        res = sum(p.map({cfn}_part, zip(range({npcs}), itertools.repeat(m, {npcs}))))
+    except KeyboardInterrupt:
+        p.terminate()
+        p.join()
+    return res'''.format(cfn=cython_func_name, npcs=num_of_procs)
+    _fmt = '''
 def {cfn}_part(j_red_m):
     j_red, m = j_red_m
 
@@ -164,8 +175,7 @@ def {cfn}_part(j_red_m):
 @cached_function
 def {cfn}(m):
     {theta_body}
-'''.format(c_header_file=c_header_file, c_func_name=c_func_name,
-           cfn=cython_func_name, theta_body=theta_body)
+'''.format(c_func_name=c_func_name, cfn=cython_func_name, theta_body=theta_body)
     return _fmt
 
 
@@ -355,14 +365,19 @@ def _cleanup_code(variables, sty=None):
     return ";\n".join(indent + sty.clear(str(v)) for v in variables) + ";"
 
 
-def header_file_format(fname, func_name):
-    res = '''#ifndef _{filename_name_upp_base}_H_
-# define _{filename_name_upp_base}_H_
-
+def header_file_format(fname, func_names):
+    decl = '''
 char * {func_name}(int j_red, int a, int b, int c, int d, int e, int f);
+'''
+    funcs_declaration = "\n\n".join([decl.format(func_name=a) for a in func_names])
 
-# endif /* _{filename_name_upp_base}_H_ */
-'''.format(func_name=func_name,
+    res = '''#ifndef _{filename_name_upp_base}_H_
+#define _{filename_name_upp_base}_H_
+
+{funcs_declaration}
+
+#endif /* _{filename_name_upp_base}_H_ */
+'''.format(funcs_declaration=funcs_declaration,
            filename_name_upp_base=os.path.basename(fname.upper()))
     return res
 
@@ -415,8 +430,35 @@ def _set_s_code(vec_len, set_si_func):
                        for s, i, a in zip(["s", "t", "u"], ["i", "j", "k"], ["a", "b", "c"]))
 
 
-def code_format(func_name, wt, mat, real_part=True, factor_pol=False, sty=None,
+def code_format_header_innerprod(vec_len):
+    code = '''#define _GNU_SOURCE             /* for asprintf */
+# include <stdio.h>
+# include "{header_file}.h"
+# include <stdlib.h>
+#include <mpir.h>
+
+{inner_prod}
+'''.format(header_file="e8vectors" if vec_len == 8 else "rank16_vectors",
+           inner_prod=_inner_prod_code(vec_len))
+    return code
+
+
+def code_format(func_names, wt, mats, real_parts=None,
+                factor_pol=False, sty=None,
                 num_of_procs=1):
+    n = len(mats)
+    if real_parts is None:
+        real_parts = [True for _ in range(n)]
+    codes = [code_format_theta(func_name, wt, mat,
+                               real_part=real_part,
+                               factor_pol=factor_pol,
+                               sty=sty, num_of_procs=num_of_procs)
+             for func_name, mat, real_part in zip(func_names, mats, real_parts)]
+    return code_format_header_innerprod(mats[0].ncols()) + "\n" + "\n\n".join(codes)
+
+
+def code_format_theta(func_name, wt, mat, real_part=True, factor_pol=False, sty=None,
+                      num_of_procs=1):
     '''
     wt: non-increasing list/tuple of non-negative integers of length 3.
     mat: 3 * 8 (or 3 * 16) matrix with mat * mat.transpose() = 0 with coefficients in
@@ -520,17 +562,7 @@ def code_format(func_name, wt, mat, real_part=True, factor_pol=False, sty=None,
     else:
         j_inc_code = "j += %s" % (num_of_procs,)
 
-    header = '''#define _GNU_SOURCE             /* for asprintf */
-# include <stdio.h>
-# include "{header_file}.h"
-# include <stdlib.h>
-#include <mpir.h>
-'''.format(header_file="e8vectors" if vec_len == 8 else "rank16_vectors")
-
-    code = '''{header}
-
-{inner_prod}
-
+    code = '''
 char * {func_name}(int j_red, int a, int b, int c, int d, int e, int f)
 {{
   /* mat: {mat_info}, quad_field: {quad_field_info}, real_part: {real_part} */
@@ -578,7 +610,7 @@ char * {func_name}(int j_red, int a, int b, int c, int d, int e, int f)
            str_concat_code=str_concat_code_str,
            cleanup_code=cleanup_code_str,
            res_str_name=res_str_name,
-           header=header, func_name=func_name,
+           func_name=func_name,
            mat_info=str(mat.list()),
            quad_field_info=str(mat.base_ring().polynomial()),
            real_part=str(real_part),
@@ -586,7 +618,6 @@ char * {func_name}(int j_red, int a, int b, int c, int d, int e, int f)
            cache_vectors=cache_vectors,
            cached_vectors=cached_vectors,
            num_of_vectors=num_of_vectors,
-           inner_prod=_inner_prod_code(vec_len),
            set_s_code=_set_s_code(vec_len, sty.set_si_func),
            j_inc_code=j_inc_code)
     return code

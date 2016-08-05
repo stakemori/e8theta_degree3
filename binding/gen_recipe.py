@@ -3,26 +3,24 @@ Recipe for generating c and cython sources.
 '''
 from __future__ import print_function
 
-import itertools
 import subprocess
 from os.path import dirname, join
 
 import e8theta_degree3
 from e8theta_degree3.binding.theta_code_format import generate_cython_and_build_scripts
-from e8theta_degree3.young_tableau import poly_repn_dim
 from sage.rings.all import QuadraticField, ZZ
 from sage.matrix.all import matrix, diagonal_matrix
 from sage.misc.all import random
 from sage.functions.all import floor
 
 
-def _gen_base(wt, mat, suffix="", real_part=True):
-    assert mat * mat.transpose() == 0
-    cyf, cf, cyfn, cfn = _names(wt, suffix)
+def _gen_base(wt, mats, cyfns, cfns, real_parts=None):
+    assert all(mat * mat.transpose() == 0 for mat in mats)
+    cyf, cf = _names(wt)
     generate_cython_and_build_scripts(_recipe_dir(wt),
-                                      cyf, cf, cyfn, cfn,
-                                      wt, mat, overwrite=True, num_of_procs=8,
-                                      real_part=real_part)
+                                      cyf, cf, cyfns, cfns,
+                                      wt, mats, overwrite=True, num_of_procs=8,
+                                      real_parts=real_parts)
 
 
 def _recipe_dir(wt):
@@ -31,34 +29,44 @@ def _recipe_dir(wt):
     return join(binding_dir, "wt{wt}/".format(wt=wt_s))
 
 
-def _names(wt, suffix):
+def _names(wt):
     '''
-    Return cython file name, c file name, cython function name, c function name.
+    Return cython file name, c file name.
     '''
     wt_s = "_".join(str(a) for a in wt)
-    return ("theta{wt}{sfx}_cython".format(wt=wt_s, sfx=suffix),
-            "theta{wt}{sfx}".format(wt=wt_s, sfx=suffix),
-            "theta{sfx}".format(sfx=suffix),
-            "theta_c_{wt}{sfx}".format(wt=wt_s, sfx=suffix))
+    return ("theta{wt}_cython".format(wt=wt_s),
+            "theta{wt}".format(wt=wt_s))
+
+
+def _cython_func_name_default(wt):
+    wt_s = "_".join(str(a) for a in wt)
+    return "theta%s_cython" % (wt_s, )
+
+
+def _c_func_name_default(wt):
+    wt_s = "_".join(str(a) for a in wt)
+    return "theta_c_%s" % (wt_s, )
 
 
 def gen_wt12():
     '''
     Recipe for weight (12, 12, 12). This is for test.
     '''
+    wt = (12, 12, 12)
     i = QuadraticField(-1, name="i").gen()
     mat = matrix(3, [1, 0, 0, i, 0, 0, 0, 0, 0, 1, 0, 0, i, 0, 0, 0, 0, 0, 1, 0, 0, i, 0, 0])
-    _gen_base((12, 12, 12), mat)
+    _gen_base(wt, [mat], [_cython_func_name_default(wt)], [_c_func_name_default(wt)])
 
 
 def gen_wt14_13_5():
     '''
     Recipe for weight (14, 13, 5).
     '''
+    wt = (14, 13, 5)
     i = QuadraticField(-1, name="i").gen()
     mat = matrix(3, [2, 3 * i, -2, -i, -1, 0, -1, 0, -2, -i, 0,
                      -i, -1, 0, -1, -2 * i, -1, 0, -1, 0, 0, i, 0, -i])
-    _gen_base((14, 13, 5), mat)
+    _gen_base(wt, [mat], [_cython_func_name_default(wt)], [_c_func_name_default(wt)])
 
 
 T0 = matrix([[ZZ(1), ZZ(1) / ZZ(2), ZZ(1) / ZZ(2)],
@@ -67,34 +75,51 @@ T0 = matrix([[ZZ(1), ZZ(1) / ZZ(2), ZZ(1) / ZZ(2)],
 
 T1 = diagonal_matrix([ZZ(1), ZZ(1), ZZ(1)])
 
-
-def compute_initial_fc_in_subprocess(dir_name, mod_name, func_name):
-    return subprocess.check_output(
-        ("""sage -c 'import sys; sys.path.append("{pkg_dir}");""" +
-         "import e8theta_degree3.binding.{dir_name}.{mod_name};" +
-         "from e8theta_degree3.binding.gen_recipe import T0;" +
-         "print e8theta_degree3.binding.{dir_name}.{mod_name}.{func_name}(T0)'").format(
-             pkg_dir=dirname(dirname(e8theta_degree3.__file__)),
-             dir_name=dir_name, mod_name=mod_name, func_name=func_name), shell=True).strip()
+Ts = [T0, T1]
 
 
-def _find_mat_wt(wt, mats, suffix=""):
-    ln = len(mats)
+def _rank(funcs):
+    m = matrix([sum([f(t).list() for t in Ts], []) for f in funcs])
+    return m.rank()
+
+
+def compute_rank_in_subprocess(dir_name, mod_name, func_names):
+    funcs = ["e8theta_degree3.binding.{dir_name}.{mod_name}.{func}".format(
+        dir_name=dir_name, mod_name=mod_name, func=func)
+        for func in func_names]
+    funcs_str = "[" + ", ".join(funcs) + "]"
+    cmd = ("""sage -c 'import sys; sys.path.append("{pkg_dir}");""" +
+           "import e8theta_degree3.binding.{dir_name}.{mod_name};" +
+           "from e8theta_degree3.binding.gen_recipe import _rank;" +
+           "print _rank({funcs})'").format(
+               pkg_dir=dirname(dirname(e8theta_degree3.__file__)),
+               dir_name=dir_name, mod_name=mod_name,
+               funcs=funcs_str)
+    return subprocess.check_output(cmd, shell=True).strip()
+
+
+def _find_mat_wt(wt, mats_base, mats_total, dim,
+                 cython_func_names=None, c_func_names=None):
+    ln = len(mats_total)
+    if cython_func_names is None:
+        cython_func_names = [_cython_func_name_default(wt) + "_" + str(i)
+                             for i in range(dim)]
+    if c_func_names is None:
+        c_func_names = [_c_func_name_default(wt) + "_" + str(i)
+                        for i in range(dim)]
     while True:
-        mat = mats[floor(random() * ln)]
+        mat = mats_total[floor(random() * ln)]
         print(mat.list())
         wt_str = "_".join([str(a) for a in wt])
-        for real_part in [True, False]:
-            _gen_base(wt, mat, suffix=suffix, real_part=real_part)
-            po = subprocess.Popen("make compile-cython", shell=True, cwd=_recipe_dir(wt))
-            po.wait()
-            print("Building done.")
-            cyf, _, cyfn, _ = _names(wt, suffix)
-            a = compute_initial_fc_in_subprocess(
-                "wt%s" % (wt_str, ), cyf, cyfn)
-            print(a)
-            zero_vec_str = "(" + ", ".join(itertools.repeat("0", poly_repn_dim(wt))) + ")"
-            if a != zero_vec_str:
-                print(mat.list())
-                print("found")
-                return
+        _gen_base(wt, mats_base + [mat], cython_func_names, c_func_names)
+        po = subprocess.Popen("make compile-cython", shell=True, cwd=_recipe_dir(wt))
+        po.wait()
+        print("Building done.")
+        cyf, _, = _names(wt)
+        a = compute_rank_in_subprocess("wt%s" % (wt_str, ), cyf, cython_func_names)
+        print(a)
+        a = ZZ(a)
+        if a == dim:
+            print(mat.list())
+            print("found")
+            return
