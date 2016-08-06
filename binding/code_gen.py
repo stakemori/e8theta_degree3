@@ -164,7 +164,10 @@ class MpirStyle(CCodeStyle):
         return "mpz_sub_ui(%s, %s, %s)" % (a, b, c)
 
     def pow_ui(self, a, b, c):
-        return "mpz_pow_ui(%s, %s, %s)" % (a, b, c)
+        if c == 1:
+            return self.set_z(a, b)
+        else:
+            return "mpz_pow_ui(%s, %s, %s)" % (a, b, c)
 
     def add_mul_ui(self, a, b, c):
         return "mpz_addmul_ui(%s, %s, %s)" % (a, b, c)
