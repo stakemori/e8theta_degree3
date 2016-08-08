@@ -1,4 +1,5 @@
 #include "vector_utils.h"
+#include <stdio.h>
 
 static int cmpfunc(const void * a, const void * b)
 {
@@ -18,7 +19,7 @@ static int cmpfunc(const void * a, const void * b)
     }
 }
 
-void sort_int_vec(void * base, size_t elt_size)
+void sort_int_vec(int * base, size_t elt_size)
 {
   qsort(base, elt_size, sizeof(int), cmpfunc);
 }
