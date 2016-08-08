@@ -75,7 +75,7 @@ T0 = matrix([[ZZ(1), ZZ(1) / ZZ(2), ZZ(1) / ZZ(2)],
 
 T1 = diagonal_matrix([ZZ(1), ZZ(1), ZZ(1)])
 
-Ts = [T0, T1]
+Ts = [T0]
 
 
 def _rank(funcs):

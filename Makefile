@@ -7,8 +7,9 @@ SHARED = -shared -fPIC
 CC = gcc
 
 compile-theta_vectors:
-	$(CC) binding/e8vectors.c -o binding/lib/libe8vectors.so $(PATHOPT) $(OPT) $(SHARED)
-	$(CC) binding/rank16_vectors.c -o binding/lib/librank16_vectors.so $(PATHOPT) $(OPT) $(SHARED)
+	$(CC) binding/int_vector_sort.c -o binding/lib/libint_vector_sort.so $(PATHOPT) $(OPT) $(SHARED)
+	$(CC) binding/e8vectors.c -o binding/lib/libe8vectors.so $(PATHOPT) -lint_vector_sort $(OPT) $(SHARED)
+	$(CC) binding/rank16_vectors.c -o binding/lib/librank16_vectors.so $(PATHOPT) -lint_vector_sort $(OPT) $(SHARED)
 
 debug:
 	$(CC) $(TARGET) -o $(OUT) $(DEBUGOPT) $(PATHOPT) $(LIBOPT)
