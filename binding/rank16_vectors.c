@@ -209,14 +209,6 @@ void print_vec(Rk16VecInt vec[16])
 }
 
 
-static void copy_vec(Rk16VecInt vec1[16], Rk16VecInt vec2[16])
-{
-  for (int i = 0; i < 16; i++)
-    {
-      vec1[i] = vec2[i];
-    }
-}
-
 static void normalize_vec(Rk16VecInt vec[16])
 {
   int mul = 1;
@@ -267,7 +259,7 @@ int repr_modulo_autom(int n, int repr[MAX_NM_OF_VECTORS_RK16][17])
   Rk16VecInt vec[16] = {0};
   for (int i = 0; i < num_of_vectors_rk16[n]; i++)
     {
-      copy_vec(vec, cached_vectors_rk16[n][i]);
+      memcpy(vec, cached_vectors_rk16[n][i], sizeof(Rk16VecInt) * 16);
       _convert_to_euclid_vector(vec);
       normalize_vec(vec);
       _convert_from_euclid_vector(vec);
@@ -312,8 +304,8 @@ int test_norm_vec(void)
       _convert_to_euclid_vector(vec1);
       memcpy(vec2, vec1, sizeof(int) * 16);
       normalize_vec(vec1);
-      copy_vec(vec3, vec1);
-      copy_vec(vec4, vec2);
+      memcpy(vec3, vec1, sizeof(int) * 16);
+      memcpy(vec4, vec2, sizeof(int) * 16);
 
       int mul1 = 1;
       int mul2 = 1;
