@@ -14,7 +14,7 @@ void print_vec(int * vec, int a)
   printf("\n");
 }
 
-int test_norm_vec(void)
+int test_norm_vec_rk16(void)
 {
   cache_vectors_rk16();
   Rk16VecInt vec1[16];
@@ -84,8 +84,7 @@ int test_norm_vec(void)
 
 int main()
 {
-  int a = test_norm_vec();
-  printf("%d\n", a);
+  printf("%d\n", test_norm_vec_rk16());
   /* static int _reprs[MAX_NM_OF_VECTORS_RK16][17]; */
   /* int num = repr_modulo_autom_rk16(3, _reprs); */
   /* printf("%d\n", num); */
@@ -118,5 +117,5 @@ int main()
 
 
 /* Local Variables: */
-/* compile-command: "gcc rank16_vectors.c -L./lib -lm -lint_vector_sort -o test -std=c11" */
+/* compile-command: "gcc test_representatives.c -o test_representatives -le8vectors -lrank16_vectors -lvector_utils -lm -L../lib -std=c11" */
 /* End: */
