@@ -5,7 +5,7 @@
 #include <math.h>
 #include "vector_utils.h"
 
-void print_vec(int * vec, int a)
+static void print_vec(int * vec, int a)
 {
   for (int i = 0; i < a; i++)
     {
@@ -14,7 +14,7 @@ void print_vec(int * vec, int a)
   printf("\n");
 }
 
-int test_norm_vec_rk16(void)
+static int test_norm_vec_rk16(void)
 {
   cache_vectors_rk16();
   Rk16VecInt vec1[16];
@@ -48,7 +48,7 @@ int test_norm_vec_rk16(void)
               printf("False: unchagne.\n");
               print_vec(vec1, 16);
               print_vec(vec2, 16);
-              return -1;
+              return 0;
             }
         }
 
@@ -68,7 +68,7 @@ int test_norm_vec_rk16(void)
               printf("False: sorting\n");
               print_vec(vec1, 16);
               print_vec(vec2, 16);
-              return -1;
+              return 0;
             }
         }
       if (mul1 != mul2)
@@ -76,29 +76,35 @@ int test_norm_vec_rk16(void)
           print_vec(vec3, 16);
           print_vec(vec4, 16);
           printf("False: sign\n");
-          return -1;
+          return 0;
         }
     }
-  return 0;
+  return 1;
 }
 
-int main()
+static int test_repr_rk16(void)
 {
-  printf("%d\n", test_norm_vec_rk16());
-  /* static int _reprs[MAX_NM_OF_VECTORS_RK16][17]; */
-  /* int num = repr_modulo_autom_rk16(3, _reprs); */
-  /* printf("%d\n", num); */
-  /* int s = 0; */
+  static int _reprs_rk16[MAX_NM_OF_VECTORS_RK16][17];
+  int num = repr_modulo_autom_rk16(3, _reprs_rk16);
+  printf("%d\n", num);
+  int s = 0;
   /* for (int i = 0; i < num; i++) */
   /*   { */
-  /*     s += _reprs[i][16]; */
-  /*     /\* for (int j = 0; j < 17; j++) *\/ */
-  /*     /\*   { *\/ */
-  /*     /\*     printf("%d, ", _reprs[i][j]); *\/ */
-  /*     /\*   } *\/ */
-  /*     /\* printf("\n"); *\/ */
+  /*     s += _reprs_rk16[i][16]; */
+  /*     for (int j = 0; j < 17; j++) */
+  /*       { */
+  /*         printf("%d, ", _reprs_rk16[i][j]); */
+  /*       } */
+  /*     printf("\n"); */
   /*   } */
-  /* printf("%d\n", s); */
+  if (s == num_of_vectors_rk16[3])
+    {
+      return 1;
+    }
+  else
+    {
+      return 0;
+    }
   /* cache_vectors_rk16(); */
   /* Rk16VecInt vec[16]; */
   /* for (int i = 0; i < num_of_vectors_rk16[2]; i++) */
@@ -112,6 +118,22 @@ int main()
   /*     normalize_vec_rk16(vec); */
   /*     print_vec(vec); */
   /*   } */
+
+}
+
+
+int main()
+{
+  printf("test_norm_vec_rk16\n");
+  if (test_norm_vec_rk16())
+    {
+      printf("OK\n");
+    }
+  printf("test_repr_rk16\n");
+  if (test_repr_rk16())
+    {
+      printf("OK\n");
+    }
   return 0;
 }
 
