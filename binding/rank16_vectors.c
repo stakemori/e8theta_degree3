@@ -259,31 +259,11 @@ static void normalize_vec(Rk16VecInt vec[16])
   qsort(vec1, 9, sizeof(int), cmpfunc);
   if (mul == -1)
     {
-      vec[8] *= -1;
+      vec1[8] *= -1;
     }
   for (int i = 0; i < 9; i++)
     {
       vec[i + 7] = vec1[i];
-    }
-  /* another sign change */
-  if (mul != 0)
-    {
-      mul = 1;
-      for (int i = 0; i < 7; i++)
-        {
-          if (vec[i] < 0)
-            {
-              mul *= -1;
-            }
-        }
-    }
-  for (int i = 0; i < 7; i++)
-    {
-      vec[i] = abs(vec[i]);
-    }
-  if (mul == -1)
-    {
-      vec[8] *= -1;
     }
 }
 
@@ -339,12 +319,16 @@ int test_norm_vec(void)
   cache_vectors_rk16();
   Rk16VecInt vec1[16];
   Rk16VecInt vec2[16];
+  Rk16VecInt vec3[16];
+  Rk16VecInt vec4[16];
   for (int i = 0; i < num_of_vectors_rk16[2]; i++)
     {
       copy_vec(vec1, cached_vectors_rk16[2][i]);
       _convert_to_euclid_vector(vec1);
       copy_vec(vec2, vec1);
       normalize_vec(vec1);
+      copy_vec(vec3, vec1);
+      copy_vec(vec4, vec2);
 
       int mul1 = 1;
       int mul2 = 1;
@@ -355,6 +339,17 @@ int test_norm_vec(void)
       for (int j = 0; j < 16; j++)
         {
           mul2 *= vec2[j];
+        }
+
+      for (int j = 0; j < 7; j++)
+        {
+          if (vec1[j] != vec2[j])
+            {
+              printf("False: unchagne.\n");
+              print_vec(vec1);
+              print_vec(vec2);
+              return -1;
+            }
         }
 
       for (int j = 0; j < 16; j++)
@@ -378,6 +373,8 @@ int test_norm_vec(void)
         }
       if (mul1 != mul2)
         {
+          print_vec(vec3);
+          print_vec(vec4);
           printf("False: sign\n");
           return -1;
         }
@@ -385,39 +382,39 @@ int test_norm_vec(void)
   return 0;
 }
 
-/* int main() */
-/* { */
-/*   int a = test_norm_vec(); */
-/*   printf("%d\n", a); */
-/*   /\* static int _reprs[MAX_NM_OF_VECTORS_RK16][17]; *\/ */
-/*   /\* int num = repr_modulo_autom(3, _reprs); *\/ */
-/*   /\* printf("%d\n", num); *\/ */
-/*   /\* int s = 0; *\/ */
-/*   /\* for (int i = 0; i < num; i++) *\/ */
-/*   /\*   { *\/ */
-/*   /\*     s += _reprs[i][16]; *\/ */
-/*   /\*     /\\* for (int j = 0; j < 17; j++) *\\/ *\/ */
-/*   /\*     /\\*   { *\\/ *\/ */
-/*   /\*     /\\*     printf("%d, ", _reprs[i][j]); *\\/ *\/ */
-/*   /\*     /\\*   } *\\/ *\/ */
-/*   /\*     /\\* printf("\n"); *\\/ *\/ */
-/*   /\*   } *\/ */
-/*   /\* printf("%d\n", s); *\/ */
-/*   /\* cache_vectors_rk16(); *\/ */
-/*   /\* Rk16VecInt vec[16]; *\/ */
-/*   /\* for (int i = 0; i < num_of_vectors_rk16[2]; i++) *\/ */
-/*   /\*   { *\/ */
-/*   /\*     for (int j = 0; j < 16; j++) *\/ */
-/*   /\*       { *\/ */
-/*   /\*         vec[j] = cached_vectors_rk16[2][i][j]; *\/ */
-/*   /\*       } *\/ */
-/*   /\*     _convert_to_euclid_vector(vec); *\/ */
-/*   /\*     print_vec(vec); *\/ */
-/*   /\*     normalize_vec(vec); *\/ */
-/*   /\*     print_vec(vec); *\/ */
-/*   /\*   } *\/ */
-/*   return 0; */
-/* } */
+int main()
+{
+  int a = test_norm_vec();
+  printf("%d\n", a);
+  /* static int _reprs[MAX_NM_OF_VECTORS_RK16][17]; */
+  /* int num = repr_modulo_autom(3, _reprs); */
+  /* printf("%d\n", num); */
+  /* int s = 0; */
+  /* for (int i = 0; i < num; i++) */
+  /*   { */
+  /*     s += _reprs[i][16]; */
+  /*     /\* for (int j = 0; j < 17; j++) *\/ */
+  /*     /\*   { *\/ */
+  /*     /\*     printf("%d, ", _reprs[i][j]); *\/ */
+  /*     /\*   } *\/ */
+  /*     /\* printf("\n"); *\/ */
+  /*   } */
+  /* printf("%d\n", s); */
+  /* cache_vectors_rk16(); */
+  /* Rk16VecInt vec[16]; */
+  /* for (int i = 0; i < num_of_vectors_rk16[2]; i++) */
+  /*   { */
+  /*     for (int j = 0; j < 16; j++) */
+  /*       { */
+  /*         vec[j] = cached_vectors_rk16[2][i][j]; */
+  /*       } */
+  /*     _convert_to_euclid_vector(vec); */
+  /*     print_vec(vec); */
+  /*     normalize_vec(vec); */
+  /*     print_vec(vec); */
+  /*   } */
+  return 0;
+}
 
 
 /* Local Variables: */
