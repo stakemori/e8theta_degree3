@@ -117,5 +117,5 @@ int main()
 
 
 /* Local Variables: */
-/* compile-command: "gcc test_representatives.c -o test_representatives -le8vectors -lrank16_vectors -lvector_utils -lm -L../lib -std=c11" */
+/* compile-command: "gcc test_representatives.c -o test_representatives.o -le8vectors -lrank16_vectors -lvector_utils -lm -L../lib -std=c11" */
 /* End: */

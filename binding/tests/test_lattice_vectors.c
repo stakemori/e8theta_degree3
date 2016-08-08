@@ -89,5 +89,5 @@ int main(void)
 }
 
 /* Local Variables: */
-/* compile-command: "gcc test_lattice_vectors.c -o test_lattice_vectors -le8vectors -lrank16_vectors -lm -L../lib -std=c11" */
+/* compile-command: "gcc test_lattice_vectors.c -o test_lattice_vectors.o -le8vectors -lrank16_vectors -lm -L../lib -std=c11" */
 /* End: */

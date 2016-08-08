@@ -77,3 +77,4 @@ TAGS
 /binding/wt12_12_12/theta12_12_12_c.c
 /binding/wt12_12_12/theta12_12_12_c.h
 /binding/wt12_12_12/theta12_12_12_cython.pyx
+/binding/tests/test*.o
