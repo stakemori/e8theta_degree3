@@ -2,7 +2,9 @@
 #include "rank16_vectors.h"
 #include <stdio.h>
 #include <stdlib.h>
-#include "int_vector_sort.h"
+#include "vector_utils.h"
+#include "memory.h"
+
 
 /* Fourier coefficients of Eisenstein series of weight 8 */
 int num_of_vectors_rk16[8] = {1, 480, 61920, 1050240, 7926240, 37500480, 135480960, 395301120};
@@ -306,9 +308,9 @@ int test_norm_vec(void)
   Rk16VecInt vec4[16];
   for (int i = 0; i < num_of_vectors_rk16[2]; i++)
     {
-      copy_vec(vec1, cached_vectors_rk16[2][i]);
+      memcpy(vec1, cached_vectors_rk16[2][i], sizeof(int) * 16);
       _convert_to_euclid_vector(vec1);
-      copy_vec(vec2, vec1);
+      memcpy(vec2, vec1, sizeof(int) * 16);
       normalize_vec(vec1);
       copy_vec(vec3, vec1);
       copy_vec(vec4, vec2);
@@ -365,41 +367,41 @@ int test_norm_vec(void)
   return 0;
 }
 
-/* int main() */
-/* { */
-/*   int a = test_norm_vec(); */
-/*   printf("%d\n", a); */
-/*   /\* static int _reprs[MAX_NM_OF_VECTORS_RK16][17]; *\/ */
-/*   /\* int num = repr_modulo_autom(3, _reprs); *\/ */
-/*   /\* printf("%d\n", num); *\/ */
-/*   /\* int s = 0; *\/ */
-/*   /\* for (int i = 0; i < num; i++) *\/ */
-/*   /\*   { *\/ */
-/*   /\*     s += _reprs[i][16]; *\/ */
-/*   /\*     /\\* for (int j = 0; j < 17; j++) *\\/ *\/ */
-/*   /\*     /\\*   { *\\/ *\/ */
-/*   /\*     /\\*     printf("%d, ", _reprs[i][j]); *\\/ *\/ */
-/*   /\*     /\\*   } *\\/ *\/ */
-/*   /\*     /\\* printf("\n"); *\\/ *\/ */
-/*   /\*   } *\/ */
-/*   /\* printf("%d\n", s); *\/ */
-/*   /\* cache_vectors_rk16(); *\/ */
-/*   /\* Rk16VecInt vec[16]; *\/ */
-/*   /\* for (int i = 0; i < num_of_vectors_rk16[2]; i++) *\/ */
-/*   /\*   { *\/ */
-/*   /\*     for (int j = 0; j < 16; j++) *\/ */
-/*   /\*       { *\/ */
-/*   /\*         vec[j] = cached_vectors_rk16[2][i][j]; *\/ */
-/*   /\*       } *\/ */
-/*   /\*     _convert_to_euclid_vector(vec); *\/ */
-/*   /\*     print_vec(vec); *\/ */
-/*   /\*     normalize_vec(vec); *\/ */
-/*   /\*     print_vec(vec); *\/ */
-/*   /\*   } *\/ */
-/*   return 0; */
-/* } */
+int main()
+{
+  int a = test_norm_vec();
+  printf("%d\n", a);
+  /* static int _reprs[MAX_NM_OF_VECTORS_RK16][17]; */
+  /* int num = repr_modulo_autom(3, _reprs); */
+  /* printf("%d\n", num); */
+  /* int s = 0; */
+  /* for (int i = 0; i < num; i++) */
+  /*   { */
+  /*     s += _reprs[i][16]; */
+  /*     /\* for (int j = 0; j < 17; j++) *\/ */
+  /*     /\*   { *\/ */
+  /*     /\*     printf("%d, ", _reprs[i][j]); *\/ */
+  /*     /\*   } *\/ */
+  /*     /\* printf("\n"); *\/ */
+  /*   } */
+  /* printf("%d\n", s); */
+  /* cache_vectors_rk16(); */
+  /* Rk16VecInt vec[16]; */
+  /* for (int i = 0; i < num_of_vectors_rk16[2]; i++) */
+  /*   { */
+  /*     for (int j = 0; j < 16; j++) */
+  /*       { */
+  /*         vec[j] = cached_vectors_rk16[2][i][j]; */
+  /*       } */
+  /*     _convert_to_euclid_vector(vec); */
+  /*     print_vec(vec); */
+  /*     normalize_vec(vec); */
+  /*     print_vec(vec); */
+  /*   } */
+  return 0;
+}
 
 
 /* Local Variables: */
-/* compile-command: "gcc rank16_vectors.c -lm -o test -std=c11" */
+/* compile-command: "gcc rank16_vectors.c -L./lib -lm -lint_vector_sort -o test -std=c11" */
 /* End: */
