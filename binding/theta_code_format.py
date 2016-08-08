@@ -395,7 +395,7 @@ def _inner_prod_code(vec_len):
           (s[0] + 2*s[1] + 2*s[2] + 2*s[3] + 2*s[4] + 2*s[5] + 2*s[6] + 4*s[7]) * t[7]);
 }
 '''
-    code16 = '''short inner_prod(short s[16], short t[16])
+    code16 = '''Rk16VecInt inner_prod(Rk16VecInt s[16], Rk16VecInt t[16])
 {
   int a = (s[0] + s[1] + s[2] + s[3] + s[4] + s[5] + s[6] + s[7] +
            s[8] + s[9] + s[10] + s[11] + s[12] + s[13] + s[14] + 2 * s[15]);

@@ -6,7 +6,7 @@
 /* Fourier coefficients of Eisenstein series of weight 8 */
 int num_of_vectors_rk16[8] = {1, 480, 61920, 1050240, 7926240, 37500480, 135480960, 395301120};
 
-short cached_vectors_rk16[MAX_NORM_RK16 + 1][MAX_NM_OF_VECTORS_RK16][16];
+Rk16VecInt cached_vectors_rk16[MAX_NORM_RK16 + 1][MAX_NM_OF_VECTORS_RK16][16];
 static int cached_idx[MAX_NORM_RK16 + 1] = {0};
 
 static void _cache_vectors(void)
@@ -168,7 +168,7 @@ void cache_vectors_rk16(void)
 
 /* convert vec to an element of a sub lattice of (2Z)^16 */
 /* (s0, ... , s15) to (s0, s1 + 2s0, ..., s0 + 2s14, s0 + 2(s1 + ... + s14) + 4s15) */
-static void _convert_to_euclid_vector(short vec[16]){
+static void _convert_to_euclid_vector(Rk16VecInt vec[16]){
   vec[15] = 4 * vec[15];
   for (int i = 1; i < 15; i++)
     {
@@ -182,7 +182,7 @@ static void _convert_to_euclid_vector(short vec[16]){
 }
 
 /* inverse to _covert_to_euclid_vector */
-static void _convert_from_euclid_vector(short vec[16]){
+static void _convert_from_euclid_vector(Rk16VecInt vec[16]){
   for (int i = 1; i < 15; i++)
     {
       vec[i] = (vec[i] - vec[0]) >> 1;
@@ -214,7 +214,7 @@ static int cmpfunc(const void * a, const void * b)
 }
 
 
-void print_vec(short vec[16])
+void print_vec(Rk16VecInt vec[16])
 {
   for (int i = 0; i < 16; i++)
     {
@@ -224,7 +224,7 @@ void print_vec(short vec[16])
 }
 
 
-static void copy_vec(short vec1[16], short vec2[16])
+static void copy_vec(Rk16VecInt vec1[16], Rk16VecInt vec2[16])
 {
   for (int i = 0; i < 16; i++)
     {
@@ -232,7 +232,7 @@ static void copy_vec(short vec1[16], short vec2[16])
     }
 }
 
-static void normalize_vec(short vec[16])
+static void normalize_vec(Rk16VecInt vec[16])
 {
   int mul = 1;
   int vec1[9];
@@ -263,7 +263,7 @@ static void normalize_vec(short vec[16])
     }
   for (int i = 0; i < 9; i++)
     {
-      vec[i + 7] = (short)vec1[i];
+      vec[i + 7] = vec1[i];
     }
   /* another sign change */
   if (mul != 0)
@@ -299,7 +299,7 @@ int repr_modulo_autom(int n, int repr[MAX_NM_OF_VECTORS_RK16][17])
  */
 {
   int num = 0;
-  short vec[16] = {0};
+  Rk16VecInt vec[16] = {0};
   for (int i = 0; i < num_of_vectors_rk16[n]; i++)
     {
       copy_vec(vec, cached_vectors_rk16[n][i]);
@@ -337,8 +337,8 @@ int repr_modulo_autom(int n, int repr[MAX_NM_OF_VECTORS_RK16][17])
 int test_norm_vec(void)
 {
   cache_vectors_rk16();
-  short vec1[16];
-  short vec2[16];
+  Rk16VecInt vec1[16];
+  Rk16VecInt vec2[16];
   for (int i = 0; i < num_of_vectors_rk16[2]; i++)
     {
       copy_vec(vec1, cached_vectors_rk16[2][i]);
@@ -404,7 +404,7 @@ int test_norm_vec(void)
 /*   /\*   } *\/ */
 /*   /\* printf("%d\n", s); *\/ */
 /*   /\* cache_vectors_rk16(); *\/ */
-/*   /\* short vec[16]; *\/ */
+/*   /\* Rk16VecInt vec[16]; *\/ */
 /*   /\* for (int i = 0; i < num_of_vectors_rk16[2]; i++) *\/ */
 /*   /\*   { *\/ */
 /*   /\*     for (int j = 0; j < 16; j++) *\/ */

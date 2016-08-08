@@ -2,7 +2,7 @@
 #include "rank16_vectors.h"
 #include <stdio.h>
 
-static inline short norm_rk16(short s[16])
+static inline Rk16VecInt norm_rk16(Rk16VecInt s[16])
 {
   return ((4*s[0] + s[1] + s[2] + s[3] + s[4] + s[5] + s[6] + s[7] + s[8] + s[9] + s[10] + s[11] + s[12] + s[13] + s[14] + s[15])*s[0] +
           (s[0] + 2*s[1] + s[2] + s[3] + s[4] + s[5] + s[6] + s[7] + s[8] + s[9] + s[10] + s[11] + s[12] + s[13] + s[14] + 2*s[15])*s[1] +
