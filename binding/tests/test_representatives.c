@@ -84,8 +84,9 @@ static int test_norm_vec_rk16(void)
 
 static int test_repr_rk16(void)
 {
-  static int _reprs_rk16[MAX_NM_OF_VECTORS_RK16][17];
-  int num = repr_modulo_autom_rk16(3, _reprs_rk16);
+  static int _reprs_rk16[MAX_NM_REPRS_RK16][17];
+  int n = 3;
+  int num = repr_modulo_autom_rk16(n, _reprs_rk16);
   printf("%d\n", num);
   int s = 0;
   /* for (int i = 0; i < num; i++) */
@@ -97,7 +98,7 @@ static int test_repr_rk16(void)
   /*       } */
   /*     printf("\n"); */
   /*   } */
-  if (s == num_of_vectors_rk16[3])
+  if (s == num_of_vectors_rk16[n])
     {
       return 1;
     }

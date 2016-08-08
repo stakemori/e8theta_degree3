@@ -5,6 +5,7 @@
 /* MAX_NORM_RK16 th Fourier coefficient of the Eisenstein series of weight 8 */
 #define MAX_NM_OF_VECTORS_RK16 1050240
 
+#define MAX_NM_REPRS_RK16 5000
 typedef int Rk16VecInt;
 
 extern int num_of_vectors_rk16[8];
