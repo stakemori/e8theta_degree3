@@ -37,11 +37,15 @@ def generate_cython_and_build_scripts(directory,
                                       c_fname_base,
                                       func_names,
                                       c_func_names, wt, mats, real_parts=None,
-                                      overwrite=False, sty=None, num_of_procs=1):
+                                      overwrite=False, sty=None, num_of_procs=1,
+                                      is_sparse_mat=False):
     '''
     directory(string): must be a subdirectory of binding
     Generate c source, cython source ,build scripts and a makefile in directory.
-    Can compile by "make compile-cython" in that directory if e8vector is compiled.
+    If is_sparse_mat is true, then every (i, j)th element of matrices given should be zero
+    if j > 5 (in case when 3 * 8 matrix) j > 6 (in case when 3 * 16 matrix).
+    Can compile by "make compile-cython" in that directory if
+    required libs were compiled by "make compile-theta_vectors".
     '''
     c_fname = c_fname_base + "_c"
     _cython_code = _cython_format(c_fname, c_func_names, func_names, num_of_procs)
@@ -50,6 +54,13 @@ def generate_cython_and_build_scripts(directory,
     save_code_to_file(directory, c_fname, c_func_names, wt, mats,
                       real_parts=real_parts, overwrite=overwrite, sty=sty,
                       num_of_procs=num_of_procs)
+
+    vec_len = mats[0].ncols
+    for m in mats:
+        assert m * m.transpose() == 0
+    if is_sparse_mat:
+        for m in mats:
+            assert all(m[i, j] == 0 for i in range(3) for j in range(6 if vec_len == 8 else 7))
 
     def _fname(f):
         return os.path.join(directory, f)
