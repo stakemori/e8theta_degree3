@@ -87,8 +87,12 @@ static int test_repr_rk16(void)
   static Rk16VecInt _reprs_rk16[MAX_NM_REPRS_RK16][16];
   static int num_of_reprs_rk16[MAX_NM_REPRS_RK16];
   int n = 3;
-  int num = repr_modulo_autom_rk16(n, _reprs_rk16, num_of_reprs_rk16);
-  printf("%d\n", num);
+  int num;
+  for (int i = 0; i < 4; i++)
+    {
+      num = repr_modulo_autom_rk16(i, _reprs_rk16, num_of_reprs_rk16);
+      printf("%d\n", num);
+    }
   int s = 0;
   for (int i = 0; i < num; i++)
     {
