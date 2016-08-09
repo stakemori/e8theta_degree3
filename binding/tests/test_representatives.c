@@ -4,6 +4,18 @@
 #include "memory.h"
 #include <math.h>
 #include "vector_utils.h"
+#include "mpir.h"
+
+Rk16VecInt inner_prod_rk16(Rk16VecInt s[16], Rk16VecInt t[16])
+{
+  int a = (s[0] + s[1] + s[2] + s[3] + s[4] + s[5] + s[6] + s[7] +
+           s[8] + s[9] + s[10] + s[11] + s[12] + s[13] + s[14] + 2 * s[15]);
+  return ((3 * s[0] + a - s[15]) * t[0] + (a + s[1]) * t[1] + (a + s[2]) * t[2] +(a + s[3]) * t[3] +
+          (a + s[4]) * t[4] + (a + s[5]) * t[5] + (a + s[6]) * t[6] + (a + s[7]) * t[7] +
+          (a + s[8]) * t[8] + (a + s[9]) * t[9] + (a + s[10]) * t[10] + (a + s[11]) * t[11] +
+          (a + s[12]) * t[12] + (a + s[13]) * t[13] + (a + s[14]) * t[14] +
+          (-s[0] + 2 * a) * t[15]);
+}
 
 static void print_vec(int * vec, int a)
 {
@@ -21,6 +33,7 @@ static int test_norm_vec_rk16(void)
   Rk16VecInt vec2[16];
   Rk16VecInt vec3[16];
   Rk16VecInt vec4[16];
+  int bl = 1;
   for (int i = 0; i < num_of_vectors_rk16[2]; i++)
     {
       memcpy(vec1, cached_vectors_rk16[2][i], sizeof(int) * 16);
@@ -41,15 +54,24 @@ static int test_norm_vec_rk16(void)
           mul2 *= vec2[j];
         }
 
+      /* Test first if 7 entries are only sign change. */
       for (int j = 0; j < 7; j++)
         {
-          if (vec1[j] != vec2[j])
+          bl = bl & (vec1[j] == vec2[j]);
+        }
+      if (! bl)
+        {
+          bl = 1;
+          for (int j = 0; j < 7; j++)
             {
+              bl = bl & (vec1[j] == -vec2[j]);
+            }
+          if (! bl) {
               printf("False: unchagne.\n");
               print_vec(vec1, 16);
               print_vec(vec2, 16);
               return 0;
-            }
+          }
         }
 
       for (int j = 0; j < 16; j++)
@@ -86,7 +108,7 @@ static int test_repr_rk16(void)
 {
   static Rk16VecInt _reprs_rk16[MAX_NM_REPRS_RK16][16];
   static int num_of_reprs_rk16[MAX_NM_REPRS_RK16];
-  int n = 3;
+  int n = 2;
   int num;
   Rk16VecInt vec[16];
   for (int i = 0; i < n + 1; i++)
@@ -127,6 +149,40 @@ static int test_repr_rk16(void)
 }
 
 
+void number_of_loops(int a, int b, int c, int d, int e, int f)
+{
+  cache_vectors_rk16();
+  static Rk16VecInt _reprs[MAX_NM_REPRS_RK16][16];
+  static int num_of_classes[MAX_NM_REPRS_RK16];
+  int num_of_reprs = repr_modulo_autom_rk16(c, _reprs, num_of_classes);
+
+  mpz_t res, one;
+  mpz_init(res);
+  mpz_init(one);
+  mpz_set_si(one, 1);
+  for (int i = 0; i < num_of_vectors_rk16[a]; i++)
+    {
+      for (int j = 0; j < num_of_vectors_rk16[b]; j++)
+        {
+          for (int k = 0; k < num_of_reprs; k++)
+            {
+              if (inner_prod_rk16(cached_vectors_rk16[a][i], cached_vectors_rk16[b][j]) == f)
+                {
+                  if (inner_prod_rk16(cached_vectors_rk16[a][i], _reprs[k]) == e)
+                    {
+                      if (inner_prod_rk16(cached_vectors_rk16[b][j], _reprs[k]) == d)
+                        {
+                          mpz_add(res, res, one);
+                        }
+                    }
+                }
+            }
+        }
+    }
+  printf("%s\n", mpz_get_str(NULL, 10, res));
+  mpz_clear(res);
+}
+
 int main()
 {
   printf("test_norm_vec_rk16\n");
@@ -139,10 +195,15 @@ int main()
     {
       printf("OK\n");
     }
+  /* number_of_loops(1, 1, 1, 0, 0, 0); */
+  /* number_of_loops(1, 1, 3, 1, 1, 1); */
+  /* number_of_loops(2, 2, 2, 1, 1, 1); */
+  /* number_of_loops(2, 2, 2, 0, 0, 0); */
+  /* number_of_loops(1, 3, 3, 1, 0, 0); */
   return 0;
 }
 
 
 /* Local Variables: */
-/* compile-command: "gcc test_representatives.c -o test_representatives.o -le8vectors -lrank16_vectors -lvector_utils -lm -L../lib -std=c11" */
+/* compile-command: "gcc test_representatives.c -o test_representatives.o -le8vectors -lrank16_vectors -lvector_utils -lm -lmpir -L../lib -std=c11" */
 /* End: */

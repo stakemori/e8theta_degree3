@@ -200,6 +200,25 @@ void _convert_from_euclid_vector_rk16(Rk16VecInt vec[16]){
 
 void normalize_vec_rk16(Rk16VecInt vec[16])
 {
+  /* Action of -1. */
+  int first_nonzero_idx;
+  for (first_nonzero_idx = 0; first_nonzero_idx < 16; first_nonzero_idx++)
+    {
+      if (vec[first_nonzero_idx] != 0)
+        {
+          break;
+        }
+    }
+
+  if (vec[first_nonzero_idx] < 0)
+    {
+      for (int i = 0; i < 16; i++)
+        {
+          vec[i] = - vec[i];
+        }
+    }
+
+  /* Action of the last 9 elements */
   int mul = 1;
   int vec1[9];
   for (int i = 0; i < 9; i++)
