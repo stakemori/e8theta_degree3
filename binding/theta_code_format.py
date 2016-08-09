@@ -448,9 +448,9 @@ def _set_s_code(vec_len, set_si_func, vecs_dict):
 
 def code_format_header_innerprod(vec_len):
     code = '''#define _GNU_SOURCE             /* for asprintf */
-# include <stdio.h>
-# include "{header_file}.h"
-# include <stdlib.h>
+#include <stdio.h>
+#include "{header_file}.h"
+#include <stdlib.h>
 #include <mpir.h>
 
 {inner_prod}
