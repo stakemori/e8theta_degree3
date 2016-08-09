@@ -332,7 +332,7 @@ def _init_code(variables, res_str, vec_len, sty=None, is_sparse_mat=False):
         res += '''
   static Rk16VecInt _reprs[MAX_NM_REPRS_RK16][16];
   static int num_of_classes[MAX_NM_REPRS_RK16];
-  int num_of_reprs = repr_modulo_autom_rk16(a, _reprs, num_of_classes);
+  int num_of_reprs = repr_modulo_autom_rk16(c, _reprs, num_of_classes);
 '''
     return res
 
@@ -557,10 +557,10 @@ def code_format_theta(func_name, wt, mat, real_part=True, factor_pol=False, sty=
     coefs_pol_code_alst1 = [(pl, codes)
                             for (pl, (codes, _)), v in zip(coefs_pol_code_alst, res_vars)]
 
-    # Add code for tmp *= num_of_classes[i] and res += + tmp
+    # Add code for tmp *= num_of_classes[k] and res += + tmp
     for (_, codes), v in zip(coefs_pol_code_alst1, res_vars):
         if is_sparse_mat:
-            codes.append(sty.mul_ui(sum_tmp_var_name, sum_tmp_var_name, "num_of_classes[i]"))
+            codes.append(sty.mul_ui(sum_tmp_var_name, sum_tmp_var_name, "num_of_classes[k]"))
         codes.append(sty.add_z(v, v, sum_tmp_var_name))
 
     _vrs = (tmp_vars + res_vars +
@@ -587,13 +587,13 @@ def code_format_theta(func_name, wt, mat, real_part=True, factor_pol=False, sty=
 
     if is_sparse_mat:
         ith_vec_dict = {i: "%s[%s][%s]" % (cached_vectors, a, i)
-                        for i, a in zip(["j", "k"], ["b", "c"])}
-        ith_vec_dict["i"] = "_reprs[i]"
-        limit_i = "num_of_reprs"
+                        for i, a in zip(["i", "j"], ["a", "b"])}
+        ith_vec_dict["k"] = "_reprs[k]"
+        limit_k = "num_of_reprs"
     else:
         ith_vec_dict = {i: "%s[%s][%s]" % (cached_vectors, a, i)
                         for i, a in zip(["i", "j", "k"], ["a", "b", "c"])}
-        limit_i = "{num_of_vectors}[a]".format(num_of_vectors=num_of_vectors)
+        limit_k = "{num_of_vectors}[a]".format(num_of_vectors=num_of_vectors)
 
     code = '''
 char * {func_name}(int j_red, int a, int b, int c, int d, int e, int f)
@@ -605,11 +605,11 @@ char * {func_name}(int j_red, int a, int b, int c, int d, int e, int f)
 
 {init_code}
 
-  for (int i = 0; i < {limit_i}; i++)
+  for (int i = 0; i < {num_of_vectors}[a]; i++)
     {{
       for (int j = j_red; j < {num_of_vectors}[b]; {j_inc_code})
         {{
-          for (int k = 0; k < {num_of_vectors}[c]; k++)
+          for (int k = 0; k < {limit_k}; k++)
             {{
               if (inner_prod({i_th_vec_having_norm_a}, {j_th_vec_having_norm_b}) == f)
                 {{
@@ -659,5 +659,5 @@ char * {func_name}(int j_red, int a, int b, int c, int d, int e, int f)
 
            set_s_code=_set_s_code(vec_len, sty.set_si_func, ith_vec_dict),
            j_inc_code=j_inc_code,
-           limit_i=limit_i)
+           limit_k=limit_k)
     return code
