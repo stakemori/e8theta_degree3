@@ -14,13 +14,14 @@ from sage.misc.all import random
 from sage.functions.all import floor
 
 
-def _gen_base(wt, mats, cyfns, cfns, real_parts=None):
+def _gen_base(wt, mats, cyfns, cfns, real_parts=None, is_sparse_mat=False):
     assert all(mat * mat.transpose() == 0 for mat in mats)
     cyf, cf = _names(wt)
     generate_cython_and_build_scripts(_recipe_dir(wt),
                                       cyf, cf, cyfns, cfns,
                                       wt, mats, overwrite=True, num_of_procs=8,
-                                      real_parts=real_parts)
+                                      real_parts=real_parts,
+                                      is_sparse_mat=is_sparse_mat)
 
 
 def _recipe_dir(wt):
@@ -83,7 +84,8 @@ def gen_wt16_16_14():
                       -5, -3 * i, -6, 8 * i, 0, 2 * i, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0])
     _gen_base(wt, [mat0, mat1],
               [_cython_func_name_default(wt) + "_" + str(a) for a in range(2)],
-              [_c_func_name_default(wt) + "_" + str(a) for a in range(2)])
+              [_c_func_name_default(wt) + "_" + str(a) for a in range(2)],
+              is_sparse_mat=True)
 
 
 T0 = matrix([[ZZ(1), ZZ(1) / ZZ(2), ZZ(1) / ZZ(2)],
@@ -116,7 +118,7 @@ def compute_rank_in_subprocess(dir_name, mod_name, func_names):
 
 
 def _find_mat_wt(wt, mats_base, mats_total, dim,
-                 cython_func_names=None, c_func_names=None):
+                 cython_func_names=None, c_func_names=None, is_sparse_mat=False):
     ln = len(mats_total)
     if cython_func_names is None:
         cython_func_names = [_cython_func_name_default(wt) + "_" + str(i)
@@ -128,7 +130,8 @@ def _find_mat_wt(wt, mats_base, mats_total, dim,
         mat = mats_total[floor(random() * ln)]
         print(mat.list())
         wt_str = "_".join([str(a) for a in wt])
-        _gen_base(wt, mats_base + [mat], cython_func_names, c_func_names)
+        _gen_base(wt, mats_base + [mat], cython_func_names, c_func_names,
+                  is_sparse_mat=is_sparse_mat)
         po = subprocess.Popen("make compile-cython", shell=True, cwd=_recipe_dir(wt))
         po.wait()
         print("Building done.")

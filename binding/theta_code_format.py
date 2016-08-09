@@ -13,14 +13,14 @@ from sage.rings.all import QQ, PolynomialRing
 
 
 def save_code_to_file(directory, fname_base, func_names, wt, mats, real_parts=None,
-                      overwrite=False, sty=None, num_of_procs=None):
+                      overwrite=False, sty=None, num_of_procs=None, is_sparse_mat=False):
     '''
     fname_base: string
     This save code for theta series to fname.h and fname.c
     '''
     hf = header_file_format(fname_base, func_names)
     cf = code_format(func_names, wt, mats, real_parts=real_parts,
-                     sty=sty, num_of_procs=num_of_procs)
+                     sty=sty, num_of_procs=num_of_procs, is_sparse_mat=is_sparse_mat)
     fnameh = os.path.join(directory, fname_base + ".h")
     fnamec = os.path.join(directory, fname_base + ".c")
     if (not overwrite) and (os.path.exists(fnameh) or os.path.exists(fnamec)):
@@ -47,20 +47,21 @@ def generate_cython_and_build_scripts(directory,
     Can compile by "make compile-cython" in that directory if
     required libs were compiled by "make compile-theta_vectors".
     '''
+    vec_len = mats[0].ncols()
+    for m in mats:
+        assert m * m.transpose() == 0
+    if is_sparse_mat:
+        for m in mats:
+            assert all(m[i, j] == 0 for i in range(3)
+                       for j in range(6 if vec_len == 8 else 7, vec_len))
+
     c_fname = c_fname_base + "_c"
     _cython_code = _cython_format(c_fname, c_func_names, func_names, num_of_procs)
     _setup_py_code = _setup_py_format(cython_fname_base, c_fname)
     _makefile_code = _makefile_format(c_fname)
     save_code_to_file(directory, c_fname, c_func_names, wt, mats,
                       real_parts=real_parts, overwrite=overwrite, sty=sty,
-                      num_of_procs=num_of_procs)
-
-    vec_len = mats[0].ncols
-    for m in mats:
-        assert m * m.transpose() == 0
-    if is_sparse_mat:
-        for m in mats:
-            assert all(m[i, j] == 0 for i in range(3) for j in range(6 if vec_len == 8 else 7))
+                      num_of_procs=num_of_procs, is_sparse_mat=is_sparse_mat)
 
     def _fname(f):
         return os.path.join(directory, f)
@@ -318,13 +319,19 @@ def _pol_basis_as_polof_factors(wt, imag_quad, names_base=('real_part', 'imag_pa
             {k: (_rl_part(v), _im_part(v)) for k, v in subs_dct.items()})
 
 
-def _init_code(variables, res_str, sty=None):
+def _init_code(variables, res_str, vec_len, sty=None, is_sparse_mat=False):
     indent = "  "
     res = ";\n".join([indent + sty.z_type_decl(v) for v in variables]) + ";\n"
     res = res + "\n"
     res = res + ";\n".join([indent + sty.init(str(v)) for v in variables]) + ";\n"
     res = res + "\n" + indent + "char * {res_str};".format(res_str=res_str)
 
+    if is_sparse_mat and vec_len == 16:
+        res += '''
+  static Rk16VecInt _reprs[MAX_NM_REPRS_RK16][16];
+  static int num_of_classes[MAX_NM_REPRS_RK16];
+  int num_of_reprs = repr_modulo_autom_rk16(a, _reprs, num_of_classes);
+'''
     return res
 
 
@@ -423,22 +430,18 @@ def _inner_prod_code(vec_len):
         return code16
 
 
-def _set_s_code(vec_len, set_si_func):
+def _set_s_code(vec_len, set_si_func, vecs_dict):
     indent = " " * 26
-    if vec_len == 8:
-        vecs = "cached_vectors"
-    else:
-        vecs = "cached_vectors_rk16"
 
-    def _set_s_code_each(s_name, loop_vname, vecs_name, a):
+    def _set_s_code_each(s_name, vecs):
         return "\n".join([indent +
-                          "{set_si_func}({s_name}{n}, {vecs}[{a}][{loop_vname}][{n}]);".format(
-                              set_si_func=set_si_func, vecs=vecs_name, n=str(n),
-                              loop_vname=loop_vname, s_name=s_name, a=a)
+                          "{set_si_func}({s_name}{n}, {vecs}[{n}]);".format(
+                              set_si_func=set_si_func, vecs=vecs, n=str(n),
+                              s_name=s_name)
                           for n in range(vec_len)])
 
-    return "\n\n".join(_set_s_code_each(s, i, vecs, a)
-                       for s, i, a in zip(["s", "t", "u"], ["i", "j", "k"], ["a", "b", "c"]))
+    return "\n\n".join(_set_s_code_each(s, vecs_dict[i])
+                       for s, i in zip(["s", "t", "u"], ["i", "j", "k"]))
 
 
 def code_format_header_innerprod(vec_len):
@@ -456,20 +459,21 @@ def code_format_header_innerprod(vec_len):
 
 def code_format(func_names, wt, mats, real_parts=None,
                 factor_pol=False, sty=None,
-                num_of_procs=1):
+                num_of_procs=1, is_sparse_mat=False):
     n = len(mats)
     if real_parts is None:
         real_parts = [True for _ in range(n)]
     codes = [code_format_theta(func_name, wt, mat,
                                real_part=real_part,
                                factor_pol=factor_pol,
-                               sty=sty, num_of_procs=num_of_procs)
+                               sty=sty, num_of_procs=num_of_procs,
+                               is_sparse_mat=is_sparse_mat)
              for func_name, mat, real_part in zip(func_names, mats, real_parts)]
     return code_format_header_innerprod(mats[0].ncols()) + "\n" + "\n\n".join(codes)
 
 
 def code_format_theta(func_name, wt, mat, real_part=True, factor_pol=False, sty=None,
-                      num_of_procs=1):
+                      num_of_procs=1, is_sparse_mat=False):
     '''
     wt: non-increasing list/tuple of non-negative integers of length 3.
     mat: 3 * 8 (or 3 * 16) matrix with mat * mat.transpose() = 0 with coefficients in
@@ -548,16 +552,22 @@ def code_format_theta(func_name, wt, mat, real_part=True, factor_pol=False, sty=
     facs_pols_code_im_alst = sorted([(k, codes) for k, (codes, _) in facs_pols_code_im_dct.items()],
                                     key=_key_fun)
 
-    # Remove tmp vars and add summing
-    coefs_pol_code_alst1 = [(pl, codes + [sty.add_z(v, v, sum_tmp_var_name)])
+    coefs_pol_code_alst1 = [(pl, codes)
                             for (pl, (codes, _)), v in zip(coefs_pol_code_alst, res_vars)]
+
+    # Add code for tmp *= num_of_classes[i] and res += + tmp
+    for (_, codes), v in zip(coefs_pol_code_alst1, res_vars):
+        if is_sparse_mat:
+            codes.append(sty.mul_ui(sum_tmp_var_name, sum_tmp_var_name, "num_of_classes[i]"))
+        codes.append(sty.add_z(v, v, sum_tmp_var_name))
 
     _vrs = (tmp_vars + res_vars +
             sorted([str(r) for r, _ in bdt_var_dct.values()]) +
             sorted([str(im) for _, im in bdt_var_dct.values()]) +
             [str(a) for a in _s_t_u_ring(vec_len=vec_len).gens()])
 
-    init_code_str = _init_code(_vrs, res_str_name, sty=sty)
+    init_code_str = _init_code(_vrs, res_str_name, vec_len,
+                               sty=sty, is_sparse_mat=is_sparse_mat)
 
     bi_det_factors_code_str = _bi_det_factors_code(facs_pols_code_rl_alst,
                                                    facs_pols_code_im_alst, _facs_pols_lcm,
@@ -573,6 +583,16 @@ def code_format_theta(func_name, wt, mat, real_part=True, factor_pol=False, sty=
     else:
         j_inc_code = "j += %s" % (num_of_procs,)
 
+    if is_sparse_mat:
+        ith_vec_dict = {i: "%s[%s][%s]" % (cached_vectors, a, i)
+                        for i, a in zip(["j", "k"], ["b", "c"])}
+        ith_vec_dict["i"] = "_reprs[i]"
+        limit_i = "num_of_reprs"
+    else:
+        ith_vec_dict = {i: "%s[%s][%s]" % (cached_vectors, a, i)
+                        for i, a in zip(["i", "j", "k"], ["a", "b", "c"])}
+        limit_i = "{num_of_vectors}[a]".format(num_of_vectors=num_of_vectors)
+
     code = '''
 char * {func_name}(int j_red, int a, int b, int c, int d, int e, int f)
 {{
@@ -583,17 +603,17 @@ char * {func_name}(int j_red, int a, int b, int c, int d, int e, int f)
 
 {init_code}
 
-  for (int i = 0; i < {num_of_vectors}[a]; i++)
+  for (int i = 0; i < {limit_i}; i++)
     {{
       for (int j = j_red; j < {num_of_vectors}[b]; {j_inc_code})
         {{
           for (int k = 0; k < {num_of_vectors}[c]; k++)
             {{
-              if (inner_prod({cached_vectors}[a][i], {cached_vectors}[b][j]) == f)
+              if (inner_prod({i_th_vec_having_norm_a}, {j_th_vec_having_norm_b}) == f)
                 {{
-                  if (inner_prod({cached_vectors}[a][i], {cached_vectors}[c][k]) == e)
+                  if (inner_prod({i_th_vec_having_norm_a}, {k_th_vec_having_norm_c}) == e)
                     {{
-                      if (inner_prod({cached_vectors}[b][j], {cached_vectors}[c][k]) == d)
+                      if (inner_prod({j_th_vec_having_norm_b}, {k_th_vec_having_norm_c}) == d)
                         {{
 
 {set_s_code}
@@ -622,13 +642,20 @@ char * {func_name}(int j_red, int a, int b, int c, int d, int e, int f)
            cleanup_code=cleanup_code_str,
            res_str_name=res_str_name,
            func_name=func_name,
+
            mat_info=str(mat.list()),
            quad_field_info=str(mat.base_ring().polynomial()),
            real_part=str(real_part),
            young_tableaux=str([x.right_tableau.row_numbers for x in Vrho.basis()]),
+
            cache_vectors=cache_vectors,
-           cached_vectors=cached_vectors,
            num_of_vectors=num_of_vectors,
-           set_s_code=_set_s_code(vec_len, sty.set_si_func),
-           j_inc_code=j_inc_code)
+
+           i_th_vec_having_norm_a=ith_vec_dict["i"],
+           j_th_vec_having_norm_b=ith_vec_dict["j"],
+           k_th_vec_having_norm_c=ith_vec_dict["k"],
+
+           set_s_code=_set_s_code(vec_len, sty.set_si_func, ith_vec_dict),
+           j_inc_code=j_inc_code,
+           limit_i=limit_i)
     return code
