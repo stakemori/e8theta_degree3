@@ -88,7 +88,8 @@ static int test_repr_rk16(void)
   static int num_of_reprs_rk16[MAX_NM_REPRS_RK16];
   int n = 3;
   int num;
-  for (int i = 0; i < 4; i++)
+  Rk16VecInt vec[16];
+  for (int i = 0; i < n + 1; i++)
     {
       num = repr_modulo_autom_rk16(i, _reprs_rk16, num_of_reprs_rk16);
       printf("%d\n", num);
@@ -97,11 +98,9 @@ static int test_repr_rk16(void)
   for (int i = 0; i < num; i++)
     {
       s += num_of_reprs_rk16[i];
-      /* for (int j = 0; j < 16; j++) */
-      /*   { */
-      /*     printf("%d, ", _reprs_rk16[i][j]); */
-      /*   } */
-      /* printf("\n"); */
+      memcpy(vec, _reprs_rk16[i], sizeof(Rk16VecInt) * 16);
+      _convert_to_euclid_vector_rk16(vec);
+      print_vec(vec, 16);
     }
   if (s == num_of_vectors_rk16[n])
     {
