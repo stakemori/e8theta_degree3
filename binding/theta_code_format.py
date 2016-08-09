@@ -159,6 +159,8 @@ def _cython_format_each(c_header_file, c_func_name, cython_func_name, num_of_pro
     except KeyboardInterrupt:
         p.terminate()
         p.join()
+    finally:
+        p.close()
     return res'''.format(cfn=cython_func_name, npcs=num_of_procs)
     _fmt = '''
 def _{cfn}_part(j_red_m):
