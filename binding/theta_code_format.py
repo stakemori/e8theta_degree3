@@ -150,17 +150,17 @@ include "cysignals/signals.pxi"
 
 def _cython_format_each(c_header_file, c_func_name, cython_func_name, num_of_procs):
     if num_of_procs == 1:
-        theta_body = 'return {cfn}_part((0, m)))\n'.format(cfn=cython_func_name)
+        theta_body = 'return _{cfn}_part((0, m)))\n'.format(cfn=cython_func_name)
     else:
         theta_body = '''p = Pool(processes={npcs})
     try:
-        res = sum(p.map({cfn}_part, zip(range({npcs}), itertools.repeat(m, {npcs}))))
+        res = sum(p.map(_{cfn}_part, zip(range({npcs}), itertools.repeat(m, {npcs}))))
     except KeyboardInterrupt:
         p.terminate()
         p.join()
     return res'''.format(cfn=cython_func_name, npcs=num_of_procs)
     _fmt = '''
-def {cfn}_part(j_red_m):
+def _{cfn}_part(j_red_m):
     j_red, m = j_red_m
 
     if not (m in MatrixSpace(QQ, 3) and (2 * m in MatrixSpace(ZZ, 3)) and
