@@ -69,13 +69,30 @@ def gen_wt14_13_5():
     _gen_base(wt, [mat], [_cython_func_name_default(wt)], [_c_func_name_default(wt)])
 
 
+def gen_wt16_16_14():
+    '''
+    Recipe for weight (16, 16, 14).
+    '''
+    wt = (16, 16, 14)
+    i = QuadraticField(-1, name="i").gen()
+    mat0 = matrix(3, [-5, -i, 5, 9 * i, -4, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                      3, 5 * i, 0, -2 * i, -2, 0, -4, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                      4, 6 * i, 0, -2 * i, -3, -i, -4, 0, 0, 0, 0, 0, 0, 0, 0, 0])
+    mat1 = matrix(3, [3, 7 * i, -3, i, -4, 0, -4, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                      3, 5 * i, 0, -2 * i, -2, 0, -4, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                      -5, -3 * i, -6, 8 * i, 0, 2 * i, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0])
+    _gen_base(wt, [mat0, mat1],
+              [_cython_func_name_default(wt) + "_" + str(a) for a in range(2)],
+              [_c_func_name_default(wt) + "_" + str(a) for a in range(2)])
+
+
 T0 = matrix([[ZZ(1), ZZ(1) / ZZ(2), ZZ(1) / ZZ(2)],
              [ZZ(1) / ZZ(2), ZZ(1), ZZ(1) / ZZ(2)],
              [ZZ(1) / ZZ(2), ZZ(1) / ZZ(2), ZZ(1)]])
 
 T1 = diagonal_matrix([ZZ(1), ZZ(1), ZZ(1)])
 
-Ts = [T0]
+Ts = [T0, T1]
 
 
 def _rank(funcs):
