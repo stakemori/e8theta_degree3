@@ -255,7 +255,11 @@ void normalize_vec_rk16_last9(Rk16VecInt vec[16])
     }
 
   /* Action of the last 9 elements */
-  int vec1[16];
+  int vec1[9];
+  for (int i = 0; i < 9; i++)
+    {
+      vec1[i] = vec[i + 7];
+    }
   _normalize_vec_w_sign(vec1, 9);
   for (int i = 0; i < 9; i++)
     {
