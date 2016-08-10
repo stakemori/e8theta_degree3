@@ -234,7 +234,7 @@ void _normalize_vec_wo_sign(Rk16VecInt vec[16], size_t len)
   sort_int_vec(vec, len);
 }
 
-void normalize_vec_rk16(Rk16VecInt vec[16])
+void normalize_vec_rk16_last9(Rk16VecInt vec[16])
 {
   /* Action of -1. */
   int first_nonzero_idx;
@@ -280,7 +280,7 @@ int repr_modulo_autom_rk16(int n, int reprs[MAX_NM_REPRS_RK16][16], int num_of_c
     {
       memcpy(vec, cached_vectors_rk16[n][i], sizeof(Rk16VecInt) * 16);
       _convert_to_euclid_vector_rk16(vec);
-      normalize_vec_rk16(vec);
+      normalize_vec_rk16_last9(vec);
       _convert_from_euclid_vector_rk16(vec);
       int found = 0;
       for (int j = 0; j < num; j++)

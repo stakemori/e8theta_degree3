@@ -39,7 +39,7 @@ static int test_norm_vec_rk16(void)
       memcpy(vec1, cached_vectors_rk16[2][i], sizeof(int) * 16);
       _convert_to_euclid_vector_rk16(vec1);
       memcpy(vec2, vec1, sizeof(int) * 16);
-      normalize_vec_rk16(vec1);
+      normalize_vec_rk16_last9(vec1);
       memcpy(vec3, vec1, sizeof(int) * 16);
       memcpy(vec4, vec2, sizeof(int) * 16);
 
@@ -142,7 +142,7 @@ static int test_repr_rk16(void)
   /*       } */
   /*     _convert_to_euclid_vector_rk16(vec); */
   /*     print_vec(vec); */
-  /*     normalize_vec_rk16(vec); */
+  /*     normalize_vec_rk16_last9(vec); */
   /*     print_vec(vec); */
   /*   } */
 
