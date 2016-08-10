@@ -3,6 +3,6 @@
 #include <stdlib.h>
 
 
-void sort_int_vec(int * base, size_t elt_size);
+void sort_int_vec(int * base, size_t len);
 
 #endif /* _VECTOR_UTILS_H_ */

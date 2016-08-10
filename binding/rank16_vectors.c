@@ -255,7 +255,7 @@ void normalize_vec_rk16_last9(Rk16VecInt vec[16])
     }
 
   /* Action of the last 9 elements */
-  int vec1[9];
+  Rk16VecInt vec1[9];
   for (int i = 0; i < 9; i++)
     {
       vec1[i] = vec[i + 7];
@@ -265,6 +265,17 @@ void normalize_vec_rk16_last9(Rk16VecInt vec[16])
     {
       vec[i + 7] = vec1[i];
     }
+}
+
+static inline int vec_equal(Rk16VecInt vec1[16], Rk16VecInt vec2[16],
+                            int start, int end)
+{
+  int is_equal = 1;
+  for (int i = start; i < end; i++)
+    {
+      is_equal = is_equal & (vec1[i] == vec2[i]);
+    }
+  return is_equal;
 }
 
 int repr_modulo_autom_rk16(int n, int reprs[MAX_NM_REPRS_RK16][16], int num_of_classes[MAX_NM_REPRS_RK16])
@@ -279,6 +290,7 @@ int repr_modulo_autom_rk16(int n, int reprs[MAX_NM_REPRS_RK16][16], int num_of_c
  */
 {
   int num = 0;
+  int found;
   Rk16VecInt vec[16] = {0};
   for (int i = 0; i < num_of_vectors_rk16[n]; i++)
     {
@@ -286,27 +298,19 @@ int repr_modulo_autom_rk16(int n, int reprs[MAX_NM_REPRS_RK16][16], int num_of_c
       _convert_to_euclid_vector_rk16(vec);
       normalize_vec_rk16_last9(vec);
       _convert_from_euclid_vector_rk16(vec);
-      int found = 0;
+      found = 0;
       for (int j = 0; j < num; j++)
         {
-          int bl = 1;
-          for (int k = 0; k < 16; k++)
+          int found = vec_equal(reprs[j], vec, 0, 16);
+          if (found)
             {
-              bl = bl & (reprs[j][k] == vec[k]);
-            }
-          if (bl)
-            {
-              found = 1;
               num_of_classes[j]++;
               break;
             }
         }
       if (! found)
         {
-          for (int j = 0; j < 16; j++)
-            {
-              reprs[num][j] = vec[j];
-            }
+          memcpy(reprs[num], vec, 16 * sizeof(Rk16VecInt));
           num_of_classes[num] = 1;
           num++;
         }

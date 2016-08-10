@@ -19,7 +19,7 @@ static int cmpfunc(const void * a, const void * b)
     }
 }
 
-void sort_int_vec(int * base, size_t elt_size)
+void sort_int_vec(int * base, size_t len)
 {
-  qsort(base, elt_size, sizeof(int), cmpfunc);
+  qsort(base, len, sizeof(int), cmpfunc);
 }
