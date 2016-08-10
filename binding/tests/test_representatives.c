@@ -110,7 +110,7 @@ static int test_repr_rk16(void)
   static int num_of_reprs_rk16[MAX_NM_REPRS_RK16];
   int n = 2;
   int num;
-  Rk16VecInt vec[16];
+  /* Rk16VecInt vec[16]; */
   for (int i = 0; i < n + 1; i++)
     {
       num = repr_modulo_autom_rk16(i, _reprs_rk16, num_of_reprs_rk16);
@@ -120,9 +120,9 @@ static int test_repr_rk16(void)
   for (int i = 0; i < num; i++)
     {
       s += num_of_reprs_rk16[i];
-      memcpy(vec, _reprs_rk16[i], sizeof(Rk16VecInt) * 16);
-      _convert_to_euclid_vector_rk16(vec);
-      print_vec(vec, 16);
+      /* memcpy(vec, _reprs_rk16[i], sizeof(Rk16VecInt) * 16); */
+      /* _convert_to_euclid_vector_rk16(vec); */
+      /* print_vec(vec, 16); */
     }
   if (s == num_of_vectors_rk16[n])
     {
@@ -183,6 +183,88 @@ void number_of_loops(int a, int b, int c, int d, int e, int f)
   mpz_clear(res);
 }
 
+int vec_equal(Rk16VecInt * vec1, Rk16VecInt * vec2, int start, int end)
+{
+  int is_equal = 1;
+  for (int i = start; i < end; i++)
+    {
+      is_equal = is_equal & (vec1[i] == vec2[i]);
+    }
+  return is_equal;
+}
+
+void abs_vec(Rk16VecInt * vec, int len)
+{
+  for (int i = 0; i < len; i++)
+    {
+      vec[i] = abs(vec[i]);
+    }
+}
+
+int equal_as_multiset(Rk16VecInt vec1[16], Rk16VecInt vec2[16], int start, int end)
+{
+  Rk16VecInt _vec1[16];
+  Rk16VecInt _vec2[16];
+  for (int i = start; i < end; i++)
+    {
+      _vec1[i - start] = vec1[i];
+      _vec2[i - start] = vec2[i];
+    }
+  sort_int_vec(_vec1, end - start);
+  sort_int_vec(_vec2, end - start);
+  return vec_equal(_vec1, _vec2, 0, end - start);
+}
+
+int test_normalize_vec_rk16_w_indices(void)
+{
+  cache_vectors_rk16();
+  int zero_idcs[16] = {0};
+  for (int i = 7; i < 12; i++)
+    {
+      zero_idcs[i-7] = i;
+    }
+  int non_zero_idcss[8][16] = {0};
+  for (int i = 12; i < 16; i++)
+    {
+      non_zero_idcss[0][i - 12] = i;
+    }
+  Rk16VecInt vec[16];
+  Rk16VecInt vec1[16];
+  int num = 2;
+  for (int i = 0; i < num_of_vectors_rk16[num]; i++)
+    {
+      memcpy(vec, cached_vectors_rk16[num][i], 16 * sizeof(Rk16VecInt));
+      _convert_to_euclid_vector_rk16(vec);
+      memcpy(vec1, vec, 16 * sizeof(Rk16VecInt));
+      normalize_vec_rk16_w_indices(vec, zero_idcs, non_zero_idcss);
+      if (! vec_equal(vec, vec1, 0, 7))
+        {
+          printf("False: unchanged.\n");
+          print_vec(vec1, 16);
+          print_vec(vec, 16);
+          return 0;
+        }
+      if (! equal_as_multiset(vec, vec1, 12, 16))
+        {
+          printf("False: multiset.\n");
+          print_vec(vec1, 16);
+          print_vec(vec, 16);
+          return 0;
+        }
+      /* Destructive operator */
+      abs_vec(vec, 16);
+      abs_vec(vec1, 16);
+      if (! equal_as_multiset(vec, vec1, 7, 12))
+        {
+          printf("False: multiset sign.\n");
+          print_vec(vec1, 16);
+          print_vec(vec, 16);
+          return 0;
+        }
+    }
+  return 1;
+}
+
 int main()
 {
   printf("test_norm_vec_rk16\n");
@@ -195,11 +277,11 @@ int main()
     {
       printf("OK\n");
     }
-  /* number_of_loops(1, 1, 1, 0, 0, 0); */
-  /* number_of_loops(1, 1, 3, 1, 1, 1); */
-  /* number_of_loops(2, 2, 2, 1, 1, 1); */
-  /* number_of_loops(2, 2, 2, 0, 0, 0); */
-  /* number_of_loops(1, 3, 3, 1, 0, 0); */
+  printf("test_normalize_vec_rk16_w_indices");
+  if (test_normalize_vec_rk16_w_indices())
+    {
+      printf("Ok\n");
+    }
   return 0;
 }
 
