@@ -110,7 +110,7 @@ static int test_repr_rk16(void)
   static int num_of_reprs_rk16[MAX_NM_REPRS_RK16];
   int n = 2;
   int num;
-  /* Rk16VecInt vec[16]; */
+  Rk16VecInt vec[16];
   for (int i = 0; i < n + 1; i++)
     {
       num = repr_modulo_autom_rk16(i, _reprs_rk16, num_of_reprs_rk16);
@@ -120,9 +120,14 @@ static int test_repr_rk16(void)
   for (int i = 0; i < num; i++)
     {
       s += num_of_reprs_rk16[i];
-      /* memcpy(vec, _reprs_rk16[i], sizeof(Rk16VecInt) * 16); */
-      /* _convert_to_euclid_vector_rk16(vec); */
-      /* print_vec(vec, 16); */
+      memcpy(vec, _reprs_rk16[i], sizeof(Rk16VecInt) * 16);
+      if (inner_prod_rk16(vec, vec) != 2 * n)
+        {
+          printf("False: norm\n");
+          return 0;
+        }
+      _convert_to_euclid_vector_rk16(vec);
+      print_vec(vec, 16);
     }
   if (s == num_of_vectors_rk16[n])
     {
@@ -141,9 +146,9 @@ static int test_repr_rk16(void)
   /*         vec[j] = cached_vectors_rk16[2][i][j]; */
   /*       } */
   /*     _convert_to_euclid_vector_rk16(vec); */
-  /*     print_vec(vec); */
+  /*     print_vec(vec, 16); */
   /*     normalize_vec_rk16_last9(vec); */
-  /*     print_vec(vec); */
+  /*     print_vec(vec, 16); */
   /*   } */
 
 }
@@ -237,6 +242,9 @@ int test_normalize_vec_rk16_w_indices(void)
       _convert_to_euclid_vector_rk16(vec);
       memcpy(vec1, vec, 16 * sizeof(Rk16VecInt));
       normalize_vec_rk16_w_indices(vec, zero_idcs, non_zero_idcss);
+      /* printf("raw:\n"); */
+      /* print_vec(vec1, 16); */
+      /* print_vec(vec, 16); */
       if (! vec_equal(vec, vec1, 0, 7))
         {
           printf("False: unchanged.\n");
@@ -265,27 +273,113 @@ int test_normalize_vec_rk16_w_indices(void)
   return 1;
 }
 
+void test_repr_rk16_w_idices(void)
+{
+  cache_vectors_rk16();
+  static Rk16VecInt reprs1[MAX_NM_REPRS_RK16][16];
+  static int num_of_classes1[MAX_NM_REPRS_RK16];
+  static Rk16VecInt _reprs2[1050240][16];
+  static int num_of_classes2[1050240];
+  int num = 3;
+  int num_of_reprs1 = repr_modulo_autom_rk16(num, reprs1, num_of_classes1);
+  mpz_t res;
+  mpz_t one;
+  mpz_init(res);
+  mpz_init(one);
+  mpz_set_si(one, 1);
+  Rk16VecInt vec[16];
+  Rk16VecInt vec_copy[16];
+  printf("%d\n", num_of_reprs1);
+  int idx = 0;
+  int num_of_reprs2;
+  for (int i = 0; i < num_of_reprs1; i++)
+    {
+      int wo_sign_indices_array[8][16] = {0};
+      int w_sign_indices[16] = {0};
+      for (int j = 0; j < 16; j++)
+        {
+          w_sign_indices[j] = 0;
+        }
+      memcpy(vec, reprs1[i], 16 * sizeof(Rk16VecInt));
+      _convert_to_euclid_vector_rk16(vec);
+      memcpy(vec_copy, vec, 16 * sizeof(Rk16VecInt));
+      printf("i: %d\n", i);
+      print_vec(vec, 16);
+      idx = 0;
+      for (int k = 7; k < 16; k++)
+        {
+          if (vec[k] == 0)
+            {
+              w_sign_indices[idx] = k;
+              idx++;
+            }
+        }
+      sort_int_vec(vec_copy, 16);
+      for (int k = vec_copy[0]; k < vec_copy[15] + 1; k++)
+        {
+          int count = 0;
+          idx = 0;
+          if (k)
+            {
+              int idx1 = 0;
+              int idx_vec[16] = {0};
+              for (int l = 7; l < 16; l++)
+                {
+                  if (k == vec[l])
+                    {
+                      idx_vec[idx1] = l;
+                      idx1++;
+                      count++;
+                    }
+                }
+              if (count > 1)
+                {
+                  for (int l = 0; l < count; l++)
+                    {
+                      wo_sign_indices_array[idx][l] = idx_vec[l];
+                    }
+                  idx++;
+                }
+            }
+        }
+      print_vec(w_sign_indices, 16);
+      num_of_reprs2 = repr_modulo_autom_rk16_w_indices(num, _reprs2,
+                                                       num_of_classes2,
+                                                       w_sign_indices, wo_sign_indices_array);
+      printf("%d\n", num_of_reprs2);
+      for (int j = 0; j < num_of_reprs2; j++)
+        {
+          mpz_add(res, res, one);
+        }
+    }
+  printf("%s\n", mpz_get_str(NULL, 10, res));
+  mpz_clear(res);
+}
+
 int main()
 {
-  printf("test_norm_vec_rk16\n");
-  if (test_norm_vec_rk16())
-    {
-      printf("OK\n");
-    }
-  printf("test_repr_rk16\n");
-  if (test_repr_rk16())
-    {
-      printf("OK\n");
-    }
-  printf("test_normalize_vec_rk16_w_indices");
-  if (test_normalize_vec_rk16_w_indices())
-    {
-      printf("Ok\n");
-    }
+  /* printf("test_norm_vec_rk16\n"); */
+  /* if (test_norm_vec_rk16()) */
+  /*   { */
+  /*     printf("OK\n"); */
+  /*   } */
+  /* printf("test_repr_rk16\n"); */
+  /* if (test_repr_rk16()) */
+  /*   { */
+  /*     printf("OK\n"); */
+  /*   } */
+  /* printf("test_normalize_vec_rk16_w_indices\n"); */
+  /* if (test_normalize_vec_rk16_w_indices()) */
+  /*   { */
+  /*     printf("Ok\n"); */
+  /*   } */
+
+  test_repr_rk16_w_idices();
+
   return 0;
 }
 
 
 /* Local Variables: */
-/* compile-command: "gcc test_representatives.c -o test_representatives.o -le8vectors -lrank16_vectors -lvector_utils -lm -lmpir -L../lib -std=c11" */
+/* compile-command: "gcc test_representatives.c -o test_representatives.o -O3 -le8vectors -lrank16_vectors -lvector_utils -lm -lmpir -L../lib -std=c11" */
 /* End: */

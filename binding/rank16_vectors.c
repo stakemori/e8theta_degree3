@@ -310,15 +310,9 @@ void normalize_vec_rk16_last9(Rk16VecInt vec[16])
     }
 }
 
-static inline int vec_equal(Rk16VecInt vec1[16], Rk16VecInt vec2[16],
-                            int start, int end)
+static inline int vec_equal(Rk16VecInt const vec1[16], Rk16VecInt const vec2[16])
 {
-  int is_equal = 1;
-  for (int i = start; i < end; i++)
-    {
-      is_equal = is_equal & (vec1[i] == vec2[i]);
-    }
-  return is_equal;
+  return !(memcmp(vec1, vec2, 16 * sizeof(Rk16VecInt)));
 }
 
 int repr_modulo_autom_rk16(int n, int reprs[MAX_NM_REPRS_RK16][16], int num_of_classes[MAX_NM_REPRS_RK16])
@@ -344,7 +338,7 @@ int repr_modulo_autom_rk16(int n, int reprs[MAX_NM_REPRS_RK16][16], int num_of_c
       found = 0;
       for (int j = 0; j < num; j++)
         {
-          int found = vec_equal(reprs[j], vec, 0, 16);
+          found = vec_equal(reprs[j], vec);
           if (found)
             {
               num_of_classes[j]++;
@@ -380,7 +374,7 @@ normalize_vec_rk16_w_indices. */
       found = 0;
       for (int j = 0; j < num; j++)
         {
-          int found = vec_equal(reprs[j], vec, 0, 16);
+          found = vec_equal(reprs[j], vec);
           if (found)
             {
               num_of_classes[j]++;
