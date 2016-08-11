@@ -46,21 +46,6 @@ static void _convert_to_euclid_vector_e8(int vec[8])
     }
 }
 
-/* /\* Inverse to _convertfy_to_euclid_vector_e8 *\/ */
-/* void _convert_from_euclid_vector_e8(int vec[8]) */
-/* { */
-/*   for (int i = 1; i < 7; i++) */
-/*     { */
-/*       vec[i] = (vec[i] - vec[0]) >> 1; */
-/*     } */
-/*   vec[7] -= vec[0]; */
-/*   for (int i = 1; i < 7; i++) */
-/*     { */
-/*       vec[7] -= 2 * vec[i]; */
-/*     } */
-/*   vec[7] = vec[7] >> 2; */
-/* } */
-
 int cached_vectors[MAX_NORM + 1][MAX_NM_OF_VECTORS][8];
 static int cached_idx[MAX_NORM + 1] = {0};
 

@@ -27,21 +27,6 @@ static void _convert_to_euclid_vector_rk16(Rk16VecInt vec[16]){
   vec[15] += vec[0];
 }
 
-/* /\* inverse to _covert_to_euclid_vector *\/ */
-/* static void _convert_from_euclid_vector_rk16(Rk16VecInt vec[16]){ */
-/*   for (int i = 1; i < 15; i++) */
-/*     { */
-/*       vec[i] = (vec[i] - vec[0]) >> 1; */
-/*     } */
-/*   vec[15] -= vec[0]; */
-/*   for (int i = 1; i < 15; i++) */
-/*     { */
-/*       vec[15] -= 2*vec[i]; */
-/*     } */
-/*   vec[15] = vec[15] >> 2; */
-/* } */
-
-
 static void _cache_vectors(void)
 {
   double m = sqrt(2 * MAX_NORM_RK16);
