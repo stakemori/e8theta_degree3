@@ -280,6 +280,8 @@ void test_repr_rk16_w_idices(void)
   static int num_of_classes1[MAX_NM_REPRS_RK16];
   static Rk16VecInt _reprs2[1050240][16];
   static int num_of_classes2[1050240];
+  static Rk16VecInt vecs[MAX_NM_OF_VECTORS_RK16][16];
+  int num_of_vecs;
   int num = 3;
   int num_of_reprs1 = repr_modulo_autom_rk16(num, reprs1, num_of_classes1);
   mpz_t res;
@@ -343,7 +345,19 @@ void test_repr_rk16_w_idices(void)
             }
         }
       print_vec(w_sign_indices, 16);
-      num_of_reprs2 = repr_modulo_autom_rk16_w_indices(num, _reprs2,
+      num_of_vecs = 0;
+      for (int k = 0; k < num_of_vectors_rk16[num]; k++)
+        {
+          if (inner_prod_rk16(cached_vectors_rk16[num][k], reprs1[i]) == 2)
+            {
+              for (int l = 0; l < 16; l++)
+                {
+                  vecs[num_of_vecs][l] = cached_vectors_rk16[num][k][l];
+                  num_of_vecs++;
+                }
+            }
+        }
+      num_of_reprs2 = repr_modulo_autom_rk16_w_indices(vecs, num_of_vecs, _reprs2,
                                                        num_of_classes2,
                                                        w_sign_indices, wo_sign_indices_array);
       printf("%d\n", num_of_reprs2);

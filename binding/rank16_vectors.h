@@ -13,7 +13,9 @@ Rk16VecInt cached_vectors_rk16[MAX_NORM_RK16 + 1][MAX_NM_OF_VECTORS_RK16][16];
 
 void cache_vectors_rk16(void);
 int repr_modulo_autom_rk16(int n, int reprs[MAX_NM_REPRS_RK16][16], int num_of_classes[MAX_NM_REPRS_RK16]);
-int repr_modulo_autom_rk16_w_indices(int n, int reprs[MAX_NM_REPRS_RK16][16],
+int repr_modulo_autom_rk16_w_indices(Rk16VecInt vecs[MAX_NM_OF_VECTORS_RK16][16],
+                                     int num_of_vecs,
+                                     int reprs[MAX_NM_REPRS_RK16][16],
                                      int num_of_classes[MAX_NM_REPRS_RK16],
                                      int w_sign_indices[16],
                                      int wo_sign_indices_array[8][16]);

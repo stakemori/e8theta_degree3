@@ -355,19 +355,22 @@ int repr_modulo_autom_rk16(int n, int reprs[MAX_NM_REPRS_RK16][16], int num_of_c
   return num;
 }
 
-int repr_modulo_autom_rk16_w_indices(int n, int reprs[MAX_NM_REPRS_RK16][16],
+int repr_modulo_autom_rk16_w_indices(Rk16VecInt vecs[MAX_NM_OF_VECTORS_RK16][16],
+                                     int num_of_vecs,
+                                     int reprs[MAX_NM_REPRS_RK16][16],
                                      int num_of_classes[MAX_NM_REPRS_RK16],
                                      int w_sign_indices[16],
                                      int wo_sign_indices_array[8][16])
 /* Similar to repr_modulo_autom_rk16 but the representative is computed by
-normalize_vec_rk16_w_indices. */
+normalize_vec_rk16_w_indices and cached_vectors_rk16[n] is replaced by vecs.
+num_of_vecs is the actual length of vecs.*/
 {
   int num = 0;
   int found;
   Rk16VecInt vec[16] = {0};
-  for (int i = 0; i < num_of_vectors_rk16[n]; i++)
+  for (int i = 0; i < num_of_vecs; i++)
     {
-      memcpy(vec, cached_vectors_rk16[n][i], sizeof(Rk16VecInt) * 16);
+      memcpy(vec, vecs[i], sizeof(Rk16VecInt) * 16);
       _convert_to_euclid_vector_rk16(vec);
       normalize_vec_rk16_w_indices(vec, w_sign_indices, wo_sign_indices_array);
       _convert_from_euclid_vector_rk16(vec);
