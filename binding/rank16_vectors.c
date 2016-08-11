@@ -297,7 +297,7 @@ void normalize_vec_rk16_last9(Rk16VecInt vec[16])
     }
 }
 
-static inline int vec_equal(Rk16VecInt const vec1[16], Rk16VecInt const vec2[16])
+static inline int vec_equal(const Rk16VecInt vec1[16], const Rk16VecInt vec2[16])
 {
   return !(memcmp(vec1, vec2, 16 * sizeof(Rk16VecInt)));
 }
