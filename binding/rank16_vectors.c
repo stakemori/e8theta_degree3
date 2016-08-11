@@ -376,3 +376,8 @@ num_of_vecs is the actual length of vecs.*/
     }
   return num;
 }
+
+
+/* Local Variables: */
+/* compile-command: "cd ..; make compile-theta_vectors" */
+/* End: */

@@ -112,5 +112,5 @@ void cache_vectors(void)
 }
 
 /* Local Variables: */
-/* compile-command: "cd ..; make compile-e8vector" */
+/* compile-command: "cd ..; make compile-theta_vectors" */
 /* End: */
