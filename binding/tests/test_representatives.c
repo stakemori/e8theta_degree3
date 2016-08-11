@@ -8,13 +8,12 @@
 
 Rk16VecInt inner_prod_rk16(Rk16VecInt s[16], Rk16VecInt t[16])
 {
-  int a = (s[0] + s[1] + s[2] + s[3] + s[4] + s[5] + s[6] + s[7] +
-           s[8] + s[9] + s[10] + s[11] + s[12] + s[13] + s[14] + 2 * s[15]);
-  return ((3 * s[0] + a - s[15]) * t[0] + (a + s[1]) * t[1] + (a + s[2]) * t[2] +(a + s[3]) * t[3] +
-          (a + s[4]) * t[4] + (a + s[5]) * t[5] + (a + s[6]) * t[6] + (a + s[7]) * t[7] +
-          (a + s[8]) * t[8] + (a + s[9]) * t[9] + (a + s[10]) * t[10] + (a + s[11]) * t[11] +
-          (a + s[12]) * t[12] + (a + s[13]) * t[13] + (a + s[14]) * t[14] +
-          (-s[0] + 2 * a) * t[15]);
+  int sum = 0;
+  for (int i = 0; i < 16; i++)
+    {
+      sum += s[i] * t[i];
+    }
+  return sum >> 2;
 }
 
 static void print_vec(int * vec, int a)
@@ -26,7 +25,7 @@ static void print_vec(int * vec, int a)
   printf("\n");
 }
 
-static int test_norm_vec_rk16(void)
+int test_norm_vec_rk16(void)
 {
   cache_vectors_rk16();
   Rk16VecInt vec1[16];
@@ -37,7 +36,6 @@ static int test_norm_vec_rk16(void)
   for (int i = 0; i < num_of_vectors_rk16[2]; i++)
     {
       memcpy(vec1, cached_vectors_rk16[2][i], sizeof(int) * 16);
-      _convert_to_euclid_vector_rk16(vec1);
       memcpy(vec2, vec1, sizeof(int) * 16);
       normalize_vec_rk16_last9(vec1);
       memcpy(vec3, vec1, sizeof(int) * 16);
@@ -104,7 +102,7 @@ static int test_norm_vec_rk16(void)
   return 1;
 }
 
-static int test_repr_rk16(void)
+int test_repr_rk16(void)
 {
   static Rk16VecInt _reprs_rk16[MAX_NM_REPRS_RK16][16];
   static int num_of_reprs_rk16[MAX_NM_REPRS_RK16];
@@ -126,7 +124,6 @@ static int test_repr_rk16(void)
           printf("False: norm\n");
           return 0;
         }
-      _convert_to_euclid_vector_rk16(vec);
       print_vec(vec, 16);
     }
   if (s == num_of_vectors_rk16[n])
@@ -145,7 +142,6 @@ static int test_repr_rk16(void)
   /*       { */
   /*         vec[j] = cached_vectors_rk16[2][i][j]; */
   /*       } */
-  /*     _convert_to_euclid_vector_rk16(vec); */
   /*     print_vec(vec, 16); */
   /*     normalize_vec_rk16_last9(vec); */
   /*     print_vec(vec, 16); */
@@ -239,7 +235,6 @@ int test_normalize_vec_rk16_w_indices(void)
   for (int i = 0; i < num_of_vectors_rk16[num]; i++)
     {
       memcpy(vec, cached_vectors_rk16[num][i], 16 * sizeof(Rk16VecInt));
-      _convert_to_euclid_vector_rk16(vec);
       memcpy(vec1, vec, 16 * sizeof(Rk16VecInt));
       normalize_vec_rk16_w_indices(vec, zero_idcs, non_zero_idcss);
       /* printf("raw:\n"); */
@@ -303,7 +298,6 @@ void test_repr_rk16_w_idices(void)
           w_sign_indices[j] = 0;
         }
       memcpy(vec, reprs1[i], 16 * sizeof(Rk16VecInt));
-      _convert_to_euclid_vector_rk16(vec);
       memcpy(vec_copy, vec, 16 * sizeof(Rk16VecInt));
       printf("i: %d\n", i);
       print_vec(vec, 16);
@@ -372,23 +366,23 @@ void test_repr_rk16_w_idices(void)
 
 int main()
 {
-  /* printf("test_norm_vec_rk16\n"); */
-  /* if (test_norm_vec_rk16()) */
-  /*   { */
-  /*     printf("OK\n"); */
-  /*   } */
-  /* printf("test_repr_rk16\n"); */
-  /* if (test_repr_rk16()) */
-  /*   { */
-  /*     printf("OK\n"); */
-  /*   } */
-  /* printf("test_normalize_vec_rk16_w_indices\n"); */
-  /* if (test_normalize_vec_rk16_w_indices()) */
-  /*   { */
-  /*     printf("Ok\n"); */
-  /*   } */
+  printf("test_norm_vec_rk16\n");
+  if (test_norm_vec_rk16())
+    {
+      printf("OK\n");
+    }
+  printf("test_repr_rk16\n");
+  if (test_repr_rk16())
+    {
+      printf("OK\n");
+    }
+  printf("test_normalize_vec_rk16_w_indices\n");
+  if (test_normalize_vec_rk16_w_indices())
+    {
+      printf("Ok\n");
+    }
 
-  test_repr_rk16_w_idices();
+  /* test_repr_rk16_w_idices(); */
 
   return 0;
 }

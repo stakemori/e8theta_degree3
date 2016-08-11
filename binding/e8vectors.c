@@ -5,14 +5,8 @@
 
 static inline int norm(int s[8])
 {
-  return ((2*s[0] + s[1] + s[2] + s[3] + s[4] + s[5] + s[6] + s[7])*s[0] +
-          (s[0] + 2*s[1] + s[2] + s[3] + s[4] + s[5] + s[6] + 2*s[7])*s[1] +
-          (s[0] + s[1] + 2*s[2] + s[3] + s[4] + s[5] + s[6] + 2*s[7])*s[2] +
-          (s[0] + s[1] + s[2] + 2*s[3] + s[4] + s[5] + s[6] + 2*s[7])*s[3] +
-          (s[0] + s[1] + s[2] + s[3] + 2*s[4] + s[5] + s[6] + 2*s[7])*s[4] +
-          (s[0] + s[1] + s[2] + s[3] + s[4] + 2*s[5] + s[6] + 2*s[7])*s[5] +
-          (s[0] + s[1] + s[2] + s[3] + s[4] + s[5] + 2*s[6] + 2*s[7])*s[6] +
-          (s[0] + 2*s[1] + 2*s[2] + 2*s[3] + 2*s[4] + 2*s[5] + 2*s[6] + 4*s[7])*s[7]);
+  return (s[0]*s[0] + s[1]*s[1] + s[2]*s[2] + s[3]*s[3] + s[4]*s[4] + s[5]*s[5] + s[6]*s[6] +
+          s[7]*s[7]) >> 2;
 }
 
 /* Fourier coefficients of Eisenstein series of weight 4 */
@@ -36,6 +30,36 @@ int num_of_vectors[100] =
    171737280, 163900800, 187012800, 169192800, 206025120,
    181466880, 213183360, 200202240, 224259840, 207446400,
    251657280, 219041760, 254864880, 241997760};
+
+/* Convert (s0, ..., s7) to eulidian vector */
+static void _convert_to_euclid_vector_e8(int vec[8])
+{
+  vec[7] = 4 * vec[7];
+  for (int i = 1; i < 7; i++)
+    {
+      vec[7] += 2 * vec[i];
+    }
+  vec[7] += vec[0];
+  for (int i = 1; i < 7; i++)
+    {
+      vec[i] = 2 * vec[i] + vec[0];
+    }
+}
+
+/* /\* Inverse to _convertfy_to_euclid_vector_e8 *\/ */
+/* void _convert_from_euclid_vector_e8(int vec[8]) */
+/* { */
+/*   for (int i = 1; i < 7; i++) */
+/*     { */
+/*       vec[i] = (vec[i] - vec[0]) >> 1; */
+/*     } */
+/*   vec[7] -= vec[0]; */
+/*   for (int i = 1; i < 7; i++) */
+/*     { */
+/*       vec[7] -= 2 * vec[i]; */
+/*     } */
+/*   vec[7] = vec[7] >> 2; */
+/* } */
 
 int cached_vectors[MAX_NORM + 1][MAX_NM_OF_VECTORS][8];
 static int cached_idx[MAX_NORM + 1] = {0};
@@ -67,6 +91,7 @@ static void _cache_vectors(void)
                               for (int s7 = floor(-m/2 - _centr); s7 < _end; s7++)
                                 {
                                   int v[8] = {s0, s1, s2, s3, s4, s5, s6, s7};
+                                  _convert_to_euclid_vector_e8(v);
                                   int _nm = norm(v)/2;
                                   if (_nm < MAX_NORM + 1)
                                     {

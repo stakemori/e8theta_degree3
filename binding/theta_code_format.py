@@ -235,41 +235,6 @@ def _pol_basis_factor_dct_and_ls(wt):
     return [{pol: [fc.const] + fc.pols for pol, fc in facs}, l]
 
 
-@cached_function
-def euclidean_basis(vec_len):
-    if vec_len == 8:
-        basis_vecs = [tuple([QQ(1) / QQ(2) for _ in range(8)]),
-                      (0, 1, 0, 0, 0, 0, 0, 1),
-                      (0, 0, 1, 0, 0, 0, 0, 1),
-                      (0, 0, 0, 1, 0, 0, 0, 1),
-                      (0, 0, 0, 0, 1, 0, 0, 1),
-                      (0, 0, 0, 0, 0, 1, 0, 1),
-                      (0, 0, 0, 0, 0, 0, 1, 1),
-                      (0, 0, 0, 0, 0, 0, 0, 2)]
-    else:
-        basis_vecs = [tuple([QQ(1) / QQ(2) for _ in range(16)]),
-                      (0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1),
-                      (0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1),
-                      (0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1),
-                      (0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1),
-                      (0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1),
-                      (0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1),
-                      (0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1),
-                      (0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1),
-                      (0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1),
-                      (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1),
-                      (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1),
-                      (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1),
-                      (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1),
-                      (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1),
-                      (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2)]
-    return [vector([QQ(a) for a in v1]) for v1 in basis_vecs]
-
-
-def to_eulidian_vec(t, vec_len=8):
-    return sum([a * b for a, b in zip(t, euclidean_basis(vec_len))])
-
-
 def _bideterminant_prime_factors_dict(mat, wt):
     '''
     wt: a list/tuple of non-increasing integers of length 3
@@ -281,9 +246,7 @@ def _bideterminant_prime_factors_dict(mat, wt):
     '''
     vec_len = mat.ncols()
     R = _s_t_u_ring(vec_len=vec_len)
-    stu_mt = matrix(R, 3, R.gens())
-    stu_mt = matrix([to_eulidian_vec(v, vec_len=vec_len)
-                     for v in stu_mt.rows()]).transpose()
+    stu_mt = matrix(R, 3, R.gens()).transpose()
     subs_dct = dict(zip(matrix_var().list(), (mat * stu_mt).list()))
     _, l = _pol_basis_factor_dct_and_ls(wt)
     d = {a: a.subs(subs_dct) for a in l}
@@ -405,25 +368,15 @@ char * {func_name}(int j_red, int a, int b, int c, int d, int e, int f);
 def _inner_prod_code(vec_len):
     code8 = '''inline int inner_prod(int s[8], int t[8])
 {
-  return ((2*s[0] + s[1] + s[2] + s[3] + s[4] + s[5] + s[6] + s[7]) * t[0] +
-          (s[0] + 2*s[1] + s[2] + s[3] + s[4] + s[5] + s[6] + 2*s[7]) * t[1] +
-          (s[0] + s[1] + 2*s[2] + s[3] + s[4] + s[5] + s[6] + 2*s[7]) * t[2] +
-          (s[0] + s[1] + s[2] + 2*s[3] + s[4] + s[5] + s[6] + 2*s[7]) * t[3] +
-          (s[0] + s[1] + s[2] + s[3] + 2*s[4] + s[5] + s[6] + 2*s[7]) * t[4] +
-          (s[0] + s[1] + s[2] + s[3] + s[4] + 2*s[5] + s[6] + 2*s[7]) * t[5] +
-          (s[0] + s[1] + s[2] + s[3] + s[4] + s[5] + 2*s[6] + 2*s[7]) * t[6] +
-          (s[0] + 2*s[1] + 2*s[2] + 2*s[3] + 2*s[4] + 2*s[5] + 2*s[6] + 4*s[7]) * t[7]);
+  return (s[0]*t[0] + s[1]*t[1] + s[2]*t[2] + s[3]*t[3] +
+          s[4]*t[4] + s[5]*t[5] + s[6]*t[6] + s[7]*t[7]) >> 2;
 }
 '''
     code16 = '''Rk16VecInt inner_prod(Rk16VecInt s[16], Rk16VecInt t[16])
 {
-  int a = (s[0] + s[1] + s[2] + s[3] + s[4] + s[5] + s[6] + s[7] +
-           s[8] + s[9] + s[10] + s[11] + s[12] + s[13] + s[14] + 2 * s[15]);
-  return ((3 * s[0] + a - s[15]) * t[0] + (a + s[1]) * t[1] + (a + s[2]) * t[2] +(a + s[3]) * t[3] +
-          (a + s[4]) * t[4] + (a + s[5]) * t[5] + (a + s[6]) * t[6] + (a + s[7]) * t[7] +
-          (a + s[8]) * t[8] + (a + s[9]) * t[9] + (a + s[10]) * t[10] + (a + s[11]) * t[11] +
-          (a + s[12]) * t[12] + (a + s[13]) * t[13] + (a + s[14]) * t[14] +
-          (-s[0] + 2 * a) * t[15]);
+  return (s[0]*t[0] + s[1]*t[1] + s[2]*t[2] + s[3]*t[3] + s[4]*t[4] + s[5]*t[5] +
+          s[6]*t[6] + s[7]*t[7] + s[8]*t[8] + s[9]*t[9] + s[10]*t[10] + s[11]*t[11] +
+          s[12]*t[12] + s[13]*t[13] + s[14]*t[14] + s[15]*t[15]) >> 2;
 }
 '''
     if vec_len == 8:
