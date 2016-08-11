@@ -8,7 +8,6 @@ from e8theta_degree3.gl3_repn import gl3_repn_module, matrix_var
 from sage.arith.all import lcm
 from sage.matrix.all import matrix
 from sage.misc.all import cached_function, mul
-from sage.modules.all import vector
 from sage.rings.all import QQ, PolynomialRing
 
 
@@ -183,7 +182,8 @@ def _{cfn}_part(j_red_m):
     sig_off()
     py_strs = py_str.split(",")
     res = [Integer(a) for a in py_strs]
-    return vector(res)
+    normalizing_num = ZZ(res[0])
+    return vector(res[1:]) / normalizing_num
 
 
 @cached_function
@@ -284,13 +284,18 @@ def _pol_basis_as_polof_factors(wt, imag_quad, names_base=('real_part', 'imag_pa
             {k: (_rl_part(v), _im_part(v)) for k, v in subs_dct.items()})
 
 
-def _init_code(variables, res_str, vec_len, sty=None, is_sparse_mat=False):
+def _init_code(variables, res_str, vec_len,
+               normalizing_num, normalizing_num_var, wt_sum,
+               sty=None, is_sparse_mat=False):
     indent = "  "
     res = ";\n".join([indent + sty.z_type_decl(v) for v in variables]) + ";\n"
     res = res + "\n"
     res = res + ";\n".join([indent + sty.init(str(v)) for v in variables]) + ";\n"
-    res = res + "\n" + indent + "char * {res_str};".format(res_str=res_str)
-
+    res = res + "\n" + indent + "char * {res_str};".format(res_str=res_str) + "\n"
+    res = res + indent + sty.set_str(normalizing_num_var,
+                                     '"%s"' % (normalizing_num, ), "10") + ";\n"
+    res = res + indent + sty.mul_2exp(normalizing_num_var,
+                                      normalizing_num_var, wt_sum) + ";\n"
     if is_sparse_mat and vec_len == 16:
         res += '''
   static Rk16VecInt _reprs[MAX_NM_REPRS_RK16][16];
@@ -521,7 +526,15 @@ def code_format_theta(func_name, wt, mat, real_part=True, factor_pol=False, sty=
             sorted([str(im) for _, im in bdt_var_dct.values()]) +
             [str(a) for a in _s_t_u_ring(vec_len=vec_len).gens()])
 
-    init_code_str = _init_code(_vrs, res_str_name, vec_len,
+    normalizing_num_var = "normalizig_num"
+    _vrs.append(normalizing_num_var)
+
+    init_code_str = _init_code(_vrs,
+                               res_str_name,
+                               vec_len,
+                               _facs_pols_lcm ** wt_small[0],
+                               normalizing_num_var,
+                               sum(wt_small),
                                sty=sty, is_sparse_mat=is_sparse_mat)
 
     bi_det_factors_code_str = _bi_det_factors_code(facs_pols_code_rl_alst,
@@ -529,7 +542,8 @@ def code_format_theta(func_name, wt, mat, real_part=True, factor_pol=False, sty=
                                                    bdt_var_dct)
     coeffs_code_str = _coeffs_code(coefs_pol_code_alst1, res_vars)
 
-    str_concat_code_str = _str_concat_code(res_vars, res_str_name, sty=sty)
+    str_concat_code_str = _str_concat_code([normalizing_num_var] + res_vars,
+                                           res_str_name, sty=sty)
 
     cleanup_code_str = _cleanup_code(_vrs, sty=sty)
 
@@ -587,7 +601,8 @@ char * {func_name}(int j_red, int a, int b, int c, int d, int e, int f)
 {str_concat_code}
 {cleanup_code}
 
-  /* {res_str_name} must be freed later. */
+  /* The first element of {res_str_name} is a number for normalization and
+    {res_str_name} must be freed later. */
   return {res_str_name};
 }}
 '''.format(init_code=init_code_str,
