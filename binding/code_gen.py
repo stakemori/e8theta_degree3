@@ -109,6 +109,10 @@ class CCodeStyle(CodeStyle):
     __metaclass__ = ABCMeta
 
     @abstractmethod
+    def set_str(self, a, s, base):
+        pass
+
+    @abstractmethod
     def init(self, var):
         pass
 
@@ -130,6 +134,9 @@ class CCodeStyle(CodeStyle):
 
 
 class MpirStyle(CCodeStyle):
+
+    def set_str(self, a, s, base):
+        return "mpz_set_str(%s, %s, %s)" % (a, s, base)
 
     @property
     def set_si_func(self):
@@ -201,6 +208,9 @@ class MpirStyle(CCodeStyle):
 
 
 class FmpzStyle(CCodeStyle):
+
+    def set_str(self, a, b, c):
+        return
 
     def z_type_decl(self, a):
         return "fmpz_t %s" % a
