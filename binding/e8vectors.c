@@ -101,19 +101,6 @@ void cache_vectors(void)
     }
 }
 
-void _set_vs(int vs[MAX_NM_OF_VECTORS][8], int a)
-{
-  cache_vectors();
-  int n = num_of_vectors[a];
-  for (int i = 0; i < n; i++)
-    {
-      for (int j = 0; j < 8; j++)
-        {
-          vs[i][j] = cached_vectors[a][i][j];
-        }
-    }
-}
-
 /* Local Variables: */
 /* compile-command: "cd ..; make compile-e8vector" */
 /* End: */
