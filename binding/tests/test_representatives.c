@@ -105,7 +105,7 @@ int test_norm_vec_rk16(void)
 int test_repr_rk16(void)
 {
   static Rk16VecInt _reprs_rk16[MAX_NM_REPRS_RK16][16];
-  static int num_of_reprs_rk16[MAX_NM_REPRS_RK16];
+  static unsigned int num_of_reprs_rk16[MAX_NM_REPRS_RK16];
   int n = 2;
   int num;
   Rk16VecInt vec[16];
@@ -154,7 +154,7 @@ void number_of_loops(int a, int b, int c, int d, int e, int f)
 {
   cache_vectors_rk16();
   static Rk16VecInt _reprs[MAX_NM_REPRS_RK16][16];
-  static int num_of_classes[MAX_NM_REPRS_RK16];
+  static unsigned int num_of_classes[MAX_NM_REPRS_RK16];
   int num_of_reprs = repr_modulo_autom_rk16(c, _reprs, num_of_classes);
 
   mpz_t res, one;
@@ -288,9 +288,9 @@ void test_repr_rk16_w_idices(void)
 {
   cache_vectors_rk16();
   static Rk16VecInt reprs1[MAX_NM_REPRS_RK16][16];
-  static int num_of_classes1[MAX_NM_REPRS_RK16];
+  static unsigned int num_of_classes1[MAX_NM_REPRS_RK16];
   static Rk16VecInt _reprs2[1050240][16];
-  static int num_of_classes2[1050240];
+  static unsigned int num_of_classes2[1050240];
   static Rk16VecInt vecs[MAX_NM_OF_VECTORS_RK16][16];
   int num_of_vecs;
   int num = 3;
@@ -301,19 +301,13 @@ void test_repr_rk16_w_idices(void)
   mpz_init(one);
   mpz_set_si(one, 1);
   Rk16VecInt vec[16];
-  Rk16VecInt vec_copy[16];
   printf("%d\n", num_of_reprs1);
   int num_of_reprs2;
   for (int i = 0; i < num_of_reprs1; i++)
     {
       int wo_sign_indices_array[8][16] = {0};
       int w_sign_indices[16] = {0};
-      for (int j = 0; j < 16; j++)
-        {
-          w_sign_indices[j] = 0;
-        }
       memcpy(vec, reprs1[i], 16 * sizeof(Rk16VecInt));
-      memcpy(vec_copy, vec, 16 * sizeof(Rk16VecInt));
       printf("i: %d\n", i);
       print_vec(vec, 16);
       set_w_sign_indices_rk16(w_sign_indices, vec);
@@ -323,7 +317,6 @@ void test_repr_rk16_w_idices(void)
         {
           print_vec(wo_sign_indices_array[j], 16);
         }
-
       num_of_vecs = 0;
       for (int k = 0; k < num_of_vectors_rk16[num]; k++)
         {
@@ -370,5 +363,5 @@ int main()
 
 
 /* Local Variables: */
-/* compile-command: "gcc test_representatives.c -o test_representatives.o -O3 -le8vectors -lrank16_vectors -lvector_utils -lm -lmpir -L../lib -std=c11" */
+/* compile-command: "gcc test_representatives.c -o test_representatives.o -O3 -le8vectors -lrank16_vectors -lvector_utils -lm -lmpir -L../lib -std=c11 -Wall -Wextra" */
 /* End: */
