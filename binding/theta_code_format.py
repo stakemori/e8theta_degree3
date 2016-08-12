@@ -115,7 +115,7 @@ CC = gcc
 
 compile-c-lib:
 \t$(CC) {c_src_file}.c -o $(parent_dir)/lib/lib{c_src_file}.so $(PATHOPT) $(OPT) \\
-\t-le8vectors $(LIBOPTBASE) $(SHARED)
+\t$(LIBOPTBASE) $(SHARED)
 
 compile-cython: compile-c-lib
 \tsage -c 'sh.eval("python setup.py build_ext -i")'
