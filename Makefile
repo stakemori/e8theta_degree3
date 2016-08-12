@@ -2,7 +2,7 @@ current_dir = $(shell pwd)
 parent_dir = $(shell dirname "$(current_dir)")
 DEBUGOPT = -Wall -g -Og -std=c11
 PATHOPT = -L$(current_dir)/binding/lib -I$(current_dir)/binding/
-OPT = -O3 -std=c11
+OPT = -O3 -std=c11 -Wall -Wextra
 SHARED = -shared -fPIC
 CC = gcc
 
