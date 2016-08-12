@@ -176,7 +176,7 @@ void cache_vectors_rk16(void)
   int b = 1;
   for (int i = 0; i < 16; i++)
     {
-      b = (! cached_vectors_rk16[1][0][i]) & b;
+      b = (! cached_vectors_rk16[1][0][i]) && b;
     }
   if (b)
     {

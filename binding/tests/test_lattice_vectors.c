@@ -79,7 +79,7 @@ int test_rank16_vectors(void)
 
 int main(void)
 {
-  if (test_e8vectors() & test_rank16_vectors())
+  if (test_e8vectors() && test_rank16_vectors())
     {
       printf("OK\n");
     }

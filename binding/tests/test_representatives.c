@@ -55,14 +55,14 @@ int test_norm_vec_rk16(void)
       /* Test first if 7 entries are only sign change. */
       for (int j = 0; j < 7; j++)
         {
-          bl = bl & (vec1[j] == vec2[j]);
+          bl = bl && (vec1[j] == vec2[j]);
         }
       if (! bl)
         {
           bl = 1;
           for (int j = 0; j < 7; j++)
             {
-              bl = bl & (vec1[j] == -vec2[j]);
+              bl = bl && (vec1[j] == -vec2[j]);
             }
           if (! bl) {
               printf("False: unchagne.\n");
@@ -189,7 +189,7 @@ int vec_equal(Rk16VecInt * vec1, Rk16VecInt * vec2, int start, int end)
   int is_equal = 1;
   for (int i = start; i < end; i++)
     {
-      is_equal = is_equal & (vec1[i] == vec2[i]);
+      is_equal = is_equal && (vec1[i] == vec2[i]);
     }
   return is_equal;
 }

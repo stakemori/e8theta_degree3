@@ -98,13 +98,13 @@ static void _cache_vectors(void)
 
 void cache_vectors(void)
 {
-  if (! cached_vectors[1][0][0] &
-      ! cached_vectors[1][0][1] &
-      ! cached_vectors[1][0][2] &
-      ! cached_vectors[1][0][3] &
-      ! cached_vectors[1][0][4] &
-      ! cached_vectors[1][0][5] &
-      ! cached_vectors[1][0][6] &
+  if (! cached_vectors[1][0][0] &&
+      ! cached_vectors[1][0][1] &&
+      ! cached_vectors[1][0][2] &&
+      ! cached_vectors[1][0][3] &&
+      ! cached_vectors[1][0][4] &&
+      ! cached_vectors[1][0][5] &&
+      ! cached_vectors[1][0][6] &&
       ! cached_vectors[1][0][7])
     {
       _cache_vectors();

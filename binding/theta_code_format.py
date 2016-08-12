@@ -613,8 +613,8 @@ char * {func_name}(int i_red, int a, int b, int c, int d, int e, int f)
         {{
           for (int i = i_red; i < {num_of_vectors}[a]; {i_inc_code})
             {{
-              if ((inner_prod({i_th_vec_having_norm_a}, {j_th_vec_having_norm_b}) == f) &
-                  (inner_prod({i_th_vec_having_norm_a}, {k_th_vec_having_norm_c}) == e) &
+              if ((inner_prod({i_th_vec_having_norm_a}, {j_th_vec_having_norm_b}) == f) &&
+                  (inner_prod({i_th_vec_having_norm_a}, {k_th_vec_having_norm_c}) == e) &&
                   (inner_prod({j_th_vec_having_norm_b}, {k_th_vec_having_norm_c}) == d))
                 {{
 
