@@ -293,7 +293,7 @@ void test_repr_rk16_w_idices(void)
   static unsigned int num_of_classes2[1050240];
   static Rk16VecInt vecs[MAX_NM_OF_VECTORS_RK16][16];
   int num_of_vecs;
-  int num = 3;
+  int num = 2;
   int num_of_reprs1 = repr_modulo_autom_rk16(num, reprs1, num_of_classes1);
   mpz_t res;
   mpz_t one;
@@ -335,6 +335,8 @@ void test_repr_rk16_w_idices(void)
         }
     }
   printf("%s\n", mpz_get_str(NULL, 10, res));
+  /* num = 3 => res = 3222705
+     num = 2 => res = 98149 */
   mpz_clear(res);
 }
 
