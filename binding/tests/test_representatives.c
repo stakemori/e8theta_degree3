@@ -268,6 +268,22 @@ int test_normalize_vec_rk16_w_indices(void)
   return 1;
 }
 
+void test_normalize_vec_rk16_w_indices_1(void)
+{
+  int vec[16] = {0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 2, 2, 2};
+  int vec1[16] = {0, 0, 0, 0, 0, 0, 0, 3, 4, 5, 1, 3, -100, 100, 30, -9};
+  int wo_sign_indices_array[8][16] = {0};
+  int idx_array[16] = {0};
+  set_w_sign_indices_rk16(idx_array, vec);
+  set_wo_sign_indices_array(wo_sign_indices_array, vec);
+  normalize_vec_rk16_w_indices(vec1, idx_array, wo_sign_indices_array);
+  print_vec(vec1, 16);
+  for (int j = 0; wo_sign_indices_array[j][0]; j++)
+    {
+      print_vec(wo_sign_indices_array[j], 16);
+    }
+}
+
 void test_repr_rk16_w_idices(void)
 {
   cache_vectors_rk16();
@@ -287,7 +303,6 @@ void test_repr_rk16_w_idices(void)
   Rk16VecInt vec[16];
   Rk16VecInt vec_copy[16];
   printf("%d\n", num_of_reprs1);
-  int idx = 0;
   int num_of_reprs2;
   for (int i = 0; i < num_of_reprs1; i++)
     {
@@ -301,54 +316,20 @@ void test_repr_rk16_w_idices(void)
       memcpy(vec_copy, vec, 16 * sizeof(Rk16VecInt));
       printf("i: %d\n", i);
       print_vec(vec, 16);
-      idx = 0;
-      for (int k = 7; k < 16; k++)
-        {
-          if (vec[k] == 0)
-            {
-              w_sign_indices[idx] = k;
-              idx++;
-            }
-        }
-      sort_int_vec(vec_copy, 16);
-      for (int k = vec_copy[0]; k < vec_copy[15] + 1; k++)
-        {
-          int count = 0;
-          idx = 0;
-          if (k)
-            {
-              int idx1 = 0;
-              int idx_vec[16] = {0};
-              for (int l = 7; l < 16; l++)
-                {
-                  if (k == vec[l])
-                    {
-                      idx_vec[idx1] = l;
-                      idx1++;
-                      count++;
-                    }
-                }
-              if (count > 1)
-                {
-                  for (int l = 0; l < count; l++)
-                    {
-                      wo_sign_indices_array[idx][l] = idx_vec[l];
-                    }
-                  idx++;
-                }
-            }
-        }
+      set_w_sign_indices_rk16(w_sign_indices, vec);
+      set_wo_sign_indices_array(wo_sign_indices_array, vec);
       print_vec(w_sign_indices, 16);
+      for (int j = 0; wo_sign_indices_array[j][0]; j++)
+        {
+          print_vec(wo_sign_indices_array[j], 16);
+        }
+
       num_of_vecs = 0;
       for (int k = 0; k < num_of_vectors_rk16[num]; k++)
         {
           if (inner_prod_rk16(cached_vectors_rk16[num][k], reprs1[i]) == 2)
             {
-              for (int l = 0; l < 16; l++)
-                {
-                  vecs[num_of_vecs][l] = cached_vectors_rk16[num][k][l];
-                  num_of_vecs++;
-                }
+              memcpy(vecs[num_of_vecs++], cached_vectors_rk16[num][k], sizeof(Rk16VecInt) * 16);
             }
         }
       num_of_reprs2 = repr_modulo_autom_rk16_w_indices(vecs, num_of_vecs, _reprs2,
@@ -366,23 +347,23 @@ void test_repr_rk16_w_idices(void)
 
 int main()
 {
-  printf("test_norm_vec_rk16\n");
-  if (test_norm_vec_rk16())
-    {
-      printf("OK\n");
-    }
-  printf("test_repr_rk16\n");
-  if (test_repr_rk16())
-    {
-      printf("OK\n");
-    }
-  printf("test_normalize_vec_rk16_w_indices\n");
-  if (test_normalize_vec_rk16_w_indices())
-    {
-      printf("Ok\n");
-    }
+  /* printf("test_norm_vec_rk16\n"); */
+  /* if (test_norm_vec_rk16()) */
+  /*   { */
+  /*     printf("OK\n"); */
+  /*   } */
+  /* printf("test_repr_rk16\n"); */
+  /* if (test_repr_rk16()) */
+  /*   { */
+  /*     printf("OK\n"); */
+  /*   } */
+  /* printf("test_normalize_vec_rk16_w_indices\n"); */
+  /* if (test_normalize_vec_rk16_w_indices()) */
+  /*   { */
+  /*     printf("Ok\n"); */
+  /*   } */
 
-  /* test_repr_rk16_w_idices(); */
+  test_repr_rk16_w_idices();
 
   return 0;
 }

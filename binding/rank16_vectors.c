@@ -377,7 +377,57 @@ num_of_vecs is the actual length of vecs.*/
   return num;
 }
 
+void set_w_sign_indices_rk16(int indices[16], const Rk16VecInt vec[16])
+{
+  int idx = 0;
+  /* 7 is hard-coded */
+  for (int k = 7; k < 16; k++)
+    {
+      if (vec[k] == 0)
+        {
+          indices[idx++] = k;
+        }
+    }
+}
 
+void set_wo_sign_indices_array(int indices_array[8][16], const Rk16VecInt vec[16])
+{
+  int max = vec[0];
+  int min = vec[0];
+  /* Set max and min of vec. */
+  for (int i = 0; i < 16; i++)
+    {
+      if (vec[i] > max)
+        {
+          max = vec[i];
+        }
+      if (vec[i] < min)
+        {
+          min = vec[i];
+        }
+    }
+
+  int idx = 0;
+  for (int k = min; k < max + 1; k++)
+    {
+      if (k)
+        {
+          int count = 0;
+          int idx_vec[16] = {0};
+          for (int l = 7; l < 16; l++)
+            {
+              if (k == vec[l])
+                {
+                  idx_vec[count++] = l;
+                }
+            }
+          if (count > 1)
+            {
+              memcpy(indices_array[idx++], idx_vec, sizeof(int) * count);
+            }
+        }
+    }
+}
 /* Local Variables: */
 /* compile-command: "cd ..; make compile-theta_vectors" */
 /* End: */
