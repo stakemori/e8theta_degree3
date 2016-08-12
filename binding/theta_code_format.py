@@ -162,8 +162,8 @@ def _cython_format_each(c_header_file, c_func_name, cython_func_name, num_of_pro
         p.close()
     return res'''.format(cfn=cython_func_name, npcs=num_of_procs)
     _fmt = '''
-def _{cfn}_part(j_red_m):
-    j_red, m = j_red_m
+def _{cfn}_part(i_red_m):
+    i_red, m = i_red_m
 
     if not (m in MatrixSpace(QQ, 3) and (2 * m in MatrixSpace(ZZ, 3)) and
             (m[a, a] in ZZ for a in range(3)) and m.transpose() == m):
@@ -173,7 +173,7 @@ def _{cfn}_part(j_red_m):
     if max([a, b, c]) > 7:
         raise ValueError("Diagonal elements are too large.")
     sig_on()
-    cdef char* c_str = {c_func_name}(j_red, a, b, c, d, e, f)
+    cdef char* c_str = {c_func_name}(i_red, a, b, c, d, e, f)
     cdef bytes py_str
     try:
         py_str = c_str
@@ -355,7 +355,7 @@ def _cleanup_code(variables, sty=None):
 
 def header_file_format(fname, func_names):
     decl = '''
-char * {func_name}(int j_red, int a, int b, int c, int d, int e, int f);
+char * {func_name}(int i_red, int a, int b, int c, int d, int e, int f);
 '''
     funcs_declaration = "\n\n".join([decl.format(func_name=a) for a in func_names])
 
@@ -548,9 +548,9 @@ def code_format_theta(func_name, wt, mat, real_part=True, factor_pol=False, sty=
     cleanup_code_str = _cleanup_code(_vrs, sty=sty)
 
     if num_of_procs == 1:
-        j_inc_code = "j++"
+        i_inc_code = "i++"
     else:
-        j_inc_code = "j += %s" % (num_of_procs,)
+        i_inc_code = "i += %s" % (num_of_procs,)
 
     if is_sparse_mat:
         ith_vec_dict = {i: "%s[%s][%s]" % (cached_vectors, a, i)
@@ -563,7 +563,7 @@ def code_format_theta(func_name, wt, mat, real_part=True, factor_pol=False, sty=
         limit_k = "{num_of_vectors}[a]".format(num_of_vectors=num_of_vectors)
 
     code = '''
-char * {func_name}(int j_red, int a, int b, int c, int d, int e, int f)
+char * {func_name}(int i_red, int a, int b, int c, int d, int e, int f)
 {{
   /* mat: {mat_info}, quad_field: {quad_field_info}, real_part: {real_part} */
   /* young tableaux of the basis: {young_tableaux} */
@@ -572,9 +572,9 @@ char * {func_name}(int j_red, int a, int b, int c, int d, int e, int f)
 
 {init_code}
 
-  for (int i = 0; i < {num_of_vectors}[a]; i++)
+  for (int i = i_red; i < {num_of_vectors}[a]; {i_inc_code})
     {{
-      for (int j = j_red; j < {num_of_vectors}[b]; {j_inc_code})
+      for (int j = 0; j < {num_of_vectors}[b]; j++)
         {{
           for (int k = 0; k < {limit_k}; k++)
             {{
@@ -626,6 +626,6 @@ char * {func_name}(int j_red, int a, int b, int c, int d, int e, int f)
            k_th_vec_having_norm_c=ith_vec_dict["k"],
 
            set_s_code=_set_s_code(vec_len, sty.set_si_func, ith_vec_dict),
-           j_inc_code=j_inc_code,
+           i_inc_code=i_inc_code,
            limit_k=limit_k)
     return code
