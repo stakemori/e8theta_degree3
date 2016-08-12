@@ -21,6 +21,10 @@ int repr_modulo_autom_rk16_w_indices(Rk16VecInt vecs[MAX_NM_OF_VECTORS_RK16][16]
                                      int wo_sign_indices_array[8][16]);
 void set_w_sign_indices_rk16(int indices[16], const Rk16VecInt vec[16]);
 void set_wo_sign_indices_array(int indices_array[8][16], const Rk16VecInt vec[16]);
+void set_w_sign_indices_rk16_2(int indices[16], const Rk16VecInt vec1[16],
+                               const Rk16VecInt vec2[16]);
+void set_wo_sign_indices_array2(int indices_array[8][16], const Rk16VecInt vec1[16],
+                                const Rk16VecInt vec2[16]);
 
 /* Extern followings only for tests */
 void normalize_vec_rk16_last9(Rk16VecInt vec[16]);

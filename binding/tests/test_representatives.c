@@ -340,6 +340,18 @@ void test_repr_rk16_w_idices(void)
   mpz_clear(res);
 }
 
+void test_set_idices_2(void)
+{
+  Rk16VecInt vec1[16] = {0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1};
+  Rk16VecInt vec2[16] = {0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0};
+  int indices_array[8][16] = {0};
+  set_wo_sign_indices_array2(indices_array, vec1, vec2);
+  for (int i = 0; indices_array[i][0]; i++)
+    {
+      print_vec(indices_array[i], 16);
+    }
+}
+
 int main()
 {
   /* printf("test_norm_vec_rk16\n"); */

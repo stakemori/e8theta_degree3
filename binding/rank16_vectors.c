@@ -391,6 +391,20 @@ void set_w_sign_indices_rk16(int indices[16], const Rk16VecInt vec[16])
     }
 }
 
+void set_w_sign_indices_rk16_2(int indices[16], const Rk16VecInt vec1[16],
+                               const Rk16VecInt vec2[16])
+{
+  int idx = 0;
+  /* 7 is hard-coded */
+  for (int k = 7; k < 16; k++)
+    {
+      if ((vec1[k] == 0) && (vec2[k] == 0))
+        {
+          indices[idx++] = k;
+        }
+    }
+}
+
 void set_wo_sign_indices_array(int indices_array[8][16], const Rk16VecInt vec[16])
 {
   int max = vec[0];
@@ -426,6 +440,70 @@ void set_wo_sign_indices_array(int indices_array[8][16], const Rk16VecInt vec[16
             {
               memcpy(indices_array[idx++], idx_vec, sizeof(int) * count);
             }
+        }
+    }
+}
+
+void set_wo_sign_indices_array2(int indices_array[8][16], const Rk16VecInt vec1[16],
+                                const Rk16VecInt vec2[16])
+{
+  int indices_array2[8][16] = {0};
+  set_wo_sign_indices_array(indices_array2, vec2);
+  int max = vec1[0];
+  int min = vec1[0];
+  /* Set max and min of vec1. */
+  for (int i = 7; i < 16; i++)
+    {
+      if (vec1[i] > max)
+        {
+          max = vec1[i];
+        }
+      if (vec1[i] < min)
+        {
+          min = vec1[i];
+        }
+    }
+
+  int idx = 0;
+
+  /* non-zero entries of vec2 and any entries of vec1. */
+  for (int idx2 = 0; indices_array2[idx2][0]; idx2++)
+    {
+      for (int i = min; i < max + 1; i++)
+        {
+          int count = 0;
+          int idx_vec[16] = {0};
+          for (int j = 0; indices_array2[idx2][j]; j++)
+            {
+              if (i == vec1[indices_array2[idx2][j]])
+                {
+                  idx_vec[count++] = indices_array2[idx2][j];
+                }
+            }
+          if (count > 1)
+            {
+              memcpy(indices_array[idx++], idx_vec, sizeof(int) * count);
+            }
+        }
+    }
+
+  /* zero entries of vec2 and any enties of vec1. */
+  int zero_idcs[16] = {0};
+  set_w_sign_indices_rk16(zero_idcs, vec2);
+  for (int i = min; i < max + 1; i++)
+    {
+      int count = 0;
+      int idx_vec[16] = {0};
+      for (int j = 0; zero_idcs[j]; j++)
+        {
+          if (i == vec1[zero_idcs[j]])
+            {
+              idx_vec[count++] = zero_idcs[j];
+            }
+        }
+      if (count > 1)
+        {
+          memcpy(indices_array[idx++], idx_vec, sizeof(int) * count);
         }
     }
 }
