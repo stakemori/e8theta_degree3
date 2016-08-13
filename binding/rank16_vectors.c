@@ -9,7 +9,7 @@
 /* Fourier coefficients of Eisenstein series of weight 8 */
 int num_of_vectors_rk16[8] = {1, 480, 61920, 1050240, 7926240, 37500480, 135480960, 395301120};
 
-Rk16VecInt cached_vectors_rk16[MAX_NORM_RK16 + 1][MAX_NM_OF_VECTORS_RK16][16];
+Rk16VecInt cached_vectors_rk16[MAX_NORM_RK16 + 1][MAX_NM_OF_VECTORS_RK16][16] = {0};
 static int cached_idx[MAX_NORM_RK16 + 1] = {0};
 
 /* convert vec to an element of a sub lattice of (2Z)^16 */
@@ -235,7 +235,7 @@ void normalize_vec_rk16_w_indices(Rk16VecInt vec[16],
    H(v) for non-zero array v in wo_sign_indices_array.
    This function converts vec to the representative by the action of G.*/
 {
-  Rk16VecInt vec1[16];
+  Rk16VecInt vec1[16] = {0};
   int len = 0;
   for (int i = 0; w_sign_indices[i]; i++)
     {
@@ -285,7 +285,7 @@ void normalize_vec_rk16_last9(Rk16VecInt vec[16])
     }
 
   /* Action of the last 9 elements */
-  Rk16VecInt vec1[9];
+  Rk16VecInt vec1[9] = {0};
   for (int i = 0; i < 9; i++)
     {
       vec1[i] = vec[i + 7];
