@@ -284,59 +284,89 @@ void test_normalize_vec_rk16_w_indices_1(void)
     }
 }
 
-void test_repr_rk16_w_idices(void)
+void test_repr_rk16_w_idices(int a, int b, int c, int d, int e, int f)
 {
   cache_vectors_rk16();
-  static Rk16VecInt reprs1[MAX_NM_REPRS_RK16][16];
-  static unsigned int num_of_classes1[MAX_NM_REPRS_RK16];
-  static Rk16VecInt _reprs2[1050240][16];
-  static unsigned int num_of_classes2[1050240];
-  static Rk16VecInt vecs[MAX_NM_OF_VECTORS_RK16][16];
-  int num_of_vecs;
-  int num = 2;
-  int num_of_reprs1 = repr_modulo_autom_rk16(num, reprs1, num_of_classes1);
+  static Rk16VecInt reprs_k[MAX_NM_REPRS_RK16][16];
+  static unsigned int num_of_classes_k[MAX_NM_REPRS_RK16];
+
+  static Rk16VecInt reprs_j[MAX_NM_REPRS_RK16][16];
+  static unsigned int num_of_classes_j[MAX_NM_REPRS_RK16];
+  static Rk16VecInt vecs_j[MAX_NM_OF_VECTORS_RK16][16];
+  int num_of_vecs_j;
+
+  static Rk16VecInt reprs_i[MAX_NM_REPRS_RK16][16];
+  static unsigned int num_of_classes_i[MAX_NM_REPRS_RK16];
+  static Rk16VecInt vecs_i[MAX_NM_OF_VECTORS_RK16][16];
+
+  int num_of_reprs_k = repr_modulo_autom_rk16(c, reprs_k, num_of_classes_k);
+
   mpz_t res;
   mpz_t one;
   mpz_init(res);
   mpz_init(one);
   mpz_set_si(one, 1);
-  Rk16VecInt vec[16];
-  printf("%d\n", num_of_reprs1);
-  int num_of_reprs2;
-  for (int i = 0; i < num_of_reprs1; i++)
+  printf("%d\n", num_of_reprs_k);
+  int num_of_reprs_j;
+  int i_reprs_max = 100;
+  for (int k = 0; k < num_of_reprs_k; k++)
     {
       int wo_sign_indices_array[8][16] = {0};
       int w_sign_indices[16] = {0};
-      memcpy(vec, reprs1[i], 16 * sizeof(Rk16VecInt));
-      printf("i: %d\n", i);
-      print_vec(vec, 16);
-      set_w_sign_indices_rk16(w_sign_indices, vec);
-      set_wo_sign_indices_array(wo_sign_indices_array, vec);
+      printf("k: %d\n", k);
+      print_vec(reprs_k[k], 16);
+      set_w_sign_indices_rk16(w_sign_indices, reprs_k[k]);
+      set_wo_sign_indices_array(wo_sign_indices_array, reprs_k[k]);
       print_vec(w_sign_indices, 16);
-      for (int j = 0; wo_sign_indices_array[j][0]; j++)
+
+      num_of_vecs_j = 0;
+
+      for (int l = 0; l < num_of_vectors_rk16[b]; l++)
         {
-          print_vec(wo_sign_indices_array[j], 16);
-        }
-      num_of_vecs = 0;
-      for (int k = 0; k < num_of_vectors_rk16[num]; k++)
-        {
-          if (inner_prod_rk16(cached_vectors_rk16[num][k], reprs1[i]) == 2)
+          if (inner_prod_rk16(cached_vectors_rk16[b][l], reprs_k[k]) == d)
             {
-              memcpy(vecs[num_of_vecs++], cached_vectors_rk16[num][k], sizeof(Rk16VecInt) * 16);
+              memcpy(vecs_j[num_of_vecs_j++], cached_vectors_rk16[b][l], sizeof(Rk16VecInt) * 16);
             }
         }
-      num_of_reprs2 = repr_modulo_autom_rk16_w_indices(vecs, num_of_vecs, _reprs2,
-                                                       num_of_classes2,
+      num_of_reprs_j = repr_modulo_autom_rk16_w_indices(vecs_j, num_of_vecs_j, reprs_j,
+                                                       num_of_classes_j,
                                                        w_sign_indices, wo_sign_indices_array);
-      printf("%d\n", num_of_reprs2);
-      for (int j = 0; j < num_of_reprs2; j++)
+      printf("%d\n", num_of_reprs_j);
+      for (int j = 0; j < num_of_reprs_j; j++)
         {
-          mpz_add(res, res, one);
+          int wo_sign_indices_array[8][16] = {0};
+          int w_sign_indices[16] = {0};
+          set_wo_sign_indices_array2(wo_sign_indices_array, reprs_j[j], reprs_k[k]);
+          set_w_sign_indices_rk16_2(w_sign_indices, reprs_j[j], reprs_k[k]);
+
+          int num_of_vecs_i = 0;
+          for (int l = 0; l < num_of_vectors_rk16[a]; l++)
+            {
+              if ((inner_prod_rk16(cached_vectors_rk16[a][l], reprs_k[k]) == e) &&
+                  (inner_prod_rk16(cached_vectors_rk16[a][l], reprs_j[j]) == f))
+                {
+                  memcpy(vecs_i[num_of_vecs_i++], cached_vectors_rk16[a][l], sizeof(Rk16VecInt) * 16);
+                }
+            }
+
+          int num_of_reprs_i = repr_modulo_autom_rk16_w_indices(vecs_i, num_of_vecs_i, reprs_i,
+                                                                num_of_classes_i,
+                                                                w_sign_indices, wo_sign_indices_array);
+          if (num_of_reprs_i > i_reprs_max)
+            {
+              i_reprs_max = num_of_reprs_i;
+            }
+
+          for (int i = 0; i < num_of_reprs_i; i++)
+            {
+              mpz_add(res, res, one);
+            }
         }
     }
+  printf("ireprs_max:%d\n", i_reprs_max);
   printf("%s\n", mpz_get_str(NULL, 10, res));
-  /* num = 3 => res = 3222705
-     num = 2 => res = 98149 */
+  /* num = 3 => res = 3222705 */
+  /*    num = 2 => res = 98149 */
   mpz_clear(res);
 }
 
@@ -382,8 +412,12 @@ int main()
   /*     printf("Ok\n"); */
   /*   } */
 
-  test_repr_rk16_w_idices();
+  /* test_repr_rk16_w_idices(2, 2, 2, 0, 0, 0); */
+  /* test_repr_rk16_w_idices(3, 3, 3, -2, 2, 2); */
+  /* test_repr_rk16_w_idices(1, 4, 4, 0, 0, 0); */
+  test_repr_rk16_w_idices(2, 2, 4, 0, 0, 0);
 
+  /* test_set_idices_2(); */
   return 0;
 }
 

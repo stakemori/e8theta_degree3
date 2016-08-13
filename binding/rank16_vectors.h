@@ -1,11 +1,11 @@
 #ifndef _RANK16_VECTORS_H_
 #define _RANK16_VECTORS_H_
 
-#define MAX_NORM_RK16 3
+#define MAX_NORM_RK16 4
 /* MAX_NORM_RK16 th Fourier coefficient of the Eisenstein series of weight 8 */
-#define MAX_NM_OF_VECTORS_RK16 1050240
+#define MAX_NM_OF_VECTORS_RK16 7926240
 
-#define MAX_NM_REPRS_RK16 10000
+#define MAX_NM_REPRS_RK16 116240
 typedef int Rk16VecInt;
 
 extern int num_of_vectors_rk16[8];
