@@ -9,7 +9,7 @@
 typedef int Rk16VecInt;
 
 extern int num_of_vectors_rk16[8];
-Rk16VecInt cached_vectors_rk16[MAX_NORM_RK16 + 1][MAX_NM_OF_VECTORS_RK16][16];
+extern int * cached_vectors_rk16_ptr[MAX_NORM_RK16 + 1];
 
 void cache_vectors_rk16(void);
 int repr_modulo_autom_rk16(int n, int reprs[MAX_NM_REPRS_RK16][16], unsigned int num_of_classes[MAX_NM_REPRS_RK16]);

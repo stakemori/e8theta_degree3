@@ -150,7 +150,7 @@ include "cysignals/signals.pxi"
 
 def _cython_format_each(c_header_file, c_func_name, cython_func_name, num_of_procs):
     if num_of_procs == 1:
-        theta_body = 'return _{cfn}_part((0, m)))\n'.format(cfn=cython_func_name)
+        theta_body = 'return _{cfn}_part((0, m))\n'.format(cfn=cython_func_name)
     else:
         theta_body = '''p = Pool(processes={npcs})
     try:
@@ -306,12 +306,16 @@ def _init_code(variables, res_str, vec_len,
   int num_of_reprs_k = repr_modulo_autom_rk16(c, reprs_k, num_of_classes_k);
 
   static Rk16VecInt vecs_j[MAX_NM_OF_VECTORS_RK16][16];
+
+  static Rk16VecInt reprs_i[MAX_NM_REPRS_RK16][16];
+  static unsigned int num_of_classes_i[MAX_NM_REPRS_RK16];
+  static Rk16VecInt vecs_i[MAX_NM_OF_VECTORS_RK16][16];
 '''
     return res
 
 
-def _bi_det_factors_code(rl_alst, im_alst, denom_lcm, var_dct):
-    indent = " " * 18
+def _bi_det_factors_code(rl_alst, im_alst, denom_lcm, var_dct, num_spaces):
+    indent = " " * num_spaces
     lines_format = ("{indent}/* Computation of {var}" +
                     " = {part} part of {lcm} * ({bi_det}) */\n{indent}{code}")
 
@@ -326,8 +330,8 @@ def _bi_det_factors_code(rl_alst, im_alst, denom_lcm, var_dct):
     return rl_code + ";\n\n\n" + im_code + ";"
 
 
-def _coeffs_code(pol_code_alst, res_vars):
-    indent = " " * 18
+def _coeffs_code(pol_code_alst, res_vars, num_spaces):
+    indent = " " * num_spaces
     comment_line = "{indent}/* Computation of {var} = {pol} */\n{indent}"
 
     code_blocks = [(comment_line.format(var=v, pol=str(pl), indent=indent) +
@@ -395,8 +399,8 @@ def _inner_prod_code(vec_len):
         return code16
 
 
-def _set_s_code(vec_len, set_si_func, vecs_dict):
-    indent = " " * 18
+def _set_s_code(vec_len, set_si_func, vecs_dict, num_spaces):
+    indent = " " * num_spaces
 
     def _set_s_code_each(s_name, vecs):
         return "\n".join([indent +
@@ -433,17 +437,49 @@ def _vec_j_normalize_code(vec_len):
       set_w_sign_indices_rk16(w_sign_indices, reprs_k[k]);
       set_wo_sign_indices_array(wo_sign_indices_array, reprs_k[k]);
       int num_of_vecs_j = 0;
-      for (int j = 0; j < num_of_vectors_rk16[b]; j++)
+
+      Rk16VecInt * cached_vec_b = cached_vectors_rk16_ptr[b];
+
+      for (int j = 0; j < num_of_vectors_rk16[b]; j++, cached_vec_b += 16)
         {
-          if (inner_prod(cached_vectors_rk16[b][j], reprs_k[k]) == d)
+          if (inner_prod(cached_vec_b, reprs_k[k]) == d)
             {
-              memcpy(vecs_j[num_of_vecs_j++], cached_vectors_rk16[b][j], sizeof(Rk16VecInt) * 16);
+              memcpy(vecs_j[num_of_vecs_j++], cached_vec_b, sizeof(Rk16VecInt) * 16);
             }
         }
       int num_of_reprs_j = repr_modulo_autom_rk16_w_indices(vecs_j, num_of_vecs_j, reprs_j,
                                                             num_of_classes_j,
                                                             w_sign_indices, wo_sign_indices_array);
 '''
+
+
+def _vec_i_normalize_code(vec_len, num_of_procs):
+    if vec_len == 8:
+        raise NotImplementedError
+    else:
+        return '''
+          int wo_sign_indices_array[8][16] = {0};
+          int w_sign_indices[16] = {0};
+          set_wo_sign_indices_array2(wo_sign_indices_array, reprs_j[j], reprs_k[k]);
+          set_w_sign_indices_rk16_2(w_sign_indices, reprs_j[j], reprs_k[k]);
+
+          int num_of_vecs_i = 0;
+          Rk16VecInt * cached_vec_a = cached_vectors_rk16_ptr[a];
+          cached_vec_a += 16 * i_red;
+          for (int l = i_red; l < num_of_vectors_rk16[a]; l++, cached_vec_a += %s)
+            {
+              if ((inner_prod(cached_vec_a, reprs_k[k]) == e) &&
+                  (inner_prod(cached_vec_a, reprs_j[j]) == f))
+                {
+                  memcpy(vecs_i[num_of_vecs_i++], cached_vec_a, sizeof(Rk16VecInt) * 16);
+                }
+            }
+
+          int num_of_reprs_i = repr_modulo_autom_rk16_w_indices(vecs_i, num_of_vecs_i, reprs_i,
+                                                                num_of_classes_i,
+                                                                w_sign_indices,
+                                                                wo_sign_indices_array);
+''' % (str(num_of_procs * 16), )
 
 
 def code_format(func_names, wt, mats, real_parts=None,
@@ -547,6 +583,7 @@ def code_format_theta(func_name, wt, mat, real_part=True, factor_pol=False, sty=
     # Add code for tmp *= num_of_classes_k[k] and res += + tmp
     for (_, codes), v in zip(coefs_pol_code_alst1, res_vars):
         if is_sparse_mat:
+            codes.append(sty.mul_ui(sum_tmp_var_name, sum_tmp_var_name, "num_of_classes_i[i]"))
             codes.append(sty.mul_ui(sum_tmp_var_name, sum_tmp_var_name, "num_of_classes_j[j]"))
             codes.append(sty.mul_ui(sum_tmp_var_name, sum_tmp_var_name, "num_of_classes_k[k]"))
         codes.append(sty.add_z(v, v, sum_tmp_var_name))
@@ -566,11 +603,14 @@ def code_format_theta(func_name, wt, mat, real_part=True, factor_pol=False, sty=
                                normalizing_num_var,
                                sum(wt_small),
                                sty=sty, is_sparse_mat=is_sparse_mat)
-
+    if is_sparse_mat:
+        num_spaces = 14
+    else:
+        num_spaces = 18
     bi_det_factors_code_str = _bi_det_factors_code(facs_pols_code_rl_alst,
                                                    facs_pols_code_im_alst, _facs_pols_lcm,
-                                                   bdt_var_dct)
-    coeffs_code_str = _coeffs_code(coefs_pol_code_alst1, res_vars)
+                                                   bdt_var_dct, num_spaces)
+    coeffs_code_str = _coeffs_code(coefs_pol_code_alst1, res_vars, num_spaces)
 
     str_concat_code_str = _str_concat_code([normalizing_num_var] + res_vars,
                                            res_str_name, sty=sty)
@@ -583,20 +623,14 @@ def code_format_theta(func_name, wt, mat, real_part=True, factor_pol=False, sty=
         i_inc_code = "i += %s" % (num_of_procs,)
 
     if is_sparse_mat:
-        ith_vec_dict = {i: "%s[%s][%s]" % (cached_vectors, a, i)
-                        for i, a in zip(["i"], ["a"])}
-        for i in ["j", "k"]:
+        ith_vec_dict = {}
+        for i in ["i", "j", "k"]:
             ith_vec_dict[i] = "reprs_{i}[{i}]".format(i=i)
         end_k = "num_of_reprs_k"
         end_j = "num_of_reprs_j"
         vec_j_normalize_code = _vec_j_normalize_code(vec_len)
-    else:
-        ith_vec_dict = {i: "%s[%s][%s]" % (cached_vectors, a, i)
-                        for i, a in zip(["i", "j", "k"], ["a", "b", "c"])}
-        end_k = "{num_of_vectors}[a]".format(num_of_vectors=num_of_vectors)
-        end_j = "{num_of_vectors}[b]".format(num_of_vectors=num_of_vectors)
-        vec_j_normalize_code = ""
-    code = '''
+        vec_i_normalize_code = _vec_i_normalize_code(vec_len, num_of_procs)
+        code = '''
 char * {func_name}(int i_red, int a, int b, int c, int d, int e, int f)
 {{
   /* mat: {mat_info}, quad_field: {quad_field_info}, real_part: {real_part} */
@@ -611,6 +645,70 @@ char * {func_name}(int i_red, int a, int b, int c, int d, int e, int f)
 {vec_j_normalize_code}
       for (int j = 0; j < {end_j}; j++)
         {{
+{vec_i_normalize_code}
+          for (int i = 0; i < num_of_reprs_i; i++)
+            {{
+
+{set_s_code}
+
+{bi_det_factors_code}
+
+{coeffs_code}
+            }}
+        }}
+    }}
+
+{str_concat_code}
+{cleanup_code}
+
+  /* The first element of {res_str_name} is a number for normalization and
+    {res_str_name} must be freed later. */
+  return {res_str_name};
+}}
+'''.format(init_code=init_code_str,
+           bi_det_factors_code=bi_det_factors_code_str,
+           coeffs_code=coeffs_code_str,
+           str_concat_code=str_concat_code_str,
+           cleanup_code=cleanup_code_str,
+           res_str_name=res_str_name,
+           func_name=func_name,
+
+           vec_j_normalize_code=vec_j_normalize_code,
+           vec_i_normalize_code=vec_i_normalize_code,
+
+           mat_info=str(mat.list()),
+           quad_field_info=str(mat.base_ring().polynomial()),
+           real_part=str(real_part),
+           young_tableaux=str([x.right_tableau.row_numbers for x in Vrho.basis()]),
+
+           cache_vectors=cache_vectors,
+
+           set_s_code=_set_s_code(vec_len, sty.set_si_func, ith_vec_dict, num_spaces),
+           end_k=end_k,
+           end_j=end_j)
+    else:
+        ith_vec_dict = {i: "%s[%s][%s]" % (cached_vectors, a, i)
+                        for i, a in zip(["i", "j", "k"], ["a", "b", "c"])}
+        end_k = "{num_of_vectors}[a]".format(num_of_vectors=num_of_vectors)
+        end_j = "{num_of_vectors}[b]".format(num_of_vectors=num_of_vectors)
+        vec_j_normalize_code = ""
+        vec_i_normalize_code = "j"
+        code = '''
+char * {func_name}(int i_red, int a, int b, int c, int d, int e, int f)
+{{
+  /* mat: {mat_info}, quad_field: {quad_field_info}, real_part: {real_part} */
+  /* young tableaux of the basis: {young_tableaux} */
+
+  {cache_vectors}();
+
+{init_code}
+
+  for (int k = 0; k < {end_k}; k++)
+    {{
+{vec_j_normalize_code}
+      for (int j = 0; j < {end_j}; j++)
+        {{
+{vec_i_normalize_code}
           for (int i = i_red; i < {num_of_vectors}[a]; {i_inc_code})
             {{
               if ((inner_prod({i_th_vec_having_norm_a}, {j_th_vec_having_norm_b}) == f) &&
@@ -644,6 +742,7 @@ char * {func_name}(int i_red, int a, int b, int c, int d, int e, int f)
            func_name=func_name,
 
            vec_j_normalize_code=vec_j_normalize_code,
+           vec_i_normalize_code=vec_i_normalize_code,
 
            mat_info=str(mat.list()),
            quad_field_info=str(mat.base_ring().polynomial()),
@@ -657,7 +756,7 @@ char * {func_name}(int i_red, int a, int b, int c, int d, int e, int f)
            j_th_vec_having_norm_b=ith_vec_dict["j"],
            k_th_vec_having_norm_c=ith_vec_dict["k"],
 
-           set_s_code=_set_s_code(vec_len, sty.set_si_func, ith_vec_dict),
+           set_s_code=_set_s_code(vec_len, sty.set_si_func, ith_vec_dict, num_spaces),
            i_inc_code=i_inc_code,
            end_k=end_k,
            end_j=end_j)

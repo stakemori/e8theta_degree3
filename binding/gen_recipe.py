@@ -14,12 +14,12 @@ from sage.misc.all import random
 from sage.functions.all import floor
 
 
-def _gen_base(wt, mats, cyfns, cfns, real_parts=None, is_sparse_mat=False):
+def _gen_base(wt, mats, cyfns, cfns, real_parts=None, is_sparse_mat=False, num_of_procs=8):
     assert all(mat * mat.transpose() == 0 for mat in mats)
     cyf, cf = _names(wt)
     generate_cython_and_build_scripts(_recipe_dir(wt),
                                       cyf, cf, cyfns, cfns,
-                                      wt, mats, overwrite=True, num_of_procs=8,
+                                      wt, mats, overwrite=True, num_of_procs=num_of_procs,
                                       real_parts=real_parts,
                                       is_sparse_mat=is_sparse_mat)
 
