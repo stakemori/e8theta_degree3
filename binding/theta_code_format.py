@@ -427,7 +427,7 @@ def code_format_header_innerprod(vec_len):
     return code
 
 
-def _vec_j_normalize_code(vec_len):
+def _vec_j_normalize_code(vec_len, num_of_procs):
     if vec_len == 8:
         raise NotImplementedError
     else:
@@ -449,14 +449,16 @@ def _vec_j_normalize_code(vec_len):
         }
       int num_of_reprs_j = repr_modulo_autom_rk16_w_indices(vecs_j, num_of_vecs_j, reprs_j,
                                                             num_of_classes_j,
-                                                            w_sign_indices, wo_sign_indices_array);
-'''
+                                                            w_sign_indices, wo_sign_indices_array,
+                                                            i_red, %s);
+''' % (num_of_procs, )
 
 
-def _vec_i_normalize_code(vec_len, num_of_procs):
+def _vec_i_normalize_code(vec_len):
     if vec_len == 8:
         raise NotImplementedError
     else:
+
         return '''
           int wo_sign_indices_array[8][16] = {0};
           int w_sign_indices[16] = {0};
@@ -465,8 +467,7 @@ def _vec_i_normalize_code(vec_len, num_of_procs):
 
           int num_of_vecs_i = 0;
           Rk16VecInt * cached_vec_a = cached_vectors_rk16_ptr[a];
-          cached_vec_a += 16 * i_red;
-          for (int l = i_red; l < num_of_vectors_rk16[a]; l++, cached_vec_a += %s)
+          for (int l = 0; l < num_of_vectors_rk16[a]; l++, cached_vec_a += 16)
             {
               if ((inner_prod(cached_vec_a, reprs_k[k]) == e) &&
                   (inner_prod(cached_vec_a, reprs_j[j]) == f))
@@ -478,8 +479,8 @@ def _vec_i_normalize_code(vec_len, num_of_procs):
           int num_of_reprs_i = repr_modulo_autom_rk16_w_indices(vecs_i, num_of_vecs_i, reprs_i,
                                                                 num_of_classes_i,
                                                                 w_sign_indices,
-                                                                wo_sign_indices_array);
-''' % (str(num_of_procs * 16), )
+                                                                wo_sign_indices_array, 0, 1);
+'''
 
 
 def code_format(func_names, wt, mats, real_parts=None,
@@ -628,8 +629,8 @@ def code_format_theta(func_name, wt, mat, real_part=True, factor_pol=False, sty=
             ith_vec_dict[i] = "reprs_{i}[{i}]".format(i=i)
         end_k = "num_of_reprs_k"
         end_j = "num_of_reprs_j"
-        vec_j_normalize_code = _vec_j_normalize_code(vec_len)
-        vec_i_normalize_code = _vec_i_normalize_code(vec_len, num_of_procs)
+        vec_j_normalize_code = _vec_j_normalize_code(vec_len, num_of_procs)
+        vec_i_normalize_code = _vec_i_normalize_code(vec_len)
         code = '''
 char * {func_name}(int i_red, int a, int b, int c, int d, int e, int f)
 {{

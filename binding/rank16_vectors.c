@@ -305,7 +305,7 @@ void normalize_vec_rk16_last9(Rk16VecInt vec[16])
     }
 }
 
-static inline int vec_equal(const Rk16VecInt vec1[16], const Rk16VecInt vec2[16])
+inline int vec_equal(const Rk16VecInt vec1[16], const Rk16VecInt vec2[16])
 {
   return !(memcmp(vec1, vec2, 16 * sizeof(Rk16VecInt)));
 }
@@ -350,12 +350,14 @@ int repr_modulo_autom_rk16(int n, int reprs[MAX_NM_REPRS_RK16][16],
   return num;
 }
 
+
 inline int repr_modulo_autom_rk16_w_indices(Rk16VecInt vecs[MAX_NM_OF_VECTORS_RK16][16],
                                             int num_of_vecs,
                                             int reprs[MAX_NM_REPRS_RK16][16],
                                             unsigned int num_of_classes[MAX_NM_REPRS_RK16],
                                             int w_sign_indices[16],
-                                            int wo_sign_indices_array[8][16])
+                                            int wo_sign_indices_array[8][16],
+                                            int idx_red, int num_of_procs)
 /* Similar to repr_modulo_autom_rk16 but the representative is computed by
 normalize_vec_rk16_w_indices and cached_vectors_rk16[n] is replaced by vecs.
 num_of_vecs is the actual length of vecs.*/
@@ -363,7 +365,7 @@ num_of_vecs is the actual length of vecs.*/
   int num = 0;
   int found;
   Rk16VecInt vec[16] = {0};
-  for (int i = 0; i < num_of_vecs; i++)
+  for (int i = idx_red; i < num_of_vecs; i += num_of_procs)
     {
       memcpy(vec, vecs[i], sizeof(Rk16VecInt) * 16);
       normalize_vec_rk16_w_indices(vec, w_sign_indices, wo_sign_indices_array);
