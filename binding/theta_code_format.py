@@ -160,6 +160,7 @@ def _cython_format_each(c_header_file, c_func_name, cython_func_name, num_of_pro
         p.join()
     finally:
         p.close()
+        p.join()
     return res'''.format(cfn=cython_func_name, npcs=num_of_procs)
     _fmt = '''
 def _{cfn}_part(i_red_m):
@@ -178,9 +179,12 @@ def _{cfn}_part(i_red_m):
     try:
         py_str = c_str
     finally:
-        free(c_str)
+        py_strs = py_str.split(",")
+        # If py_str is empty, asprintf was not called
+        if len(py_strs) > 1:
+            free(c_str)
     sig_off()
-    py_strs = py_str.split(",")
+    assert len(py_strs) > 1, "MAX_NM_REPRS_RK16 is too small."
     res = [Integer(a) for a in py_strs]
     normalizing_num = ZZ(res[0])
     return vector(res[1:]) / normalizing_num
@@ -304,6 +308,12 @@ def _init_code(variables, res_str, vec_len,
   static unsigned int num_of_classes_j[MAX_NM_REPRS_RK16];
 
   int num_of_reprs_k = repr_modulo_autom_rk16(c, reprs_k, num_of_classes_k);
+
+
+  if (num_of_reprs_k + 1 > MAX_NM_REPRS_RK16)
+    {
+      return "";
+    }
 
   static Rk16VecInt vecs_j[MAX_NM_OF_VECTORS_RK16][16];
 
@@ -451,6 +461,12 @@ def _vec_j_normalize_code(vec_len, num_of_procs):
                                                             num_of_classes_j,
                                                             w_sign_indices, wo_sign_indices_array,
                                                             i_red, %s);
+
+      if (num_of_reprs_j + 1 > MAX_NM_REPRS_RK16)
+        {
+          return "";
+        }
+
 ''' % (num_of_procs, )
 
 
@@ -480,6 +496,13 @@ def _vec_i_normalize_code(vec_len):
                                                                 num_of_classes_i,
                                                                 w_sign_indices,
                                                                 wo_sign_indices_array, 0, 1);
+
+
+          if (num_of_reprs_i + 1 > MAX_NM_REPRS_RK16)
+            {
+              return "";
+            }
+
 '''
 
 
