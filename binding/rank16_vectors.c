@@ -15,9 +15,9 @@ Rk16VecInt cached_vectors2[61920][16] = {0};
 Rk16VecInt cached_vectors3[1050240][16] = {0};
 Rk16VecInt cached_vectors4[7926240][16] = {0};
 
-int *cached_vectors_rk16_ptr[MAX_NORM_RK16 + 1] = {cached_vectors0[0], cached_vectors1[0],
-                                                   cached_vectors2[0], cached_vectors3[0],
-                                                   cached_vectors4[0]};
+int *cached_vectors_rk16_ptr[] = {cached_vectors0[0], cached_vectors1[0],
+                                  cached_vectors2[0], cached_vectors3[0],
+                                  cached_vectors4[0]};
 
 static int cached_idx[MAX_NORM_RK16 + 1] = {0};
 
