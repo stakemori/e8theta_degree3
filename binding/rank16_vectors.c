@@ -143,10 +143,7 @@ static void _cache_vectors(void)
                                                                                                                               _convert_to_euclid_vector_rk16(v);
                                                                                                                               int _nm = nrm15 >> 3;
                                                                                                                               int idx = cached_idx[_nm]++;
-                                                                                                                              for (int i = 0; i < 16; i++)
-                                                                                                                                {
-                                                                                                                                  memcpy(cached_vectors_rk16_ptr[_nm] + 16 * idx, v, 16 * sizeof(Rk16VecInt));
-                                                                                                                                }
+                                                                                                                              memcpy(cached_vectors_rk16_ptr[_nm] + 16 * idx, v, 16 * sizeof(Rk16VecInt));
                                                                                                                             }
                                                                                                                         }
                                                                                                                     }
