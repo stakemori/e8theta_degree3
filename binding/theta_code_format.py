@@ -300,8 +300,14 @@ def _init_code(variables, res_str, vec_len,
                                      '"%s"' % (normalizing_num, ), "10") + ";\n"
     res = res + indent + sty.mul_2exp(normalizing_num_var,
                                       normalizing_num_var, wt_sum) + ";\n"
+
+    res = res + _vec_k_init_code(is_sparse_mat, vec_len)
+    return res
+
+
+def _vec_k_init_code(is_sparse_mat, vec_len):
     if is_sparse_mat and vec_len == 16:
-        res += '''
+        res = '''
   static Rk16VecInt reprs_k[MAX_NM_REPRS_RK16][16];
   static Rk16VecInt reprs_j[MAX_NM_REPRS_RK16][16];
   static unsigned int num_of_classes_k[MAX_NM_REPRS_RK16];
@@ -321,6 +327,15 @@ def _init_code(variables, res_str, vec_len,
   static unsigned int num_of_classes_i[MAX_NM_REPRS_RK16];
   static Rk16VecInt vecs_i[MAX_NM_OF_VECTORS_RK16][16];
 '''
+    elif (not is_sparse_mat) and vec_len == 16:
+        raise NotImplementedError
+    elif (not is_sparse_mat) and vec_len == 8:
+        res = '''
+  int * vec_k = cached_vectors_ptr[c];
+  vec_k += i_red * 8;
+'''
+    elif is_sparse_mat and vec_len == 8:
+        raise NotImplementedError
     return res
 
 
@@ -437,10 +452,10 @@ def code_format_header_innerprod(vec_len):
     return code
 
 
-def _vec_j_normalize_code(vec_len):
-    if vec_len == 8:
+def _vec_j_normalize_code(vec_len, is_sparse_mat):
+    if vec_len == 8 and is_sparse_mat:
         raise NotImplementedError
-    else:
+    elif vec_len == 16 and is_sparse_mat:
         return '''
       int wo_sign_indices_array[8][16] = {0};
       int w_sign_indices[16] = {0};
@@ -467,13 +482,18 @@ def _vec_j_normalize_code(vec_len):
         }
 
 '''
-
-
-def _vec_i_normalize_code(vec_len):
-    if vec_len == 8:
+    elif vec_len == 8 and (not is_sparse_mat):
+        return '''
+      int * vec_j = cached_vectors_ptr[b];
+'''
+    elif vec_len == 16 and (not is_sparse_mat):
         raise NotImplementedError
-    else:
 
+
+def _vec_i_normalize_code(vec_len, is_sparse_mat):
+    if vec_len == 8 and is_sparse_mat:
+        raise NotImplementedError
+    elif vec_len == 16 and is_sparse_mat:
         return '''
           int wo_sign_indices_array[8][16] = {0};
           int w_sign_indices[16] = {0};
@@ -503,6 +523,12 @@ def _vec_i_normalize_code(vec_len):
             }
 
 '''
+    elif vec_len == 8 and (not is_sparse_mat):
+        return '''
+          int * vec_i = cached_vectors_ptr[a];
+'''
+    elif vec_len == 16 and (not is_sparse_mat):
+        raise NotImplementedError
 
 
 def code_format(func_names, wt, mats, real_parts=None,
@@ -545,12 +571,10 @@ def code_format_theta(func_name, wt, mat, real_part=True, factor_pol=False, sty=
 
     if vec_len == 8:
         wt_small = tuple([a - 4 for a in wt])
-        cached_vectors = "cached_vectors"
         cache_vectors = "cache_vectors"
         num_of_vectors = "num_of_vectors"
     else:
         wt_small = tuple([a - 8 for a in wt])
-        cached_vectors = "cached_vectors_rk16"
         cache_vectors = "cache_vectors_rk16"
         num_of_vectors = "num_of_vectors_rk16"
 
@@ -640,19 +664,14 @@ def code_format_theta(func_name, wt, mat, real_part=True, factor_pol=False, sty=
 
     cleanup_code_str = _cleanup_code(_vrs, sty=sty)
 
-    if num_of_procs == 1:
-        i_inc_code = "i++"
-    else:
-        i_inc_code = "i += %s" % (num_of_procs,)
+    vec_j_normalize_code = _vec_j_normalize_code(vec_len, is_sparse_mat)
+    vec_i_normalize_code = _vec_i_normalize_code(vec_len, is_sparse_mat)
+    k_inc_code = "k++" if num_of_procs == 1 else "k += %s" % (num_of_procs, )
 
     if is_sparse_mat:
         ith_vec_dict = {}
         for i in ["i", "j", "k"]:
             ith_vec_dict[i] = "reprs_{i}[{i}]".format(i=i)
-        end_k = "num_of_reprs_k"
-        end_j = "num_of_reprs_j"
-        vec_j_normalize_code = _vec_j_normalize_code(vec_len)
-        vec_i_normalize_code = _vec_i_normalize_code(vec_len)
         code = '''
 char * {func_name}(int i_red, int a, int b, int c, int d, int e, int f)
 {{
@@ -663,10 +682,10 @@ char * {func_name}(int i_red, int a, int b, int c, int d, int e, int f)
 
 {init_code}
 
-  for (int k = i_red; k < {end_k}; {k_inc_code})
+  for (int k = i_red; k < num_of_reprs_k; {k_inc_code})
     {{
 {vec_j_normalize_code}
-      for (int j = 0; j < {end_j}; j++)
+      for (int j = 0; j < num_of_reprs_j; j++)
         {{
 {vec_i_normalize_code}
           for (int i = 0; i < num_of_reprs_i; i++)
@@ -707,16 +726,10 @@ char * {func_name}(int i_red, int a, int b, int c, int d, int e, int f)
            cache_vectors=cache_vectors,
 
            set_s_code=_set_s_code(vec_len, sty.set_si_func, ith_vec_dict, num_spaces),
-           end_k=end_k,
-           end_j=end_j,
            k_inc_code="k++" if num_of_procs == 1 else "k += %s" % (num_of_procs, ))
     else:
-        ith_vec_dict = {i: "%s[%s][%s]" % (cached_vectors, a, i)
-                        for i, a in zip(["i", "j", "k"], ["a", "b", "c"])}
-        end_k = "{num_of_vectors}[a]".format(num_of_vectors=num_of_vectors)
-        end_j = "{num_of_vectors}[b]".format(num_of_vectors=num_of_vectors)
-        vec_j_normalize_code = ""
-        vec_i_normalize_code = "j"
+        # Non sparse matrix
+        ith_vec_dict = {i: "vec_%s" % (i,) for i in ["i", "j", "k"]}
         code = '''
 char * {func_name}(int i_red, int a, int b, int c, int d, int e, int f)
 {{
@@ -727,13 +740,13 @@ char * {func_name}(int i_red, int a, int b, int c, int d, int e, int f)
 
 {init_code}
 
-  for (int k = 0; k < {end_k}; k++)
+  for (int k = i_red; k < {num_of_vectors}[c]; {k_inc_code}, vec_k += {vec_k_inc})
     {{
 {vec_j_normalize_code}
-      for (int j = 0; j < {end_j}; j++)
+      for (int j = 0; j < {num_of_vectors}[b]; j++, vec_j += {vec_len})
         {{
 {vec_i_normalize_code}
-          for (int i = i_red; i < {num_of_vectors}[a]; {i_inc_code})
+          for (int i = 0; i < {num_of_vectors}[a]; i++, vec_i += {vec_len})
             {{
               if ((inner_prod({i_th_vec_having_norm_a}, {j_th_vec_having_norm_b}) == f) &&
                   (inner_prod({i_th_vec_having_norm_a}, {k_th_vec_having_norm_c}) == e) &&
@@ -781,7 +794,6 @@ char * {func_name}(int i_red, int a, int b, int c, int d, int e, int f)
            k_th_vec_having_norm_c=ith_vec_dict["k"],
 
            set_s_code=_set_s_code(vec_len, sty.set_si_func, ith_vec_dict, num_spaces),
-           i_inc_code=i_inc_code,
-           end_k=end_k,
-           end_j=end_j)
+           k_inc_code=k_inc_code,
+           vec_k_inc=str(num_of_procs * vec_len), vec_len=vec_len)
     return code
