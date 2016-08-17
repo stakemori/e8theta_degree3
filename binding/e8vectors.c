@@ -1,7 +1,7 @@
 #include <math.h>
 #include "e8vectors.h"
-#include <string.h>
 #include <stdlib.h>
+#include <memory.h>
 
 static inline int norm(int s[8])
 {
@@ -46,7 +46,21 @@ static void _convert_to_euclid_vector_e8(int vec[8])
     }
 }
 
-int cached_vectors[MAX_NORM + 1][MAX_NM_OF_VECTORS][8];
+static int cached_vectors0[1][8] = {0};
+static int cached_vectors1[240][8] = {0};
+static int cached_vectors2[2160][8] = {0};
+static int cached_vectors3[6720][8] = {0};
+static int cached_vectors4[17520][8] = {0};
+static int cached_vectors5[30240][8] = {0};
+static int cached_vectors6[60480][8] = {0};
+
+int * cached_vectors_ptr[] = {cached_vectors0[0],
+                              cached_vectors1[0],
+                              cached_vectors2[0],
+                              cached_vectors3[0],
+                              cached_vectors4[0],
+                              cached_vectors5[0],
+                              cached_vectors6[0]};
 static int cached_idx[MAX_NORM + 1] = {0};
 
 static void _cache_vectors(void)
@@ -81,10 +95,7 @@ static void _cache_vectors(void)
                                   if (_nm < MAX_NORM + 1)
                                     {
                                       int idx = cached_idx[_nm]++;
-                                      for (int i = 0; i < 8; i++)
-                                        {
-                                          cached_vectors[_nm][idx][i] = v[i];
-                                        }
+                                      memcpy(cached_vectors_ptr[_nm] + 8 * idx, v, 8 * sizeof(int));
                                     }
                                 }
                             }
@@ -98,14 +109,12 @@ static void _cache_vectors(void)
 
 void cache_vectors(void)
 {
-  if (! cached_vectors[1][0][0] &&
-      ! cached_vectors[1][0][1] &&
-      ! cached_vectors[1][0][2] &&
-      ! cached_vectors[1][0][3] &&
-      ! cached_vectors[1][0][4] &&
-      ! cached_vectors[1][0][5] &&
-      ! cached_vectors[1][0][6] &&
-      ! cached_vectors[1][0][7])
+  int b = 1;
+  for (int i = 0; i < 8; i++)
+    {
+      b = (! (cached_vectors_ptr[1] + 8 * 0)[i]) && b;
+    }
+  if (b)
     {
       _cache_vectors();
     }

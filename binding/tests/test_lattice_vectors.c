@@ -36,13 +36,14 @@ static inline int norm(int s[8])
 
 int test_e8vectors(void)
 {
+  cache_vectors();
   for (int i = 1; i < MAX_NORM + 1; i++)
     {
       int count = 0;
-      cache_vectors();
-      for (int j = 0; j < MAX_NM_OF_VECTORS; j++)
+      int * cached_vec = cached_vectors_ptr[i];
+      for (int j = 0; j < num_of_vectors[i]; j++, cached_vec += 8)
         {
-          if (norm(cached_vectors[i][j]) == i * 2)
+          if (norm(cached_vec) == i * 2)
             {
               count++;
             }
@@ -62,9 +63,10 @@ int test_rank16_vectors(void)
   for (int i = 1; i < MAX_NORM_RK16 + 1; i++)
     {
       int count = 0;
-      for (int j = 0; j < MAX_NM_OF_VECTORS_RK16; j++)
+      int * cached_vec = cached_vectors_rk16_ptr[i];
+      for (int j = 0; j < num_of_vectors_rk16[i]; j++, cached_vec += 16)
         {
-          if (norm_rk16(cached_vectors_rk16[i][j]) >> 1 == i)
+          if (norm_rk16(cached_vec) >> 1 == i)
             {
               count++;
             }

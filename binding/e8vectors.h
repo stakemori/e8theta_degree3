@@ -5,7 +5,8 @@
 
 #define MAX_NORM 6
 #define MAX_NM_OF_VECTORS 60480
-extern int cached_vectors[MAX_NORM + 1][MAX_NM_OF_VECTORS][8];
+
+extern int * cached_vectors_ptr[];
 
 extern int num_of_vectors[100];
 
