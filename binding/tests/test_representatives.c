@@ -297,8 +297,9 @@ void test_repr_rk16_w_idices(int a, int b, int c, int d, int e, int f)
             }
         }
       num_of_reprs_j = repr_modulo_autom_rk16_w_indices(vecs_j, num_of_vecs_j, reprs_j,
-                                                       num_of_classes_j,
-                                                       w_sign_indices, wo_sign_indices_array);
+                                                        num_of_classes_j,
+                                                        w_sign_indices, wo_sign_indices_array,
+                                                        0, 6);
       printf("%d\n", num_of_reprs_j);
       for (int j = 0; j < num_of_reprs_j; j++)
         {
@@ -317,10 +318,10 @@ void test_repr_rk16_w_idices(int a, int b, int c, int d, int e, int f)
                   memcpy(vecs_i[num_of_vecs_i++], cached_vec_a, sizeof(Rk16VecInt) * 16);
                 }
             }
-
           int num_of_reprs_i = repr_modulo_autom_rk16_w_indices(vecs_i, num_of_vecs_i, reprs_i,
                                                                 num_of_classes_i,
-                                                                w_sign_indices, wo_sign_indices_array);
+                                                                w_sign_indices,
+                                                                wo_sign_indices_array, 0, 1);
           if (num_of_reprs_i > i_reprs_max)
             {
               i_reprs_max = num_of_reprs_i;
@@ -365,26 +366,28 @@ void test_set_idices_2(void)
 
 int main()
 {
-  printf("test_norm_vec_rk16\n");
-  if (test_norm_vec_rk16())
-    {
-      printf("OK\n");
-    }
-  printf("test_repr_rk16\n");
-  if (test_repr_rk16())
-    {
-      printf("OK\n");
-    }
-  printf("test_normalize_vec_rk16_w_indices\n");
-  if (test_normalize_vec_rk16_w_indices())
-    {
-      printf("Ok\n");
-    }
+  /* printf("test_norm_vec_rk16\n"); */
+  /* if (test_norm_vec_rk16()) */
+  /*   { */
+  /*     printf("OK\n"); */
+  /*   } */
+  /* printf("test_repr_rk16\n"); */
+  /* if (test_repr_rk16()) */
+  /*   { */
+  /*     printf("OK\n"); */
+  /*   } */
+  /* printf("test_normalize_vec_rk16_w_indices\n"); */
+  /* if (test_normalize_vec_rk16_w_indices()) */
+  /*   { */
+  /*     printf("Ok\n"); */
+  /*   } */
 
-  /* test_repr_rk16_w_idices(2, 2, 2, 0, 0, 0); */
+  /* test_repr_rk16_w_idices(1, 1, 2, 0, 0, 0); */
   /* test_repr_rk16_w_idices(3, 3, 3, -2, 2, 2); */
-  /* test_repr_rk16_w_idices(1, 4, 4, 0, 0, 0); */
+  test_repr_rk16_w_idices(1, 4, 4, 0, 0, 0);
   /* test_repr_rk16_w_idices(2, 2, 4, 0, 0, 0); */
+  /* test_repr_rk16_w_idices(1, 3, 3, -2, 2, 2); */
+  /* test_repr_rk16_w_idices(1, 1, 2, 0, 0, 0); */
 
   /* test_set_idices_2(); */
   return 0;
