@@ -9,11 +9,11 @@
 /* Fourier coefficients of Eisenstein series of weight 8 */
 int num_of_vectors_rk16[8] = {1, 480, 61920, 1050240, 7926240, 37500480, 135480960, 395301120};
 
-Rk16VecInt cached_vectors0[1][16] = {0};
-Rk16VecInt cached_vectors1[480][16] = {0};
-Rk16VecInt cached_vectors2[61920][16] = {0};
-Rk16VecInt cached_vectors3[1050240][16] = {0};
-Rk16VecInt cached_vectors4[7926240][16] = {0};
+static Rk16VecInt cached_vectors0[1][16] = {0};
+static Rk16VecInt cached_vectors1[480][16] = {0};
+static Rk16VecInt cached_vectors2[61920][16] = {0};
+static Rk16VecInt cached_vectors3[1050240][16] = {0};
+static Rk16VecInt cached_vectors4[7926240][16] = {0};
 
 int *cached_vectors_rk16_ptr[] = {cached_vectors0[0], cached_vectors1[0],
                                   cached_vectors2[0], cached_vectors3[0],
