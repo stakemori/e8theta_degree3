@@ -437,7 +437,7 @@ def code_format_header_innerprod(vec_len):
     return code
 
 
-def _vec_j_normalize_code(vec_len, num_of_procs):
+def _vec_j_normalize_code(vec_len):
     if vec_len == 8:
         raise NotImplementedError
     else:
@@ -459,15 +459,14 @@ def _vec_j_normalize_code(vec_len, num_of_procs):
         }
       int num_of_reprs_j = repr_modulo_autom_rk16_w_indices(vecs_j, num_of_vecs_j, reprs_j,
                                                             num_of_classes_j,
-                                                            w_sign_indices, wo_sign_indices_array,
-                                                            i_red, %s);
+                                                            w_sign_indices, wo_sign_indices_array);
 
       if (num_of_reprs_j + 1 > MAX_NM_REPRS_RK16)
         {
           return "";
         }
 
-''' % (num_of_procs, )
+'''
 
 
 def _vec_i_normalize_code(vec_len):
@@ -495,7 +494,7 @@ def _vec_i_normalize_code(vec_len):
           int num_of_reprs_i = repr_modulo_autom_rk16_w_indices(vecs_i, num_of_vecs_i, reprs_i,
                                                                 num_of_classes_i,
                                                                 w_sign_indices,
-                                                                wo_sign_indices_array, 0, 1);
+                                                                wo_sign_indices_array);
 
 
           if (num_of_reprs_i + 1 > MAX_NM_REPRS_RK16)
@@ -652,7 +651,7 @@ def code_format_theta(func_name, wt, mat, real_part=True, factor_pol=False, sty=
             ith_vec_dict[i] = "reprs_{i}[{i}]".format(i=i)
         end_k = "num_of_reprs_k"
         end_j = "num_of_reprs_j"
-        vec_j_normalize_code = _vec_j_normalize_code(vec_len, num_of_procs)
+        vec_j_normalize_code = _vec_j_normalize_code(vec_len)
         vec_i_normalize_code = _vec_i_normalize_code(vec_len)
         code = '''
 char * {func_name}(int i_red, int a, int b, int c, int d, int e, int f)
@@ -664,7 +663,7 @@ char * {func_name}(int i_red, int a, int b, int c, int d, int e, int f)
 
 {init_code}
 
-  for (int k = 0; k < {end_k}; k++)
+  for (int k = i_red; k < {end_k}; {k_inc_code})
     {{
 {vec_j_normalize_code}
       for (int j = 0; j < {end_j}; j++)
@@ -709,7 +708,8 @@ char * {func_name}(int i_red, int a, int b, int c, int d, int e, int f)
 
            set_s_code=_set_s_code(vec_len, sty.set_si_func, ith_vec_dict, num_spaces),
            end_k=end_k,
-           end_j=end_j)
+           end_j=end_j,
+           k_inc_code="k++" if num_of_procs == 1 else "k += %s" % (num_of_procs, ))
     else:
         ith_vec_dict = {i: "%s[%s][%s]" % (cached_vectors, a, i)
                         for i, a in zip(["i", "j", "k"], ["a", "b", "c"])}

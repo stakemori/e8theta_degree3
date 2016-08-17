@@ -277,7 +277,7 @@ void test_repr_rk16_w_idices(int a, int b, int c, int d, int e, int f)
   printf("%d\n", num_of_reprs_k);
   int num_of_reprs_j;
   int i_reprs_max = 100;
-  for (int k = 0; k < num_of_reprs_k; k++)
+  for (int k = 0; k < num_of_reprs_k; k += 6)
     {
       int wo_sign_indices_array[8][16] = {0};
       int w_sign_indices[16] = {0};
@@ -298,8 +298,7 @@ void test_repr_rk16_w_idices(int a, int b, int c, int d, int e, int f)
         }
       num_of_reprs_j = repr_modulo_autom_rk16_w_indices(vecs_j, num_of_vecs_j, reprs_j,
                                                         num_of_classes_j,
-                                                        w_sign_indices, wo_sign_indices_array,
-                                                        0, 6);
+                                                        w_sign_indices, wo_sign_indices_array);
       printf("%d\n", num_of_reprs_j);
       for (int j = 0; j < num_of_reprs_j; j++)
         {
@@ -321,7 +320,7 @@ void test_repr_rk16_w_idices(int a, int b, int c, int d, int e, int f)
           int num_of_reprs_i = repr_modulo_autom_rk16_w_indices(vecs_i, num_of_vecs_i, reprs_i,
                                                                 num_of_classes_i,
                                                                 w_sign_indices,
-                                                                wo_sign_indices_array, 0, 1);
+                                                                wo_sign_indices_array);
           if (num_of_reprs_i > i_reprs_max)
             {
               i_reprs_max = num_of_reprs_i;
