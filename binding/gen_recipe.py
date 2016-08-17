@@ -85,7 +85,7 @@ def gen_wt16_16_14():
     _gen_base(wt, [mat0, mat1],
               [_cython_func_name_default(wt) + "_" + str(a) for a in range(2)],
               [_c_func_name_default(wt) + "_" + str(a) for a in range(2)],
-              is_sparse_mat=True, num_of_procs=6)
+              is_sparse_mat=True, num_of_procs=8)
 
 
 T0 = matrix([[ZZ(1), ZZ(1) / ZZ(2), ZZ(1) / ZZ(2)],

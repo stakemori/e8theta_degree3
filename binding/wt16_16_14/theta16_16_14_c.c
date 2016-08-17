@@ -199,7 +199,7 @@ char * theta_c_16_16_14_0(int i_red, int a, int b, int c, int d, int e, int f)
   static Rk16VecInt vecs_i[MAX_NM_OF_VECTORS_RK16][16];
 
 
-  for (int k = 0; k < num_of_reprs_k; k++)
+  for (int k = i_red; k < num_of_reprs_k; k += 8)
     {
 
       int wo_sign_indices_array[8][16] = {0};
@@ -219,8 +219,7 @@ char * theta_c_16_16_14_0(int i_red, int a, int b, int c, int d, int e, int f)
         }
       int num_of_reprs_j = repr_modulo_autom_rk16_w_indices(vecs_j, num_of_vecs_j, reprs_j,
                                                             num_of_classes_j,
-                                                            w_sign_indices, wo_sign_indices_array,
-                                                            i_red, 6);
+                                                            w_sign_indices, wo_sign_indices_array);
 
       if (num_of_reprs_j + 1 > MAX_NM_REPRS_RK16)
         {
@@ -250,7 +249,7 @@ char * theta_c_16_16_14_0(int i_red, int a, int b, int c, int d, int e, int f)
           int num_of_reprs_i = repr_modulo_autom_rk16_w_indices(vecs_i, num_of_vecs_i, reprs_i,
                                                                 num_of_classes_i,
                                                                 w_sign_indices,
-                                                                wo_sign_indices_array, 0, 1);
+                                                                wo_sign_indices_array);
 
 
           if (num_of_reprs_i + 1 > MAX_NM_REPRS_RK16)
@@ -1493,7 +1492,7 @@ char * theta_c_16_16_14_1(int i_red, int a, int b, int c, int d, int e, int f)
   static Rk16VecInt vecs_i[MAX_NM_OF_VECTORS_RK16][16];
 
 
-  for (int k = 0; k < num_of_reprs_k; k++)
+  for (int k = i_red; k < num_of_reprs_k; k += 8)
     {
 
       int wo_sign_indices_array[8][16] = {0};
@@ -1513,8 +1512,7 @@ char * theta_c_16_16_14_1(int i_red, int a, int b, int c, int d, int e, int f)
         }
       int num_of_reprs_j = repr_modulo_autom_rk16_w_indices(vecs_j, num_of_vecs_j, reprs_j,
                                                             num_of_classes_j,
-                                                            w_sign_indices, wo_sign_indices_array,
-                                                            i_red, 6);
+                                                            w_sign_indices, wo_sign_indices_array);
 
       if (num_of_reprs_j + 1 > MAX_NM_REPRS_RK16)
         {
@@ -1544,7 +1542,7 @@ char * theta_c_16_16_14_1(int i_red, int a, int b, int c, int d, int e, int f)
           int num_of_reprs_i = repr_modulo_autom_rk16_w_indices(vecs_i, num_of_vecs_i, reprs_i,
                                                                 num_of_classes_i,
                                                                 w_sign_indices,
-                                                                wo_sign_indices_array, 0, 1);
+                                                                wo_sign_indices_array);
 
 
           if (num_of_reprs_i + 1 > MAX_NM_REPRS_RK16)

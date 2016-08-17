@@ -42,9 +42,9 @@ def _theta16_16_14_cython_0_part(i_red_m):
 
 @cached_function
 def theta16_16_14_cython_0(m):
-    p = Pool(processes=6)
+    p = Pool(processes=8)
     try:
-        res = sum(p.map(_theta16_16_14_cython_0_part, zip(range(6), itertools.repeat(m, 6))))
+        res = sum(p.map(_theta16_16_14_cython_0_part, zip(range(8), itertools.repeat(m, 8))))
     except KeyboardInterrupt:
         p.terminate()
         p.join()
@@ -83,9 +83,9 @@ def _theta16_16_14_cython_1_part(i_red_m):
 
 @cached_function
 def theta16_16_14_cython_1(m):
-    p = Pool(processes=6)
+    p = Pool(processes=8)
     try:
-        res = sum(p.map(_theta16_16_14_cython_1_part, zip(range(6), itertools.repeat(m, 6))))
+        res = sum(p.map(_theta16_16_14_cython_1_part, zip(range(8), itertools.repeat(m, 8))))
     except KeyboardInterrupt:
         p.terminate()
         p.join()
