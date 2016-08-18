@@ -59,6 +59,17 @@ def gen_wt12():
     _gen_base(wt, [mat], [_cython_func_name_default(wt)], [_c_func_name_default(wt)])
 
 
+def gen_wt14():
+    wt = (14, 14, 14)
+    i = QuadraticField(-1, name="i").gen()
+    mat0 = matrix(3, [-5, -i, 5, 9 * i, -4, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                      3, 5 * i, 0, -2 * i, -2, 0, -4, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                      4, 6 * i, 0, -2 * i, -3, -i, -4, 0, 0, 0, 0, 0, 0, 0, 0, 0])
+    _gen_base(wt, [mat0],
+              [_cython_func_name_default(wt)], [_c_func_name_default(wt)],
+              is_sparse_mat=True, num_of_procs=8)
+
+
 def gen_wt14_13_5():
     '''
     Recipe for weight (14, 13, 5).
