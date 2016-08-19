@@ -6,11 +6,12 @@ from sage.all import mul
 from sage.arith.all import kronecker_symbol
 from sage.matrix.all import (block_diagonal_matrix, block_matrix,
                              diagonal_matrix, identity_matrix, matrix)
-from sage.misc.all import cached_function
+from sage.misc.all import cached_function, cached_method
 from sage.quadratic_forms.all import QuadraticForm, least_quadratic_nonresidue
 from sage.rings.all import QQ, ZZ, CyclotomicField, FiniteField, PolynomialRing
 
 from .reduction import _minkowski_reduction_transform_matrix
+from .utils import find_linearly_indep_indices
 
 
 def _index_of_gamma_0_gl_n(alpha, p):
@@ -530,3 +531,112 @@ def _expt_sum(S, p, alpha, i):
         return 0
     else:
         return p ** (c * (c + 1)) * p ** (b * c) * _generalized_gauss_sum(S22, p, b - i)
+
+
+class HeckeModule(object):
+
+    def __init__(self, basis):
+        '''
+        Classs for Hecke module of vector valued Siegel modular forms of degree 3.
+        :param basis: a list of dictionary whose set of keys are instances of HalfIntMatElement
+        and values are instances of ReplSpaceElement.
+        '''
+        self._basis = basis
+        self._wt = basis.values()[0].weight
+
+    @property
+    def basis(self):
+        return self._basis
+
+    def dimension(self):
+        return len(self.basis()[0].vector)
+
+    @property
+    def weight(self):
+        return self._wt
+
+    def linearly_indep_tuples(self):
+        '''
+        Return a list of (T, i) where T is an isntance of HalfIntMatElement
+        and i is an idex of vector s.t.
+        matrix([[b[T].vector[i] for b in basis] for T, i in ts]) is non-degenerate.
+        '''
+        _ts = itertools.chain(*[d.keys() for d in self.basis])
+        _ts = sorted(_ts, key=lambda x: (x.T[0, 0] + x.T[1, 1] + x.T[2, 2],
+                                         x.T[0, 0], x.T[1, 1], x.T[2, 2]))
+        ts = [(t, i) for t in _ts for i in range(self.dimension())]
+        vecs = [[d[t][i] for d in self.basis] for t, i in ts]
+        return [ts[i] for i in find_linearly_indep_indices(vecs, self.dimension())]
+
+    def matrix_representaion(self, lin_op):
+        '''
+        Let lin_op(f, t) be an endomorphsim of self, where f is
+        a modular form as dictionary and t is a tuple of
+        HalfIntMatElement and an index.
+        This medthod returns the matrix representation of lin_op.
+        '''
+        basis = self.basis()
+        lin_indep_tuples = self.linearly_indep_tuples()
+        m1 = matrix([[f[t][i] for t, i in lin_indep_tuples] for f in basis])
+        m2 = matrix([[lin_op(f, t) for t in lin_indep_tuples]
+                     for f in basis])
+        return (m2 * m1 ** (-1)).transpose()
+
+    def eigenvector_with_eigenvalue(self, lin_op, lm):
+        '''Let lin_op(f, t) be an endomorphsim of self and assume
+        it has a unique eigenvector (up to constant) with eigenvalue lm.
+        This medhod returns an eigenvector as a dictionary.
+        '''
+        basis = self.basis()
+        dim = self.dimension()
+        if hasattr(lm, "parent"):
+            K = lm.parent()
+            if hasattr(K, "fraction_field"):
+                K = K.fraction_field()
+        else:
+            K = QQ
+        A = self.matrix_representaion(lin_op)
+        S = PolynomialRing(K, names="x")
+        x = S.gens()[0]
+        f = S(A.charpoly())
+        g = S(f // (x - lm))
+        cffs_g = [g[y] for y in range(dim)]
+        A_pws = []
+        C = identity_matrix(dim)
+        for i in range(dim):
+            A_pws.append(C)
+            C = A * C
+
+        for i in range(dim):
+            clm_i = [a.columns()[i] for a in A_pws]
+            w = sum((a * v for a, v in zip(cffs_g, clm_i)))
+            if w != 0:
+                egvec = w
+                break
+        res = {}
+        for a, d in zip(egvec, basis):
+            for k in d:
+                res[k] = res.get(k, 0) + d[k] * a
+        return res
+
+    @cached_method
+    def hecke_matrix_tp(self, p):
+        '''
+        Return the representation matrix of T(p).
+        '''
+        return self.matrix_representaion(lambda f, t: tp_action_fourier_coeff(ZZ(2), t[0], f)[t[1]])
+
+    def hecke_charpoly_tp(self, p, var="x", algorithm="linbox"):
+        '''
+        Return the charasteristic polynomial of T(p).
+        '''
+        return self.hecke_matrix_tp(p).charpoly(var, algorithm=algorithm)
+
+    def eigenform_with_eigenvalue_t2(self, eigenvalue):
+        '''
+        Assuming that T(2) is semisimple,
+        Return an eigenform as a dictionary whose eigenvalue is eigenvalue.
+        :parm eigenvalue: a number
+        '''
+        return self.eigenvector_with_eigenvalue(
+            lambda f, t: tp_action_fourier_coeff(ZZ(2), t[0], f)[t[1]], eigenvalue)
