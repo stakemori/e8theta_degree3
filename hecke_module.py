@@ -632,11 +632,20 @@ class HeckeModule(object):
         '''
         return self.matrix_representaion(lambda f, t: tp_action_fourier_coeff(ZZ(2), t[0], f)[t[1]])
 
+    @cached_method
+    def hecke_matrix_tp2(self, p, i):
+        def _lin_op(f, t):
+            return tp2_action_fourier_coeff(ZZ(2), i, t[0], f)[t[1]]
+        return self.matrix_representaion(_lin_op)
+
     def hecke_charpoly_tp(self, p, var="x", algorithm="linbox"):
         '''
         Return the charasteristic polynomial of T(p).
         '''
         return self.hecke_matrix_tp(p).charpoly(var, algorithm=algorithm)
+
+    def hecke_charpoly_tp2(self, p, i, var="x", algorithm="linbox"):
+        return self.hecke_matrix_tp2(p, i).charpoly(var, algorithm=algorithm)
 
     def eigenform_with_eigenvalue_t2(self, eigenvalue):
         '''
