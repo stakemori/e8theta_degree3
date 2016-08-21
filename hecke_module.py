@@ -307,8 +307,9 @@ def spinor_l_euler_factor(p, F, t=None, T=None):
     G(p^(-s))^(-1) is the p-Euler factor of the spinor L function of F.
     '''
     p = ZZ(p)
+    base_ring = F.values()[0].vector.base_ring()
     if t is None:
-        t = PolynomialRing(QQ, 1, names='t', order="neglex").gens()[0]
+        t = PolynomialRing(base_ring, 1, names='t', order="neglex").gens()[0]
     c = {}
     tp = hecke_eigenvalue_tp(p, F, T=T)
     tpp1, tpp2, tpp3 = [hecke_eigenvalue_tp2(p, i, F, T=T) for i in [1, 2, 3]]
@@ -336,7 +337,7 @@ def rankin_convolution_degree1(f, g, p, name=None):
     k2 = g.weight()
     ap = f[p]
     bp = g[p]
-    t = PolynomialRing(QQ, 1, names='t' if name is None else name,
+    t = PolynomialRing(base_ring, 1, names='t' if name is None else name,
                        order="neglex").gens()[0]
     return (1 - ap * bp * t +
             (ap**2 * p**(k2 - 1) + bp**2 * p**(k1 - 1) - 2 * p**(k1 + k2 - 2)) * t**2 -
