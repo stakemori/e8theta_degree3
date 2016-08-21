@@ -327,7 +327,14 @@ def spinor_l_euler_factor(p, F, t=None, T=None):
     return sum((-1)**k * v * t**k for k, v in c.items())
 
 
-def rankin_convolution_degree1(f, g, p, name=None):
+def hecke_poly_degree1(f, p, name=None, dl=0):
+    t = PolynomialRing(f.base_ring(), 1, names='t' if name is None else name,
+                       order="neglex").gens()[0]
+    pl = 1 - (f[p] / f[1]) * t + p ** (f.weight() - 1) * t**2
+    return pl.subs({t: ZZ(p)**dl * t})
+
+
+def rankin_convolution_degree1(f, g, p, name=None, base_ring=QQ):
     u'''
     f, g: primitive forms of degree 1 and level 1.
     Return p-euler factor of the Rankin convolution of f and g as
