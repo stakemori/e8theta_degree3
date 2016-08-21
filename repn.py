@@ -48,10 +48,10 @@ class ReplSpaceElement(object):
         return self.__add__(other)
 
     def __mul__(self, other):
-        if other in self.vector.base_ring():
+        try:
             return self.__class__(self.vector * other, self.weight)
-        else:
-            raise ValueError
+        except:
+            raise
 
     def __rmul__(self, other):
         return self * other

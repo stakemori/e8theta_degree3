@@ -535,21 +535,24 @@ def _expt_sum(S, p, alpha, i):
 
 class HeckeModule(object):
 
-    def __init__(self, basis):
+    def __init__(self, basis, lin_indep_ts=None):
         '''
         Classs for Hecke module of vector valued Siegel modular forms of degree 3.
         :param basis: a list of dictionary whose set of keys are instances of HalfIntMatElement
         and values are instances of ReplSpaceElement.
+        :param lin_indep_ts: None or a list of instances of HalfIntMatElement. If this is given,
+        linearly_indep_tuples tries to find the result in the list.
         '''
         self._basis = basis
-        self._wt = basis.values()[0].weight
+        self._wt = basis[0].values()[0].weight
+        self._lin_indep_ts = lin_indep_ts
 
     @property
     def basis(self):
         return self._basis
 
     def dimension(self):
-        return len(self.basis()[0].vector)
+        return len(self.basis)
 
     @property
     def weight(self):
@@ -561,7 +564,10 @@ class HeckeModule(object):
         and i is an idex of vector s.t.
         matrix([[b[T].vector[i] for b in basis] for T, i in ts]) is non-degenerate.
         '''
-        _ts = itertools.chain(*[d.keys() for d in self.basis])
+        if self._lin_indep_ts:
+            _ts = self._lin_indep_ts
+        else:
+            _ts = itertools.chain(*[d.keys() for d in self.basis])
         _ts = sorted(_ts, key=lambda x: (x.T[0, 0] + x.T[1, 1] + x.T[2, 2],
                                          x.T[0, 0], x.T[1, 1], x.T[2, 2]))
         ts = [(t, i) for t in _ts for i in range(self.dimension())]
@@ -575,7 +581,7 @@ class HeckeModule(object):
         HalfIntMatElement and an index.
         This medthod returns the matrix representation of lin_op.
         '''
-        basis = self.basis()
+        basis = self.basis
         lin_indep_tuples = self.linearly_indep_tuples()
         m1 = matrix([[f[t][i] for t, i in lin_indep_tuples] for f in basis])
         m2 = matrix([[lin_op(f, t) for t in lin_indep_tuples]
@@ -587,7 +593,7 @@ class HeckeModule(object):
         it has a unique eigenvector (up to constant) with eigenvalue lm.
         This medhod returns an eigenvector as a dictionary.
         '''
-        basis = self.basis()
+        basis = self.basis
         dim = self.dimension()
         if hasattr(lm, "parent"):
             K = lm.parent()
