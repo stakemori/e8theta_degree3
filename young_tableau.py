@@ -61,6 +61,12 @@ class YoungTableu(object):
             self._row_numers = _transpose(self._col_numbers)
             return self._row_numers
 
+    def __eq__(self, other):
+        if isinstance(other, YoungTableu):
+            return (self.n == other.n) and (self.row_numbers == other.row_numbers)
+        else:
+            raise NotImplementedError
+
     def weight(self):
         return [len(l) for l in self.row_numbers]
 
