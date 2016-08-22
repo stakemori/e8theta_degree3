@@ -7,6 +7,7 @@ from sage.arith.all import kronecker_symbol
 from sage.matrix.all import (block_diagonal_matrix, block_matrix,
                              diagonal_matrix, identity_matrix, matrix)
 from sage.misc.all import cached_function, cached_method
+from sage.modules.all import vector
 from sage.quadratic_forms.all import QuadraticForm, least_quadratic_nonresidue
 from sage.rings.all import QQ, ZZ, CyclotomicField, FiniteField, PolynomialRing
 
@@ -663,3 +664,14 @@ class HeckeModule(object):
         '''
         return self.eigenvector_with_eigenvalue(
             lambda f, t: tp_action_fourier_coeff(ZZ(2), t[0], f)[t[1]], eigenvalue)
+
+    def _to_vector(self, fm, tpls=None):
+        '''
+        Returns a vector corresponding to fm.
+        By this method, self.basis becomes the standard basis.
+        '''
+        if tpls is None:
+            tpls = self.linearly_indep_tuples()
+        m1 = matrix([[f[t][i] for t, i in tpls] for f in self.basis])
+        v = vector([fm[t][i] for t, i in tpls])
+        return v * m1 ** (-1)
