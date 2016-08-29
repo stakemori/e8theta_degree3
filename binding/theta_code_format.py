@@ -128,7 +128,7 @@ def _cython_format(c_header_file, c_func_names, cython_func_names, num_of_procs)
     ext_code = "\n".join([ext_fmt.format(c_func_name=c_func_name) for c_func_name in c_func_names])
     ext_code = ('cdef extern from "{c_header_file}.h":\n'.format(
         c_header_file=c_header_file) + ext_code)
-    funcs_code = "\n".join([_cython_format_each(c_header_file, c_fcn, cy_fcn, num_of_procs)
+    funcs_code = "\n".join([_cython_format_each(c_fcn, cy_fcn, num_of_procs)
                             for c_fcn, cy_fcn in zip(c_func_names, cython_func_names)])
 
     code = '''import itertools
@@ -148,7 +148,7 @@ include "cysignals/signals.pxi"
     return code
 
 
-def _cython_format_each(c_header_file, c_func_name, cython_func_name, num_of_procs):
+def _cython_format_each(c_func_name, cython_func_name, num_of_procs):
     if num_of_procs == 1:
         theta_body = 'return _{cfn}_part((0, m))\n'.format(cfn=cython_func_name)
     else:
