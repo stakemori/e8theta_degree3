@@ -9,11 +9,11 @@
 /* Fourier coefficients of Eisenstein series of weight 8 */
 int num_of_vectors_rk16[8] = {1, 480, 61920, 1050240, 7926240, 37500480, 135480960, 395301120};
 
-static Rk16VecInt cached_vectors0[1][16] = {0};
-static Rk16VecInt cached_vectors1[480][16] = {0};
-static Rk16VecInt cached_vectors2[61920][16] = {0};
-static Rk16VecInt cached_vectors3[1050240][16] = {0};
-static Rk16VecInt cached_vectors4[7926240][16] = {0};
+static int cached_vectors0[1][16] = {0};
+static int cached_vectors1[480][16] = {0};
+static int cached_vectors2[61920][16] = {0};
+static int cached_vectors3[1050240][16] = {0};
+static int cached_vectors4[7926240][16] = {0};
 
 int *cached_vectors_rk16_ptr[] = {cached_vectors0[0], cached_vectors1[0],
                                   cached_vectors2[0], cached_vectors3[0],
@@ -23,7 +23,7 @@ static int cached_idx[MAX_NORM_RK16 + 1] = {0};
 
 /* convert vec to an element of a sub lattice of (2Z)^16 */
 /* (s0, ... , s15) to (s0, s1 + 2s0, ..., s0 + 2s14, s0 + 2(s1 + ... + s14) + 4s15) */
-static void _convert_to_euclid_vector_rk16(Rk16VecInt vec[16]){
+static void _convert_to_euclid_vector_rk16(int vec[16]){
   vec[15] = 4 * vec[15];
   for (int i = 1; i < 15; i++)
     {
@@ -143,7 +143,7 @@ static void _cache_vectors(void)
                                                                                                                               _convert_to_euclid_vector_rk16(v);
                                                                                                                               int _nm = nrm15 >> 3;
                                                                                                                               int idx = cached_idx[_nm]++;
-                                                                                                                              memcpy(cached_vectors_rk16_ptr[_nm] + 16 * idx, v, 16 * sizeof(Rk16VecInt));
+                                                                                                                              memcpy(cached_vectors_rk16_ptr[_nm] + 16 * idx, v, 16 * sizeof(int));
                                                                                                                             }
                                                                                                                         }
                                                                                                                     }
@@ -191,9 +191,9 @@ void cache_vectors_rk16(void)
 }
 
 
-inline int vec_equal(const Rk16VecInt vec1[16], const Rk16VecInt vec2[16])
+inline int vec_equal(const int vec1[16], const int vec2[16])
 {
-  return !(memcmp(vec1, vec2, 16 * sizeof(Rk16VecInt)));
+  return !(memcmp(vec1, vec2, 16 * sizeof(int)));
 }
 
 int repr_modulo_autom_rk16(int n, int reprs[MAX_NM_REPRS_RK16][16],
@@ -206,15 +206,15 @@ int repr_modulo_autom_rk16(int n, int reprs[MAX_NM_REPRS_RK16][16],
    Set num_of_repres so that ith element of num_of_repres is the number of
    vectors in L L equivalent to the ith element of reprs.
    Finally, return the number of representatives.
- */
+*/
 {
   int num = 0;
   int found;
-  Rk16VecInt vec[16] = {0};
-  Rk16VecInt * ptr = cached_vectors_rk16_ptr[n];
+  int vec[16] = {0};
+  int * ptr = cached_vectors_rk16_ptr[n];
   for (int i = 0; i < num_of_vectors_rk16[n]; i++, ptr += 16)
     {
-      memcpy(vec, ptr, sizeof(Rk16VecInt) * 16);
+      memcpy(vec, ptr, sizeof(int) * 16);
       normalize_vec_last_len_elts(vec, 16, 9);
       found = 0;
       for (int j = 0; j < num; j++)
@@ -228,7 +228,7 @@ int repr_modulo_autom_rk16(int n, int reprs[MAX_NM_REPRS_RK16][16],
         }
       if (! found)
         {
-          memcpy(reprs[num], vec, 16 * sizeof(Rk16VecInt));
+          memcpy(reprs[num], vec, 16 * sizeof(int));
           num_of_classes[num] = 1;
           num++;
         }
@@ -237,22 +237,22 @@ int repr_modulo_autom_rk16(int n, int reprs[MAX_NM_REPRS_RK16][16],
 }
 
 
-inline int repr_modulo_autom_rk16_w_indices(Rk16VecInt vecs[MAX_NM_OF_VECTORS_RK16][16],
+inline int repr_modulo_autom_rk16_w_indices(int vecs[MAX_NM_OF_VECTORS_RK16][16],
                                             int num_of_vecs,
                                             int reprs[MAX_NM_REPRS_RK16][16],
                                             unsigned int num_of_classes[MAX_NM_REPRS_RK16],
                                             int w_sign_indices[16],
                                             int wo_sign_indices_array[8][16])
 /* Similar to repr_modulo_autom_rk16 but the representative is computed by
-normalize_vec_w_indices and cached_vectors_rk16[n] is replaced by vecs.
-num_of_vecs is the actual length of vecs.*/
+   normalize_vec_w_indices and cached_vectors_rk16[n] is replaced by vecs.
+   num_of_vecs is the actual length of vecs.*/
 {
   int num = 0;
   int found;
-  Rk16VecInt vec[16] = {0};
+  int vec[16] = {0};
   for (int i = 0; i < num_of_vecs; i++)
     {
-      memcpy(vec, vecs[i], sizeof(Rk16VecInt) * 16);
+      memcpy(vec, vecs[i], sizeof(int) * 16);
       normalize_vec_w_indices(vec, w_sign_indices, wo_sign_indices_array);
       found = 0;
       for (int j = 0; j < num; j++)
@@ -266,7 +266,7 @@ num_of_vecs is the actual length of vecs.*/
         }
       if (! found)
         {
-          memcpy(reprs[num], vec, 16 * sizeof(Rk16VecInt));
+          memcpy(reprs[num], vec, 16 * sizeof(int));
           num_of_classes[num] = 1;
           num++;
         }
@@ -274,7 +274,7 @@ num_of_vecs is the actual length of vecs.*/
   return num;
 }
 
-void set_w_sign_indices_rk16(int indices[16], const Rk16VecInt vec[16])
+void set_w_sign_indices_rk16(int indices[16], const int vec[16])
 {
   int idx = 0;
   /* 7 is hard-coded */
@@ -287,8 +287,8 @@ void set_w_sign_indices_rk16(int indices[16], const Rk16VecInt vec[16])
     }
 }
 
-void set_w_sign_indices_rk16_2(int indices[16], const Rk16VecInt vec1[16],
-                               const Rk16VecInt vec2[16])
+void set_w_sign_indices_rk16_2(int indices[16], const int vec1[16],
+                               const int vec2[16])
 {
   int idx = 0;
   /* 7 is hard-coded */
@@ -301,7 +301,7 @@ void set_w_sign_indices_rk16_2(int indices[16], const Rk16VecInt vec1[16],
     }
 }
 
-void set_wo_sign_indices_array(int indices_array[8][16], const Rk16VecInt vec[16])
+void set_wo_sign_indices_array(int indices_array[8][16], const int vec[16])
 {
   int max = vec[0];
   int min = vec[0];
@@ -340,8 +340,8 @@ void set_wo_sign_indices_array(int indices_array[8][16], const Rk16VecInt vec[16
     }
 }
 
-void set_wo_sign_indices_array2(int indices_array[8][16], const Rk16VecInt vec1[16],
-                                const Rk16VecInt vec2[16])
+void set_wo_sign_indices_array2(int indices_array[8][16], const int vec1[16],
+                                const int vec2[16])
 {
   int indices_array2[8][16] = {0};
   set_wo_sign_indices_array(indices_array2, vec2);

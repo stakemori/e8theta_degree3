@@ -5,7 +5,7 @@
 #include <mpir.h>
 #include "memory.h"
 
-Rk16VecInt inner_prod(Rk16VecInt s[16], Rk16VecInt t[16])
+int inner_prod(int s[16], int t[16])
 {
   return (s[0]*t[0] + s[1]*t[1] + s[2]*t[2] + s[3]*t[3] + s[4]*t[4] + s[5]*t[5] +
           s[6]*t[6] + s[7]*t[7] + s[8]*t[8] + s[9]*t[9] + s[10]*t[10] + s[11]*t[11] +
@@ -179,8 +179,8 @@ char * theta_c_16_16_14_0(int i_red, int a, int b, int c, int d, int e, int f)
   mpz_set_str(normalizig_num, "1", 10);
   mpz_mul_2exp(normalizig_num, normalizig_num, 22);
 
-  static Rk16VecInt reprs_k[MAX_NM_REPRS_RK16][16];
-  static Rk16VecInt reprs_j[MAX_NM_REPRS_RK16][16];
+  static int reprs_k[MAX_NM_REPRS_RK16][16];
+  static int reprs_j[MAX_NM_REPRS_RK16][16];
   static unsigned int num_of_classes_k[MAX_NM_REPRS_RK16];
   static unsigned int num_of_classes_j[MAX_NM_REPRS_RK16];
 
@@ -192,11 +192,11 @@ char * theta_c_16_16_14_0(int i_red, int a, int b, int c, int d, int e, int f)
       return "";
     }
 
-  static Rk16VecInt vecs_j[MAX_NM_OF_VECTORS_RK16][16];
+  static int vecs_j[MAX_NM_OF_VECTORS_RK16][16];
 
-  static Rk16VecInt reprs_i[MAX_NM_REPRS_RK16][16];
+  static int reprs_i[MAX_NM_REPRS_RK16][16];
   static unsigned int num_of_classes_i[MAX_NM_REPRS_RK16];
-  static Rk16VecInt vecs_i[MAX_NM_OF_VECTORS_RK16][16];
+  static int vecs_i[MAX_NM_OF_VECTORS_RK16][16];
 
 
   for (int k = i_red; k < num_of_reprs_k; k += 8)
@@ -208,13 +208,13 @@ char * theta_c_16_16_14_0(int i_red, int a, int b, int c, int d, int e, int f)
       set_wo_sign_indices_array(wo_sign_indices_array, reprs_k[k]);
       int num_of_vecs_j = 0;
 
-      Rk16VecInt * cached_vec_b = cached_vectors_rk16_ptr[b];
+      int * cached_vec_b = cached_vectors_rk16_ptr[b];
 
       for (int j = 0; j < num_of_vectors_rk16[b]; j++, cached_vec_b += 16)
         {
           if (inner_prod(cached_vec_b, reprs_k[k]) == d)
             {
-              memcpy(vecs_j[num_of_vecs_j++], cached_vec_b, sizeof(Rk16VecInt) * 16);
+              memcpy(vecs_j[num_of_vecs_j++], cached_vec_b, sizeof(int) * 16);
             }
         }
       int num_of_reprs_j = repr_modulo_autom_rk16_w_indices(vecs_j, num_of_vecs_j, reprs_j,
@@ -236,13 +236,13 @@ char * theta_c_16_16_14_0(int i_red, int a, int b, int c, int d, int e, int f)
           set_w_sign_indices_rk16_2(w_sign_indices, reprs_j[j], reprs_k[k]);
 
           int num_of_vecs_i = 0;
-          Rk16VecInt * cached_vec_a = cached_vectors_rk16_ptr[a];
+          int * cached_vec_a = cached_vectors_rk16_ptr[a];
           for (int l = 0; l < num_of_vectors_rk16[a]; l++, cached_vec_a += 16)
             {
               if ((inner_prod(cached_vec_a, reprs_k[k]) == e) &&
                   (inner_prod(cached_vec_a, reprs_j[j]) == f))
                 {
-                  memcpy(vecs_i[num_of_vecs_i++], cached_vec_a, sizeof(Rk16VecInt) * 16);
+                  memcpy(vecs_i[num_of_vecs_i++], cached_vec_a, sizeof(int) * 16);
                 }
             }
 
@@ -1472,8 +1472,8 @@ char * theta_c_16_16_14_1(int i_red, int a, int b, int c, int d, int e, int f)
   mpz_set_str(normalizig_num, "1", 10);
   mpz_mul_2exp(normalizig_num, normalizig_num, 22);
 
-  static Rk16VecInt reprs_k[MAX_NM_REPRS_RK16][16];
-  static Rk16VecInt reprs_j[MAX_NM_REPRS_RK16][16];
+  static int reprs_k[MAX_NM_REPRS_RK16][16];
+  static int reprs_j[MAX_NM_REPRS_RK16][16];
   static unsigned int num_of_classes_k[MAX_NM_REPRS_RK16];
   static unsigned int num_of_classes_j[MAX_NM_REPRS_RK16];
 
@@ -1485,11 +1485,11 @@ char * theta_c_16_16_14_1(int i_red, int a, int b, int c, int d, int e, int f)
       return "";
     }
 
-  static Rk16VecInt vecs_j[MAX_NM_OF_VECTORS_RK16][16];
+  static int vecs_j[MAX_NM_OF_VECTORS_RK16][16];
 
-  static Rk16VecInt reprs_i[MAX_NM_REPRS_RK16][16];
+  static int reprs_i[MAX_NM_REPRS_RK16][16];
   static unsigned int num_of_classes_i[MAX_NM_REPRS_RK16];
-  static Rk16VecInt vecs_i[MAX_NM_OF_VECTORS_RK16][16];
+  static int vecs_i[MAX_NM_OF_VECTORS_RK16][16];
 
 
   for (int k = i_red; k < num_of_reprs_k; k += 8)
@@ -1501,13 +1501,13 @@ char * theta_c_16_16_14_1(int i_red, int a, int b, int c, int d, int e, int f)
       set_wo_sign_indices_array(wo_sign_indices_array, reprs_k[k]);
       int num_of_vecs_j = 0;
 
-      Rk16VecInt * cached_vec_b = cached_vectors_rk16_ptr[b];
+      int * cached_vec_b = cached_vectors_rk16_ptr[b];
 
       for (int j = 0; j < num_of_vectors_rk16[b]; j++, cached_vec_b += 16)
         {
           if (inner_prod(cached_vec_b, reprs_k[k]) == d)
             {
-              memcpy(vecs_j[num_of_vecs_j++], cached_vec_b, sizeof(Rk16VecInt) * 16);
+              memcpy(vecs_j[num_of_vecs_j++], cached_vec_b, sizeof(int) * 16);
             }
         }
       int num_of_reprs_j = repr_modulo_autom_rk16_w_indices(vecs_j, num_of_vecs_j, reprs_j,
@@ -1529,13 +1529,13 @@ char * theta_c_16_16_14_1(int i_red, int a, int b, int c, int d, int e, int f)
           set_w_sign_indices_rk16_2(w_sign_indices, reprs_j[j], reprs_k[k]);
 
           int num_of_vecs_i = 0;
-          Rk16VecInt * cached_vec_a = cached_vectors_rk16_ptr[a];
+          int * cached_vec_a = cached_vectors_rk16_ptr[a];
           for (int l = 0; l < num_of_vectors_rk16[a]; l++, cached_vec_a += 16)
             {
               if ((inner_prod(cached_vec_a, reprs_k[k]) == e) &&
                   (inner_prod(cached_vec_a, reprs_j[j]) == f))
                 {
-                  memcpy(vecs_i[num_of_vecs_i++], cached_vec_a, sizeof(Rk16VecInt) * 16);
+                  memcpy(vecs_i[num_of_vecs_i++], cached_vec_a, sizeof(int) * 16);
                 }
             }
 

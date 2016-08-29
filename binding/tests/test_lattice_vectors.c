@@ -2,7 +2,7 @@
 #include "rank16_vectors.h"
 #include <stdio.h>
 
-static inline Rk16VecInt norm_rk16(Rk16VecInt s[16])
+static inline int norm_rk16(int s[16])
 {
   int sum = 0;
   for (int i = 0; i < 16; i++)

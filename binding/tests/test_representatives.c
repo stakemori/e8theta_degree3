@@ -6,7 +6,7 @@
 #include "vector_utils.h"
 #include "mpir.h"
 
-Rk16VecInt inner_prod_rk16(Rk16VecInt s[16], Rk16VecInt t[16])
+int inner_prod_rk16(int s[16], int t[16])
 {
   int sum = 0;
   for (int i = 0; i < 16; i++)
@@ -28,10 +28,10 @@ static void print_vec(int * vec, int a)
 int test_norm_vec_rk16(void)
 {
   cache_vectors_rk16();
-  Rk16VecInt vec1[16];
-  Rk16VecInt vec2[16];
-  Rk16VecInt vec3[16];
-  Rk16VecInt vec4[16];
+  int vec1[16];
+  int vec2[16];
+  int vec3[16];
+  int vec4[16];
   int bl = 1;
   int * cached_vec = cached_vectors_rk16_ptr[2];
   for (int i = 0; i < num_of_vectors_rk16[2]; i++, cached_vec += 16)
@@ -66,10 +66,10 @@ int test_norm_vec_rk16(void)
               bl = bl && (vec1[j] == -vec2[j]);
             }
           if (! bl) {
-              printf("False: unchagne.\n");
-              print_vec(vec1, 16);
-              print_vec(vec2, 16);
-              return 0;
+            printf("False: unchagne.\n");
+            print_vec(vec1, 16);
+            print_vec(vec2, 16);
+            return 0;
           }
         }
 
@@ -105,11 +105,11 @@ int test_norm_vec_rk16(void)
 
 int test_repr_rk16(void)
 {
-  static Rk16VecInt _reprs_rk16[MAX_NM_REPRS_RK16][16];
+  static int _reprs_rk16[MAX_NM_REPRS_RK16][16];
   static unsigned int num_of_reprs_rk16[MAX_NM_REPRS_RK16];
   int n = 2;
   int num;
-  Rk16VecInt vec[16];
+  int vec[16];
   for (int i = 0; i < n + 1; i++)
     {
       num = repr_modulo_autom_rk16(i, _reprs_rk16, num_of_reprs_rk16);
@@ -119,7 +119,7 @@ int test_repr_rk16(void)
   for (int i = 0; i < num; i++)
     {
       s += num_of_reprs_rk16[i];
-      memcpy(vec, _reprs_rk16[i], sizeof(Rk16VecInt) * 16);
+      memcpy(vec, _reprs_rk16[i], sizeof(int) * 16);
       if (inner_prod_rk16(vec, vec) != 2 * n)
         {
           printf("False: norm\n");
@@ -136,7 +136,7 @@ int test_repr_rk16(void)
       return 0;
     }
   /* cache_vectors_rk16(); */
-  /* Rk16VecInt vec[16]; */
+  /* int vec[16]; */
   /* for (int i = 0; i < num_of_vectors_rk16[2]; i++) */
   /*   { */
   /*     for (int j = 0; j < 16; j++) */
@@ -151,7 +151,7 @@ int test_repr_rk16(void)
 }
 
 
-int vec_equal(Rk16VecInt * vec1, Rk16VecInt * vec2, int start, int end)
+int vec_equal(int * vec1, int * vec2, int start, int end)
 {
   int is_equal = 1;
   for (int i = start; i < end; i++)
@@ -161,7 +161,7 @@ int vec_equal(Rk16VecInt * vec1, Rk16VecInt * vec2, int start, int end)
   return is_equal;
 }
 
-void abs_vec(Rk16VecInt * vec, int len)
+void abs_vec(int * vec, int len)
 {
   for (int i = 0; i < len; i++)
     {
@@ -169,10 +169,10 @@ void abs_vec(Rk16VecInt * vec, int len)
     }
 }
 
-int equal_as_multiset(Rk16VecInt vec1[16], Rk16VecInt vec2[16], int start, int end)
+int equal_as_multiset(int vec1[16], int vec2[16], int start, int end)
 {
-  Rk16VecInt _vec1[16];
-  Rk16VecInt _vec2[16];
+  int _vec1[16];
+  int _vec2[16];
   for (int i = start; i < end; i++)
     {
       _vec1[i - start] = vec1[i];
@@ -196,14 +196,14 @@ int test_normalize_vec_rk16_w_indices(void)
     {
       non_zero_idcss[0][i - 12] = i;
     }
-  Rk16VecInt vec[16];
-  Rk16VecInt vec1[16];
+  int vec[16];
+  int vec1[16];
   int num = 2;
   int * cached_vec = cached_vectors_rk16_ptr[num];
   for (int i = 0; i < num_of_vectors_rk16[num]; i++, cached_vec += 16)
     {
-      memcpy(vec, cached_vec, 16 * sizeof(Rk16VecInt));
-      memcpy(vec1, vec, 16 * sizeof(Rk16VecInt));
+      memcpy(vec, cached_vec, 16 * sizeof(int));
+      memcpy(vec1, vec, 16 * sizeof(int));
       normalize_vec_w_indices(vec, zero_idcs, non_zero_idcss);
       /* printf("raw:\n"); */
       /* print_vec(vec1, 16); */
@@ -255,17 +255,17 @@ void test_normalize_vec_rk16_w_indices_1(void)
 void test_repr_rk16_w_idices(int a, int b, int c, int d, int e, int f)
 {
   cache_vectors_rk16();
-  static Rk16VecInt reprs_k[MAX_NM_REPRS_RK16][16];
+  static int reprs_k[MAX_NM_REPRS_RK16][16];
   static unsigned int num_of_classes_k[MAX_NM_REPRS_RK16];
 
-  static Rk16VecInt reprs_j[MAX_NM_REPRS_RK16][16];
+  static int reprs_j[MAX_NM_REPRS_RK16][16];
   static unsigned int num_of_classes_j[MAX_NM_REPRS_RK16];
-  static Rk16VecInt vecs_j[MAX_NM_OF_VECTORS_RK16][16];
+  static int vecs_j[MAX_NM_OF_VECTORS_RK16][16];
   int num_of_vecs_j;
 
-  static Rk16VecInt reprs_i[MAX_NM_REPRS_RK16][16];
+  static int reprs_i[MAX_NM_REPRS_RK16][16];
   static unsigned int num_of_classes_i[MAX_NM_REPRS_RK16];
-  static Rk16VecInt vecs_i[MAX_NM_OF_VECTORS_RK16][16];
+  static int vecs_i[MAX_NM_OF_VECTORS_RK16][16];
 
   int num_of_reprs_k = repr_modulo_autom_rk16(c, reprs_k, num_of_classes_k);
 
@@ -288,12 +288,12 @@ void test_repr_rk16_w_idices(int a, int b, int c, int d, int e, int f)
       print_vec(w_sign_indices, 16);
 
       num_of_vecs_j = 0;
-      Rk16VecInt * cached_vec_b = cached_vectors_rk16_ptr[b];
+      int * cached_vec_b = cached_vectors_rk16_ptr[b];
       for (int l = 0; l < num_of_vectors_rk16[b]; l++, cached_vec_b += 16)
         {
           if (inner_prod_rk16(cached_vec_b, reprs_k[k]) == d)
             {
-              memcpy(vecs_j[num_of_vecs_j++], cached_vec_b, sizeof(Rk16VecInt) * 16);
+              memcpy(vecs_j[num_of_vecs_j++], cached_vec_b, sizeof(int) * 16);
             }
         }
       num_of_reprs_j = repr_modulo_autom_rk16_w_indices(vecs_j, num_of_vecs_j, reprs_j,
@@ -308,13 +308,13 @@ void test_repr_rk16_w_idices(int a, int b, int c, int d, int e, int f)
           set_w_sign_indices_rk16_2(w_sign_indices, reprs_j[j], reprs_k[k]);
 
           int num_of_vecs_i = 0;
-          Rk16VecInt * cached_vec_a = cached_vectors_rk16_ptr[a];
+          int * cached_vec_a = cached_vectors_rk16_ptr[a];
           for (int l = 0; l < num_of_vectors_rk16[a]; l++, cached_vec_a += 16)
             {
               if ((inner_prod_rk16(cached_vec_a, reprs_k[k]) == e) &&
                   (inner_prod_rk16(cached_vec_a, reprs_j[j]) == f))
                 {
-                  memcpy(vecs_i[num_of_vecs_i++], cached_vec_a, sizeof(Rk16VecInt) * 16);
+                  memcpy(vecs_i[num_of_vecs_i++], cached_vec_a, sizeof(int) * 16);
                 }
             }
           int num_of_reprs_i = repr_modulo_autom_rk16_w_indices(vecs_i, num_of_vecs_i, reprs_i,
@@ -342,8 +342,8 @@ void test_repr_rk16_w_idices(int a, int b, int c, int d, int e, int f)
 void test_set_idices_2(void)
 {
   {
-    Rk16VecInt vec1[16] = {0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1};
-    Rk16VecInt vec2[16] = {0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0};
+    int vec1[16] = {0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1};
+    int vec2[16] = {0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0};
     int indices_array[8][16] = {0};
     set_wo_sign_indices_array2(indices_array, vec1, vec2);
     for (int i = 0; indices_array[i][0]; i++)
@@ -352,8 +352,8 @@ void test_set_idices_2(void)
       }
   }
   {
-    Rk16VecInt vec1[16] = {0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1};
-    Rk16VecInt vec2[16] = {0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 2, 0, 2, 2, 0};
+    int vec1[16] = {0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1};
+    int vec2[16] = {0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 2, 0, 2, 2, 0};
     int indices_array[8][16] = {0};
     set_wo_sign_indices_array2(indices_array, vec1, vec2);
     for (int i = 0; indices_array[i][0]; i++)
