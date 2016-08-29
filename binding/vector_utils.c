@@ -1,5 +1,6 @@
 #include "vector_utils.h"
 #include <stdio.h>
+#include "memory.h"
 
 static int cmpfunc(const void * a, const void * b)
 {
@@ -127,5 +128,143 @@ void normalize_vec_last_len_elts(int * vec, int vec_len, int len)
   for (int i = 0; i < len; i++)
     {
       vec[i + vec_len - len] = vec1[i];
+    }
+}
+
+
+void set_w_sign_indices(int * indices, const int * vec, int vec_len, int zero_len)
+/* Used for constructing the second argument of normalize_vec_w_indices.*/
+{
+  int idx = 0;
+  for (int k = vec_len - zero_len; k < vec_len; k++)
+    {
+      if (vec[k] == 0)
+        {
+          indices[idx++] = k;
+        }
+    }
+}
+
+void set_w_sign_indices_2(int * indices, const int * vec1, const int * vec2,
+                          int vec_len, int zero_len)
+/* Used for constructing the second argument of normalize_vec_w_indices.*/
+{
+  int idx = 0;
+  for (int k = vec_len - zero_len; k < vec_len; k++)
+    {
+      if ((vec1[k] == 0) && (vec2[k] == 0))
+        {
+          indices[idx++] = k;
+        }
+    }
+}
+
+
+void set_wo_sign_indices_array(int indices_array[8][16], const int * vec, int vec_len,
+                               int zero_len)
+/* Used for constructing the third argument of normalize_vec_w_indices. */
+{
+  int max = vec[0];
+  int min = vec[0];
+  int non_zero_len = vec_len - zero_len;
+  /* Set max and min of vec. */
+  for (int i = 0; i < vec_len; i++)
+    {
+      if (vec[i] > max)
+        {
+          max = vec[i];
+        }
+      if (vec[i] < min)
+        {
+          min = vec[i];
+        }
+    }
+
+  int idx = 0;
+  for (int k = min; k < max + 1; k++)
+    {
+      if (k)
+        {
+          int count = 0;
+          int idx_vec[16] = {0};
+          for (int l = non_zero_len; l < vec_len; l++)
+            {
+              if (k == vec[l])
+                {
+                  idx_vec[count++] = l;
+                }
+            }
+          if (count > 1)
+            {
+              memcpy(indices_array[idx++], idx_vec, sizeof(int) * count);
+            }
+        }
+    }
+}
+
+
+void set_wo_sign_indices_array2(int indices_array[8][16], const int * vec1,
+                                const int * vec2, int vec_len, int zero_len)
+/* Used for constructing the third argument of normalize_vec_w_indices. */
+{
+  int indices_array2[8][16] = {0};
+  set_wo_sign_indices_array(indices_array2, vec2, vec_len, zero_len);
+  int max = vec1[0];
+  int min = vec1[0];
+  int non_zero_len = vec_len - zero_len;
+  /* Set max and min of vec1. */
+  for (int i = non_zero_len; i < vec_len; i++)
+    {
+      if (vec1[i] > max)
+        {
+          max = vec1[i];
+        }
+      if (vec1[i] < min)
+        {
+          min = vec1[i];
+        }
+    }
+
+  int idx = 0;
+
+  /* non-zero entries of vec2 and any entries of vec1. */
+  for (int idx2 = 0; indices_array2[idx2][0]; idx2++)
+    {
+      for (int i = min; i < max + 1; i++)
+        {
+          int count = 0;
+          int idx_vec[16] = {0};
+          for (int j = 0; indices_array2[idx2][j]; j++)
+            {
+              if (i == vec1[indices_array2[idx2][j]])
+                {
+                  idx_vec[count++] = indices_array2[idx2][j];
+                }
+            }
+          if (count > 1)
+            {
+              memcpy(indices_array[idx++], idx_vec, sizeof(int) * count);
+            }
+        }
+    }
+
+  /* zero entries of vec2 and any enties of vec1. */
+  int zero_idcs[16] = {0};
+  set_w_sign_indices(zero_idcs, vec2, vec_len, zero_len);
+  for (int i = min; i < max + 1; i++)
+    {
+      int count = 0;
+      int idx_vec[16] = {0};
+      for (int j = 0; zero_idcs[j]; j++)
+        {
+          if (i == vec1[zero_idcs[j]])
+            {
+              idx_vec[count++] = zero_idcs[j];
+            }
+        }
+      if (count > 1)
+        {
+          memcpy(indices_array[idx++], idx_vec, sizeof(int) * count);
+        }
     }
 }

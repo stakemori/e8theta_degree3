@@ -242,8 +242,8 @@ void test_normalize_vec_rk16_w_indices_1(void)
   int vec1[16] = {0, 0, 0, 0, 0, 0, 0, 3, 4, 5, 1, 3, -100, 100, 30, -9};
   int wo_sign_indices_array[8][16] = {0};
   int idx_array[16] = {0};
-  set_w_sign_indices_rk16(idx_array, vec);
-  set_wo_sign_indices_array(wo_sign_indices_array, vec);
+  set_w_sign_indices(idx_array, vec, 16, 9);
+  set_wo_sign_indices_array(wo_sign_indices_array, vec, 16, 9);
   normalize_vec_w_indices(vec1, idx_array, wo_sign_indices_array);
   print_vec(vec1, 16);
   for (int j = 0; wo_sign_indices_array[j][0]; j++)
@@ -283,8 +283,8 @@ void test_repr_rk16_w_idices(int a, int b, int c, int d, int e, int f)
       int w_sign_indices[16] = {0};
       printf("k: %d\n", k);
       print_vec(reprs_k[k], 16);
-      set_w_sign_indices_rk16(w_sign_indices, reprs_k[k]);
-      set_wo_sign_indices_array(wo_sign_indices_array, reprs_k[k]);
+      set_w_sign_indices(w_sign_indices, reprs_k[k], 16, 9);
+      set_wo_sign_indices_array(wo_sign_indices_array, reprs_k[k], 16, 9);
       print_vec(w_sign_indices, 16);
 
       num_of_vecs_j = 0;
@@ -304,8 +304,8 @@ void test_repr_rk16_w_idices(int a, int b, int c, int d, int e, int f)
         {
           int wo_sign_indices_array[8][16] = {0};
           int w_sign_indices[16] = {0};
-          set_wo_sign_indices_array2(wo_sign_indices_array, reprs_j[j], reprs_k[k]);
-          set_w_sign_indices_rk16_2(w_sign_indices, reprs_j[j], reprs_k[k]);
+          set_wo_sign_indices_array2(wo_sign_indices_array, reprs_j[j], reprs_k[k], 16, 9);
+          set_w_sign_indices_2(w_sign_indices, reprs_j[j], reprs_k[k], 16, 9);
 
           int num_of_vecs_i = 0;
           int * cached_vec_a = cached_vectors_rk16_ptr[a];
@@ -345,7 +345,7 @@ void test_set_idices_2(void)
     int vec1[16] = {0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1};
     int vec2[16] = {0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0};
     int indices_array[8][16] = {0};
-    set_wo_sign_indices_array2(indices_array, vec1, vec2);
+    set_wo_sign_indices_array2(indices_array, vec1, vec2, 16, 9);
     for (int i = 0; indices_array[i][0]; i++)
       {
         print_vec(indices_array[i], 16);
@@ -355,11 +355,22 @@ void test_set_idices_2(void)
     int vec1[16] = {0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1};
     int vec2[16] = {0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 2, 0, 2, 2, 0};
     int indices_array[8][16] = {0};
-    set_wo_sign_indices_array2(indices_array, vec1, vec2);
+    set_wo_sign_indices_array2(indices_array, vec1, vec2, 16, 9);
     for (int i = 0; indices_array[i][0]; i++)
       {
         print_vec(indices_array[i], 16);
       }
+  }
+  {
+    int vec1[8] = {0, 0, 0, 0, 0, 0, 1, 1};
+    int vec2[16] = {0, 0, 0, 0, 1, 1, 1, 1};
+    int indices_array[8][16] = {0};
+    set_wo_sign_indices_array2(indices_array, vec1, vec2, 8, 2);
+    for (int i = 0; indices_array[i][0]; i++)
+      {
+        print_vec(indices_array[i], 16);
+      }
+
   }
 }
 

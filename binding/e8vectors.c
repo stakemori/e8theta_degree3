@@ -1,5 +1,6 @@
 #include <math.h>
 #include "e8vectors.h"
+#include "vector_utils.h"
 #include <stdlib.h>
 #include <memory.h>
 
@@ -153,6 +154,83 @@ void cache_vectors(void)
       _cache_vectors();
     }
 }
+
+/* Code for representatives. */
+/* TODO: REMOVE DUPLICATE OF CODE. */
+
+static inline int vec_equal(const int vec1[8], const int vec2[8])
+{
+  return !(memcmp(vec1, vec2, 8 * sizeof(int)));
+}
+
+int repr_modulo_autom(int n, int reprs[MAX_NM_REPRS][8],
+                      unsigned int num_of_classes[MAX_NM_REPRS])
+/* Similar to repr_modulo_autom_rk16 but for the E8 lattice
+ and "the first 7 entries" => "the first 6 entries"*/
+{
+  int num = 0;
+  int found;
+  int vec[8] = {0};
+  int * ptr = cached_vectors_ptr[n];
+  for (int i = 0; i < num_of_vectors[n]; i++, ptr += 8)
+    {
+      memcpy(vec, ptr, sizeof(int) * 8);
+      normalize_vec_last_len_elts(vec, 8, 2);
+      found = 0;
+      for (int j = 0; j < num; j++)
+        {
+          found = vec_equal(reprs[j], vec);
+          if (found)
+            {
+              num_of_classes[j]++;
+              break;
+            }
+        }
+      if (! found)
+        {
+          memcpy(reprs[num], vec, 8 * sizeof(int));
+          num_of_classes[num] = 1;
+          num++;
+        }
+    }
+  return num;
+}
+
+int repr_modulo_autom_w_indices(int vecs[MAX_NM_OF_VECTORS][8],
+                                int num_of_vecs,
+                                int reprs[MAX_NM_REPRS][8],
+                                unsigned int num_of_classes[MAX_NM_REPRS],
+                                int w_sign_indices[8],
+                                int wo_sign_indices_array[8][16])
+/* Similar to repr_modulo_autom_rk16_w_indices but for the E8 lattice.*/
+{
+  int num = 0;
+  int found;
+  int vec[8] = {0};
+  for (int i = 0; i < num_of_vecs; i++)
+    {
+      memcpy(vec, vecs[i], sizeof(int) * 8);
+      normalize_vec_w_indices(vec, w_sign_indices, wo_sign_indices_array);
+      found = 0;
+      for (int j = 0; j < num; j++)
+        {
+          found = vec_equal(reprs[j], vec);
+          if (found)
+            {
+              num_of_classes[j]++;
+              break;
+            }
+        }
+      if (! found)
+        {
+          memcpy(reprs[num], vec, 8 * sizeof(int));
+          num_of_classes[num] = 1;
+          num++;
+        }
+    }
+  return num;
+}
+
 
 /* Local Variables: */
 /* compile-command: "cd ..; make compile-theta_vectors" */

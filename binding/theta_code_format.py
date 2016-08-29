@@ -459,8 +459,8 @@ def _vec_j_normalize_code(vec_len, is_sparse_mat):
         return '''
       int wo_sign_indices_array[8][16] = {0};
       int w_sign_indices[16] = {0};
-      set_w_sign_indices_rk16(w_sign_indices, reprs_k[k]);
-      set_wo_sign_indices_array(wo_sign_indices_array, reprs_k[k]);
+      set_w_sign_indices(w_sign_indices, reprs_k[k], 16, 9);
+      set_wo_sign_indices_array(wo_sign_indices_array, reprs_k[k], 16, 9);
       int num_of_vecs_j = 0;
 
       int * cached_vec_b = cached_vectors_rk16_ptr[b];
@@ -497,8 +497,8 @@ def _vec_i_normalize_code(vec_len, is_sparse_mat):
         return '''
           int wo_sign_indices_array[8][16] = {0};
           int w_sign_indices[16] = {0};
-          set_wo_sign_indices_array2(wo_sign_indices_array, reprs_j[j], reprs_k[k]);
-          set_w_sign_indices_rk16_2(w_sign_indices, reprs_j[j], reprs_k[k]);
+          set_wo_sign_indices_array2(wo_sign_indices_array, reprs_j[j], reprs_k[k], 16, 9);
+          set_w_sign_indices_2(w_sign_indices, reprs_j[j], reprs_k[k], 16, 9);
 
           int num_of_vecs_i = 0;
           int * cached_vec_a = cached_vectors_rk16_ptr[a];
