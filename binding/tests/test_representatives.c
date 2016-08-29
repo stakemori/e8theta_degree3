@@ -38,7 +38,7 @@ int test_norm_vec_rk16(void)
     {
       memcpy(vec1, cached_vec, sizeof(int) * 16);
       memcpy(vec2, vec1, sizeof(int) * 16);
-      normalize_vec_rk16_last9(vec1);
+      normalize_vec_last_len_elts(vec1, 16, 9);
       memcpy(vec3, vec1, sizeof(int) * 16);
       memcpy(vec4, vec2, sizeof(int) * 16);
 
@@ -204,7 +204,7 @@ int test_normalize_vec_rk16_w_indices(void)
     {
       memcpy(vec, cached_vec, 16 * sizeof(Rk16VecInt));
       memcpy(vec1, vec, 16 * sizeof(Rk16VecInt));
-      normalize_vec_rk16_w_indices(vec, zero_idcs, non_zero_idcss);
+      normalize_vec_w_indices(vec, zero_idcs, non_zero_idcss);
       /* printf("raw:\n"); */
       /* print_vec(vec1, 16); */
       /* print_vec(vec, 16); */
@@ -244,7 +244,7 @@ void test_normalize_vec_rk16_w_indices_1(void)
   int idx_array[16] = {0};
   set_w_sign_indices_rk16(idx_array, vec);
   set_wo_sign_indices_array(wo_sign_indices_array, vec);
-  normalize_vec_rk16_w_indices(vec1, idx_array, wo_sign_indices_array);
+  normalize_vec_w_indices(vec1, idx_array, wo_sign_indices_array);
   print_vec(vec1, 16);
   for (int j = 0; wo_sign_indices_array[j][0]; j++)
     {
@@ -365,25 +365,25 @@ void test_set_idices_2(void)
 
 int main()
 {
-  /* printf("test_norm_vec_rk16\n"); */
-  /* if (test_norm_vec_rk16()) */
-  /*   { */
-  /*     printf("OK\n"); */
-  /*   } */
-  /* printf("test_repr_rk16\n"); */
-  /* if (test_repr_rk16()) */
-  /*   { */
-  /*     printf("OK\n"); */
-  /*   } */
-  /* printf("test_normalize_vec_rk16_w_indices\n"); */
-  /* if (test_normalize_vec_rk16_w_indices()) */
-  /*   { */
-  /*     printf("Ok\n"); */
-  /*   } */
+  printf("test_norm_vec_rk16\n");
+  if (test_norm_vec_rk16())
+    {
+      printf("OK\n");
+    }
+  printf("test_repr_rk16\n");
+  if (test_repr_rk16())
+    {
+      printf("OK\n");
+    }
+  printf("test_normalize_vec_rk16_w_indices\n");
+  if (test_normalize_vec_rk16_w_indices())
+    {
+      printf("Ok\n");
+    }
 
   /* test_repr_rk16_w_idices(1, 1, 2, 0, 0, 0); */
   /* test_repr_rk16_w_idices(3, 3, 3, -2, 2, 2); */
-  test_repr_rk16_w_idices(1, 4, 4, 0, 0, 0);
+  /* test_repr_rk16_w_idices(1, 4, 4, 0, 0, 0); */
   /* test_repr_rk16_w_idices(2, 2, 4, 0, 0, 0); */
   /* test_repr_rk16_w_idices(1, 3, 3, -2, 2, 2); */
   /* test_repr_rk16_w_idices(1, 1, 2, 0, 0, 0); */

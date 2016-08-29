@@ -26,7 +26,4 @@ void set_w_sign_indices_rk16_2(int indices[16], const Rk16VecInt vec1[16],
 void set_wo_sign_indices_array2(int indices_array[8][16], const Rk16VecInt vec1[16],
                                 const Rk16VecInt vec2[16]);
 
-/* Extern followings only for tests */
-void normalize_vec_rk16_last9(Rk16VecInt vec[16]);
-void normalize_vec_rk16_w_indices(Rk16VecInt vec[16], int w_sign_indices[16], int wo_sign_indices_array[8][16]);
 #endif /* _RANK16_VECTORS_H_ */
