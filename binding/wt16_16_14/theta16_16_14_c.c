@@ -204,8 +204,8 @@ char * theta_c_16_16_14_0(int i_red, int a, int b, int c, int d, int e, int f)
 
       int wo_sign_indices_array[8][16] = {0};
       int w_sign_indices[16] = {0};
-      set_w_sign_indices_rk16(w_sign_indices, reprs_k[k]);
-      set_wo_sign_indices_array(wo_sign_indices_array, reprs_k[k]);
+      set_w_sign_indices(w_sign_indices, reprs_k[k], 16, 9);
+      set_wo_sign_indices_array(wo_sign_indices_array, reprs_k[k], 16, 9);
       int num_of_vecs_j = 0;
 
       int * cached_vec_b = cached_vectors_rk16_ptr[b];
@@ -232,8 +232,8 @@ char * theta_c_16_16_14_0(int i_red, int a, int b, int c, int d, int e, int f)
 
           int wo_sign_indices_array[8][16] = {0};
           int w_sign_indices[16] = {0};
-          set_wo_sign_indices_array2(wo_sign_indices_array, reprs_j[j], reprs_k[k]);
-          set_w_sign_indices_rk16_2(w_sign_indices, reprs_j[j], reprs_k[k]);
+          set_wo_sign_indices_array2(wo_sign_indices_array, reprs_j[j], reprs_k[k], 16, 9);
+          set_w_sign_indices_2(w_sign_indices, reprs_j[j], reprs_k[k], 16, 9);
 
           int num_of_vecs_i = 0;
           int * cached_vec_a = cached_vectors_rk16_ptr[a];
@@ -1497,8 +1497,8 @@ char * theta_c_16_16_14_1(int i_red, int a, int b, int c, int d, int e, int f)
 
       int wo_sign_indices_array[8][16] = {0};
       int w_sign_indices[16] = {0};
-      set_w_sign_indices_rk16(w_sign_indices, reprs_k[k]);
-      set_wo_sign_indices_array(wo_sign_indices_array, reprs_k[k]);
+      set_w_sign_indices(w_sign_indices, reprs_k[k], 16, 9);
+      set_wo_sign_indices_array(wo_sign_indices_array, reprs_k[k], 16, 9);
       int num_of_vecs_j = 0;
 
       int * cached_vec_b = cached_vectors_rk16_ptr[b];
@@ -1525,8 +1525,8 @@ char * theta_c_16_16_14_1(int i_red, int a, int b, int c, int d, int e, int f)
 
           int wo_sign_indices_array[8][16] = {0};
           int w_sign_indices[16] = {0};
-          set_wo_sign_indices_array2(wo_sign_indices_array, reprs_j[j], reprs_k[k]);
-          set_w_sign_indices_rk16_2(w_sign_indices, reprs_j[j], reprs_k[k]);
+          set_wo_sign_indices_array2(wo_sign_indices_array, reprs_j[j], reprs_k[k], 16, 9);
+          set_w_sign_indices_2(w_sign_indices, reprs_j[j], reprs_k[k], 16, 9);
 
           int num_of_vecs_i = 0;
           int * cached_vec_a = cached_vectors_rk16_ptr[a];
