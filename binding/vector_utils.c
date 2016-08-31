@@ -124,7 +124,7 @@ void normalize_vec_last_len_elts(int * vec, int vec_len, int len)
     {
       vec1[i] = vec[i + vec_len - len];
     }
-  _normalize_vec_w_sign(vec1, vec_len - len);
+  _normalize_vec_w_sign(vec1, len);
   for (int i = 0; i < len; i++)
     {
       vec[i + vec_len - len] = vec1[i];
