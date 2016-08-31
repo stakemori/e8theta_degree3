@@ -191,7 +191,7 @@ void cache_vectors_rk16(void)
 }
 
 
-inline int vec_equal(const int vec1[16], const int vec2[16])
+static inline int vec_equal(const int vec1[16], const int vec2[16])
 {
   return !(memcmp(vec1, vec2, 16 * sizeof(int)));
 }
