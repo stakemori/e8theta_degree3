@@ -116,8 +116,7 @@ def _rank(funcs):
 
 def compute_rank_in_subprocess(dir_name, mod_name, func_names):
     funcs = ["e8theta_degree3.binding.{dir_name}.{mod_name}.{func}".format(
-        dir_name=dir_name, mod_name=mod_name, func=func)
-        for func in func_names]
+        dir_name=dir_name, mod_name=mod_name, func=func) for func in func_names]
     funcs_str = "[" + ", ".join(funcs) + "]"
     cmd = ("""sage -c 'import sys; sys.path.append("{pkg_dir}");""" +
            "import e8theta_degree3.binding.{dir_name}.{mod_name};" +
