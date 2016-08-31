@@ -335,7 +335,23 @@ def _vec_k_init_code(is_sparse_mat, vec_len):
   vec_k += i_red * 8;
 '''
     elif is_sparse_mat and vec_len == 8:
-        raise NotImplementedError
+        res = '''
+
+  static int reprs_k[MAX_NM_REPRS][8];
+  static unsigned int num_of_classes_k[MAX_NM_REPRS];
+
+  static int reprs_j[MAX_NM_REPRS][8];
+  static unsigned int num_of_classes_j[MAX_NM_REPRS];
+  static int vecs_j[MAX_NM_OF_VECTORS][8];
+  int num_of_vecs_j;
+
+  static int reprs_i[MAX_NM_REPRS][8];
+  static unsigned int num_of_classes_i[MAX_NM_REPRS];
+  static int vecs_i[MAX_NM_OF_VECTORS][8];
+
+  int num_of_reprs_k = repr_modulo_autom(c, reprs_k, num_of_classes_k);
+  int num_of_reprs_j;
+'''
     return res
 
 
@@ -445,6 +461,7 @@ def code_format_header_innerprod(vec_len):
 #include <stdlib.h>
 #include <mpir.h>
 #include "memory.h"
+#include "vector_utils.h"
 
 {inner_prod}
 '''.format(header_file="e8vectors" if vec_len == 8 else "rank16_vectors",
@@ -454,7 +471,25 @@ def code_format_header_innerprod(vec_len):
 
 def _vec_j_normalize_code(vec_len, is_sparse_mat):
     if vec_len == 8 and is_sparse_mat:
-        raise NotImplementedError
+        return '''
+      int wo_sign_indices_array[8][16] = {0};
+      int w_sign_indices[8] = {0};
+      set_w_sign_indices(w_sign_indices, reprs_k[k], 8, 2);
+      set_wo_sign_indices_array(wo_sign_indices_array, reprs_k[k], 8, 2);
+
+      num_of_vecs_j = 0;
+      int * cached_vec_b = cached_vectors_ptr[b];
+      for (int j = 0; j < num_of_vectors[b]; j++, cached_vec_b += 8)
+        {
+          if (inner_prod(cached_vec_b, reprs_k[k]) == d)
+            {
+              memcpy(vecs_j[num_of_vecs_j++], cached_vec_b, sizeof(int) * 8);
+            }
+        }
+      num_of_reprs_j = repr_modulo_autom_w_indices(vecs_j, num_of_vecs_j, reprs_j,
+                                                   num_of_classes_j,
+                                                   w_sign_indices, wo_sign_indices_array);
+'''
     elif vec_len == 16 and is_sparse_mat:
         return '''
       int wo_sign_indices_array[8][16] = {0};
@@ -492,7 +527,27 @@ def _vec_j_normalize_code(vec_len, is_sparse_mat):
 
 def _vec_i_normalize_code(vec_len, is_sparse_mat):
     if vec_len == 8 and is_sparse_mat:
-        raise NotImplementedError
+        return '''
+          int wo_sign_indices_array[8][16] = {0};
+          int w_sign_indices[8] = {0};
+          set_wo_sign_indices_array2(wo_sign_indices_array, reprs_j[j], reprs_k[k], 8, 2);
+          set_w_sign_indices_2(w_sign_indices, reprs_j[j], reprs_k[k], 8, 2);
+
+          int num_of_vecs_i = 0;
+          int * cached_vec_a = cached_vectors_ptr[a];
+          for (int l = 0; l < num_of_vectors[a]; l++, cached_vec_a += 8)
+            {
+              if ((inner_prod(cached_vec_a, reprs_k[k]) == e) &&
+                  (inner_prod(cached_vec_a, reprs_j[j]) == f))
+                {
+                  memcpy(vecs_i[num_of_vecs_i++], cached_vec_a, sizeof(int) * 8);
+                }
+            }
+          int num_of_reprs_i = repr_modulo_autom_w_indices(vecs_i, num_of_vecs_i, reprs_i,
+                                                           num_of_classes_i,
+                                                           w_sign_indices,
+                                                           wo_sign_indices_array);
+'''
     elif vec_len == 16 and is_sparse_mat:
         return '''
           int wo_sign_indices_array[8][16] = {0};

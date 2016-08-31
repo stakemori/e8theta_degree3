@@ -56,7 +56,8 @@ def gen_wt12():
     wt = (12, 12, 12)
     i = QuadraticField(-1, name="i").gen()
     mat = matrix(3, [1, 0, 0, i, 0, 0, 0, 0, 0, 1, 0, 0, i, 0, 0, 0, 0, 0, 1, 0, 0, i, 0, 0])
-    _gen_base(wt, [mat], [_cython_func_name_default(wt)], [_c_func_name_default(wt)])
+    _gen_base(wt, [mat], [_cython_func_name_default(wt)], [_c_func_name_default(wt)],
+              is_sparse_mat=True)
 
 
 def gen_wt14():
