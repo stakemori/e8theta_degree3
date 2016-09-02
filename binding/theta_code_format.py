@@ -472,7 +472,7 @@ def code_format_header_innerprod(vec_len):
 def _vec_j_normalize_code(vec_len, is_sparse_mat):
     if vec_len == 8 and is_sparse_mat:
         return '''
-      int wo_sign_indices_array[8][16] = {0};
+      int wo_sign_indices_array[8][16] = {{0}};
       int w_sign_indices[8] = {0};
       set_w_sign_indices(w_sign_indices, reprs_k[k], 8, 2);
       set_wo_sign_indices_array(wo_sign_indices_array, reprs_k[k], 8, 2);
@@ -492,7 +492,7 @@ def _vec_j_normalize_code(vec_len, is_sparse_mat):
 '''
     elif vec_len == 16 and is_sparse_mat:
         return '''
-      int wo_sign_indices_array[8][16] = {0};
+      int wo_sign_indices_array[8][16] = {{0}};
       int w_sign_indices[16] = {0};
       set_w_sign_indices(w_sign_indices, reprs_k[k], 16, 9);
       set_wo_sign_indices_array(wo_sign_indices_array, reprs_k[k], 16, 9);
@@ -528,7 +528,7 @@ def _vec_j_normalize_code(vec_len, is_sparse_mat):
 def _vec_i_normalize_code(vec_len, is_sparse_mat):
     if vec_len == 8 and is_sparse_mat:
         return '''
-          int wo_sign_indices_array[8][16] = {0};
+          int wo_sign_indices_array[8][16] = {{0}};
           int w_sign_indices[8] = {0};
           set_wo_sign_indices_array2(wo_sign_indices_array, reprs_j[j], reprs_k[k], 8, 2);
           set_w_sign_indices_2(w_sign_indices, reprs_j[j], reprs_k[k], 8, 2);
@@ -550,7 +550,7 @@ def _vec_i_normalize_code(vec_len, is_sparse_mat):
 '''
     elif vec_len == 16 and is_sparse_mat:
         return '''
-          int wo_sign_indices_array[8][16] = {0};
+          int wo_sign_indices_array[8][16] = {{0}};
           int w_sign_indices[16] = {0};
           set_wo_sign_indices_array2(wo_sign_indices_array, reprs_j[j], reprs_k[k], 16, 9);
           set_w_sign_indices_2(w_sign_indices, reprs_j[j], reprs_k[k], 16, 9);
