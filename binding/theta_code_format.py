@@ -853,3 +853,16 @@ char * {func_name}(int i_red, int a, int b, int c, int d, int e, int f)
            k_inc_code=k_inc_code,
            vec_k_inc=str(num_of_procs * vec_len), vec_len=vec_len)
     return code
+
+
+def _used_vars(vrs, codes):
+    '''
+    Return a sub list of vrs which are used in codes.
+    '''
+    code_str = " ".join(codes)
+    res = []
+    for a in vrs:
+        p = re.compile(r"\b%s\b" % a)
+        if p.search(code_str) is not None:
+            res.append(a)
+    return res
