@@ -1,4 +1,5 @@
 import itertools
+import hashlib
 import os
 import re
 
@@ -11,15 +12,33 @@ from sage.misc.all import cached_function, mul
 from sage.rings.all import QQ, PolynomialRing
 
 
+class CCode(object):
+
+    def __init__(self, code, s_codes=None):
+        self.code = code
+        self.s_codes = s_codes
+
+
+class SepCCode(object):
+
+    def __init__(self, func_name, code, args):
+        self.func_name = func_name
+        self.code = code
+        self.args = args
+
+
 def save_code_to_file(directory, fname_base, func_names, wt, mats, real_parts=None,
-                      overwrite=False, sty=None, num_of_procs=None, is_sparse_mat=False):
+                      overwrite=False, sty=None, num_of_procs=None, is_sparse_mat=False,
+                      separate_code=False):
     '''
     fname_base: string
     This save code for theta series to fname.h and fname.c
+    If separate_code, return file names for separated code, otherwise return None.
     '''
     hf = header_file_format(fname_base, func_names)
-    cf = code_format(func_names, wt, mats, real_parts=real_parts,
-                     sty=sty, num_of_procs=num_of_procs, is_sparse_mat=is_sparse_mat)
+    code_obj = code_format(func_names, wt, mats, real_parts=real_parts,
+                           sty=sty, num_of_procs=num_of_procs, is_sparse_mat=is_sparse_mat,
+                           separate_code=separate_code)
     fnameh = os.path.join(directory, fname_base + ".h")
     fnamec = os.path.join(directory, fname_base + ".c")
     if (not overwrite) and (os.path.exists(fnameh) or os.path.exists(fnamec)):
@@ -28,7 +47,17 @@ def save_code_to_file(directory, fname_base, func_names, wt, mats, real_parts=No
         fp.write(hf)
 
     with open(fnamec, "w") as fp:
-        fp.write(cf)
+        fp.write(code_obj.code)
+    if separate_code:
+        sep_code_fs = []
+        for s_c in code_obj.s_codes:
+            fname_scode = os.path.join(directory, s_c.func_name + '.c')
+            sep_code_fs.append(fname_scode)
+            with open(fname_scode, 'w') as fp:
+                fp.write(s_c.code)
+        return sep_code_fs
+    else:
+        return
 
 
 def generate_cython_and_build_scripts(directory,
@@ -37,7 +66,7 @@ def generate_cython_and_build_scripts(directory,
                                       func_names,
                                       c_func_names, wt, mats, real_parts=None,
                                       overwrite=False, sty=None, num_of_procs=1,
-                                      is_sparse_mat=False):
+                                      is_sparse_mat=False, separate_code=False):
     '''
     directory(string): must be a subdirectory of binding
     Generate c source, cython source ,build scripts and a makefile in directory.
@@ -57,10 +86,11 @@ def generate_cython_and_build_scripts(directory,
     c_fname = c_fname_base + "_c"
     _cython_code = _cython_format(c_fname, c_func_names, func_names, num_of_procs)
     _setup_py_code = _setup_py_format(cython_fname_base, c_fname)
-    _makefile_code = _makefile_format(c_fname)
-    save_code_to_file(directory, c_fname, c_func_names, wt, mats,
-                      real_parts=real_parts, overwrite=overwrite, sty=sty,
-                      num_of_procs=num_of_procs, is_sparse_mat=is_sparse_mat)
+    sep_code_fs_maybe = save_code_to_file(directory, c_fname, c_func_names, wt, mats,
+                                          real_parts=real_parts, overwrite=overwrite, sty=sty,
+                                          num_of_procs=num_of_procs, is_sparse_mat=is_sparse_mat,
+                                          separate_code=separate_code)
+    _makefile_code = _makefile_format(c_fname, sep_code_fs_maybe)
 
     def _fname(f):
         return os.path.join(directory, f)
@@ -103,7 +133,11 @@ setup(
     return fmt
 
 
-def _makefile_format(c_src_file):
+def _makefile_format(c_src_file, sep_code_fnames):
+    if sep_code_fnames:
+        code = " ".join(os.path.basename(f) for f in sep_code_fnames)
+    else:
+        code = None
     _fmt = '''current_dir = $(shell pwd)
 parent_dir = $(shell dirname "$(current_dir)")
 DEBUGOPT = -Wall -g -Og -std=c11
@@ -114,12 +148,12 @@ SHARED = -shared -fPIC
 CC = gcc
 
 compile-c-lib:
-\t$(CC) {c_src_file}.c -o $(parent_dir)/lib/lib{c_src_file}.so $(PATHOPT) $(OPT) \\
+\t$(CC) {c_src_file}.c {code} -o $(parent_dir)/lib/lib{c_src_file}.so $(PATHOPT) $(OPT) \\
 \t$(LIBOPTBASE) $(SHARED)
 
 compile-cython: compile-c-lib
 \tsage -c 'sh.eval("python setup.py build_ext -i")'
-'''.format(c_src_file=c_src_file)
+'''.format(c_src_file=c_src_file, code=code)
     return _fmt
 
 
@@ -588,21 +622,37 @@ def _vec_i_normalize_code(vec_len, is_sparse_mat):
 
 def code_format(func_names, wt, mats, real_parts=None,
                 factor_pol=False, sty=None,
-                num_of_procs=1, is_sparse_mat=False):
+                num_of_procs=1, is_sparse_mat=False, separate_code=False):
     n = len(mats)
     if real_parts is None:
         real_parts = [True for _ in range(n)]
-    codes = [code_format_theta(func_name, wt, mat,
-                               real_part=real_part,
-                               factor_pol=factor_pol,
-                               sty=sty, num_of_procs=num_of_procs,
-                               is_sparse_mat=is_sparse_mat)
-             for func_name, mat, real_part in zip(func_names, mats, real_parts)]
-    return code_format_header_innerprod(mats[0].ncols()) + "\n" + "\n\n".join(codes)
+    code_objs = [code_format_theta(func_name, wt, mat,
+                                   real_part=real_part,
+                                   factor_pol=factor_pol,
+                                   sty=sty, num_of_procs=num_of_procs,
+                                   is_sparse_mat=is_sparse_mat, separate_code=separate_code)
+                 for func_name, mat, real_part in zip(func_names, mats, real_parts)]
+    header = code_format_header_innerprod(mats[0].ncols()) + "\n"
+    if separate_code:
+        for c in code_objs:
+            for s_c in c.s_codes:
+                header = header + _sep_code_signature(s_c) + "\n"
 
+    code = (header + "\n" + "\n\n".join((c.code for c in code_objs)))
+    if separate_code:
+        return CCode(code, sum([c.s_codes for c in code_objs], []))
+    else:
+        return CCode(code, None)
+
+
+def _sep_code_signature(s_code):
+    code = "void {func_name}({args_code});".format(
+        func_name=s_code.func_name,
+        args_code=", ".join(("mpz_t " + a for a in s_code.args)))
+    return code
 
 def code_format_theta(func_name, wt, mat, real_part=True, factor_pol=False, sty=None,
-                      num_of_procs=1, is_sparse_mat=False):
+                      num_of_procs=1, is_sparse_mat=False, separate_code=False):
     '''
     wt: non-increasing list/tuple of non-negative integers of length 3.
     mat: 3 * 8 (or 3 * 16) matrix with mat * mat.transpose() = 0 with coefficients in
@@ -612,10 +662,12 @@ def code_format_theta(func_name, wt, mat, real_part=True, factor_pol=False, sty=
     Here for alpha = a + b * omega in K (an imaginary quadratic field with the
     generator omega), the real part and imaginary part of alpha are
     a and b respectively.
-    Return code for computing the theta series of weight wt associated to the
+    Return an instance of CCode for computing the theta series of weight wt associated to the
     theta series and the matrix.
     num_of_procs: a positive integer. If it is greather than one, then it tries to
     compute by using multiple processes.
+    separate_code: bool
+    If true, separate code to sepate the main code to multiple files.
     '''
     tmp_var_name = "a"
     sum_tmp_var_name = "tmp"
@@ -683,6 +735,22 @@ def code_format_theta(func_name, wt, mat, real_part=True, factor_pol=False, sty=
     coefs_pol_code_alst1 = [(pl, codes)
                             for (pl, (codes, _)), v in zip(coefs_pol_code_alst, res_vars)]
 
+    _vrs = (tmp_vars + res_vars +
+            sorted([str(r) for r, _ in bdt_var_dct.values()]) +
+            sorted([str(im) for _, im in bdt_var_dct.values()]) +
+            [str(a) for a in _s_t_u_ring(vec_len=vec_len).gens()])
+
+    if separate_code:
+        separated_codes = []
+        alst = []
+        for pl, codes in coefs_pol_code_alst1:
+            s_cd, s_fname, s_args = _separated_code(func_name, _vrs, codes)
+            alst.append((pl, ["%s(%s)" % (s_fname, ", ".join(s_args))]))
+            separated_codes.append(SepCCode(s_fname, s_cd, s_args))
+        coefs_pol_code_alst1 = alst
+    else:
+        separated_codes = None
+
     # Add code for tmp *= num_of_classes_k[k] and res += + tmp
     for (_, codes), v in zip(coefs_pol_code_alst1, res_vars):
         if is_sparse_mat:
@@ -690,11 +758,6 @@ def code_format_theta(func_name, wt, mat, real_part=True, factor_pol=False, sty=
             codes.append(sty.mul_ui(sum_tmp_var_name, sum_tmp_var_name, "num_of_classes_j[j]"))
             codes.append(sty.mul_ui(sum_tmp_var_name, sum_tmp_var_name, "num_of_classes_k[k]"))
         codes.append(sty.add_z(v, v, sum_tmp_var_name))
-
-    _vrs = (tmp_vars + res_vars +
-            sorted([str(r) for r, _ in bdt_var_dct.values()]) +
-            sorted([str(im) for _, im in bdt_var_dct.values()]) +
-            [str(a) for a in _s_t_u_ring(vec_len=vec_len).gens()])
 
     normalizing_num_var = "normalizig_num"
     _vrs.append(normalizing_num_var)
@@ -852,7 +915,8 @@ char * {func_name}(int i_red, int a, int b, int c, int d, int e, int f)
            set_s_code=_set_s_code(vec_len, sty.set_si_func, ith_vec_dict, num_spaces),
            k_inc_code=k_inc_code,
            vec_k_inc=str(num_of_procs * vec_len), vec_len=vec_len)
-    return code
+
+    return CCode(code, separated_codes)
 
 
 def _used_vars(vrs, codes):
@@ -866,3 +930,28 @@ def _used_vars(vrs, codes):
         if p.search(code_str) is not None:
             res.append(a)
     return res
+
+
+def _separated_code(func_name, vrs, codes):
+    '''
+    Return code, func_name of separated code and args code.
+    '''
+    svrs = _used_vars(vrs, codes)
+    sfunc_name = _separated_code_func_name(func_name, codes)
+    args_code = ", ".join("mpz_t " + str(v) for v in svrs)
+    body = "\n".join(c + ";" for c in codes)
+    code = '''void {func_name}({args_code})
+{{
+{body}
+}}
+'''.format(func_name=sfunc_name, args_code=args_code, body=body)
+    return (code, sfunc_name, svrs)
+
+
+def _separated_code_func_name(func_name, codes):
+    '''
+    Return a unique name associated with func_name and codes.
+    '''
+    m = hashlib.sha256()
+    m.update(func_name + ", ".join(codes))
+    return func_name + m.hexdigest()
