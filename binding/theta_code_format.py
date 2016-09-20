@@ -940,7 +940,9 @@ def _separated_code(func_name, vrs, codes):
     sfunc_name = _separated_code_func_name(func_name, codes)
     args_code = ", ".join("mpz_t " + str(v) for v in svrs)
     body = "\n".join(c + ";" for c in codes)
-    code = '''void {func_name}({args_code})
+    code = '''#include <mpir.h>
+
+void {func_name}({args_code})
 {{
 {body}
 }}
