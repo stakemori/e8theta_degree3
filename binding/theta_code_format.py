@@ -137,7 +137,7 @@ def _makefile_format(c_src_file, sep_code_fnames):
     if sep_code_fnames:
         code = " ".join(os.path.basename(f) for f in sep_code_fnames)
     else:
-        code = None
+        code = ""
     _fmt = '''current_dir = $(shell pwd)
 parent_dir = $(shell dirname "$(current_dir)")
 DEBUGOPT = -Wall -g -Og -std=c11
