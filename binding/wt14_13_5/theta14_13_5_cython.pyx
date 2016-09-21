@@ -8,12 +8,11 @@ from libc.stdlib cimport free
 from e8theta_degree3.gl3_repn import GL3RepnElement
 include "cysignals/signals.pxi"
 
-
 cdef extern from "theta14_13_5_c.h":
     cpdef char * theta_c_14_13_5(int, int, int, int, int, int, int)
 
 
-def theta_part(i_red_m):
+def _theta14_13_5_cython_part(i_red_m):
     i_red, m = i_red_m
 
     if not (m in MatrixSpace(QQ, 3) and (2 * m in MatrixSpace(ZZ, 3)) and
@@ -29,20 +28,27 @@ def theta_part(i_red_m):
     try:
         py_str = c_str
     finally:
-        free(c_str)
+        py_strs = py_str.split(",")
+        # If py_str is empty, asprintf was not called
+        if len(py_strs) > 1:
+            free(c_str)
     sig_off()
-    py_strs = py_str.split(",")
+    assert len(py_strs) > 1, "MAX_NM_REPRS_RK16 is too small."
     res = [Integer(a) for a in py_strs]
-    return vector(res)
+    normalizing_num = ZZ(res[0])
+    return vector(res[1:]) / normalizing_num
 
 
 @cached_function
-def theta(m):
+def theta14_13_5_cython(m):
     p = Pool(processes=8)
     try:
-        res = sum(p.map(theta_part, zip(range(8), itertools.repeat(m, 8))))
+        res = sum(p.map(_theta14_13_5_cython_part, zip(range(8), itertools.repeat(m, 8))))
     except KeyboardInterrupt:
         p.terminate()
+        p.join()
+    finally:
+        p.close()
         p.join()
     return res
 

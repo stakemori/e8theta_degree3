@@ -11,6 +11,6 @@ setup(
                   sources=["theta14_13_5_cython.pyx"],
                   include_dirs=[abspath(curdir), abspath(pardir)],
                   library_dirs=[join(abspath(pardir), "lib")],
-                  libraries=["theta14_13_5_c", "e8vectors"]),
+                  libraries=["theta14_13_5_c", "e8vectors", "rank16_vectors"]),
     ),
 )
