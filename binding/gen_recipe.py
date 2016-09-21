@@ -101,15 +101,15 @@ def gen_wt16_16_14():
               is_sparse_mat=True, num_of_procs=8)
 
 
-# def gen_wt18_13_5():
-#     '''
-#     Recipe for weight (18, 13, 5).
-#     '''
-#     wt = (18, 13, 5)
-#     i = QuadraticField(-1, name="i").gen()
-#     mat = matrix(3, [1, 0, 0, i, 0, 0, 0, 0, 0, 1, 0, 0, i, 0, 0, 0, 0, 0, 1, 0, 0, i, 0, 0])
-#     _gen_base(wt, [mat], [_cython_func_name_default(wt)], [_c_func_name_default(wt)],
-#               is_sparse_mat=True, separate_code=True)
+def gen_wt18_13_5():
+    '''
+    Recipe for weight (18, 13, 5).
+    '''
+    wt = (18, 13, 5)
+    i = QuadraticField(-1, name="i").gen()
+    mat = matrix(3, [1, 0, 0, i, 0, 0, 0, 0, 0, 1, 0, 0, i, 0, 0, 0, 0, 0, 1, 0, 0, i, 0, 0])
+    _gen_base(wt, [mat], [_cython_func_name_default(wt)], [_c_func_name_default(wt)],
+              is_sparse_mat=True, separate_code=True)
 
 
 T0 = matrix([[ZZ(1), ZZ(1) / ZZ(2), ZZ(1) / ZZ(2)],
@@ -141,7 +141,8 @@ def compute_rank_in_subprocess(dir_name, mod_name, func_names):
 
 
 def _find_mat_wt(wt, mats_base, mats_total, dim,
-                 cython_func_names=None, c_func_names=None, is_sparse_mat=False):
+                 cython_func_names=None, c_func_names=None,
+                 is_sparse_mat=False, separate_code=False):
     ln = len(mats_total)
     if cython_func_names is None:
         cython_func_names = [_cython_func_name_default(wt) + "_" + str(i)
@@ -154,7 +155,7 @@ def _find_mat_wt(wt, mats_base, mats_total, dim,
         print(mat.list())
         wt_str = "_".join([str(a) for a in wt])
         _gen_base(wt, mats_base + [mat], cython_func_names, c_func_names,
-                  is_sparse_mat=is_sparse_mat)
+                  is_sparse_mat=is_sparse_mat, separate_code=separate_code)
         po = subprocess.Popen("make compile-cython", shell=True, cwd=_recipe_dir(wt))
         po.wait()
         print("Building done.")
