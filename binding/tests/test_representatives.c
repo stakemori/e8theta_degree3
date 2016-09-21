@@ -440,6 +440,12 @@ void test_set_idices_2(void)
 void test_repr_e8_w_indices(int a, int b, int c, int d, int e, int f)
 {
   cache_vectors();
+  mpz_t res;
+  mpz_t one;
+  mpz_init(res);
+  mpz_init(one);
+  mpz_set_si(one, 1);
+
   static int reprs_k[MAX_NM_REPRS][8];
   static unsigned int num_of_classes_k[MAX_NM_REPRS];
 
@@ -453,27 +459,20 @@ void test_repr_e8_w_indices(int a, int b, int c, int d, int e, int f)
   static int vecs_i[MAX_NM_OF_VECTORS][8];
 
   int num_of_reprs_k = repr_modulo_autom(c, reprs_k, num_of_classes_k);
-
-  mpz_t res;
-  mpz_t one;
-  mpz_init(res);
-  mpz_init(one);
-  mpz_set_si(one, 1);
-  printf("%d\n", num_of_reprs_k);
   int num_of_reprs_j;
-  for (int k = 0; k < num_of_reprs_k; k++)
+
+  int i_red = 0;
+  for (int k = i_red; k < num_of_reprs_k; k += 8)
     {
-      int wo_sign_indices_array[8][16] = {0};
+
+      int wo_sign_indices_array[8][16] = {{0}};
       int w_sign_indices[8] = {0};
-      printf("k: %d\n", k);
-      print_vec(reprs_k[k], 8);
       set_w_sign_indices(w_sign_indices, reprs_k[k], 8, 2);
       set_wo_sign_indices_array(wo_sign_indices_array, reprs_k[k], 8, 2);
-      print_vec(w_sign_indices, 8);
 
       num_of_vecs_j = 0;
       int * cached_vec_b = cached_vectors_ptr[b];
-      for (int l = 0; l < num_of_vectors[b]; l++, cached_vec_b += 8)
+      for (int j = 0; j < num_of_vectors[b]; j++, cached_vec_b += 8)
         {
           if (inner_prod(cached_vec_b, reprs_k[k]) == d)
             {
@@ -483,20 +482,21 @@ void test_repr_e8_w_indices(int a, int b, int c, int d, int e, int f)
       num_of_reprs_j = repr_modulo_autom_w_indices(vecs_j, num_of_vecs_j, reprs_j,
                                                    num_of_classes_j,
                                                    w_sign_indices, wo_sign_indices_array);
-      printf("%d\n", num_of_reprs_j);
+
       for (int j = 0; j < num_of_reprs_j; j++)
         {
-          int wo_sign_indices_array[8][16] = {0};
+
+          int wo_sign_indices_array[8][16] = {{0}};
           int w_sign_indices[8] = {0};
           set_wo_sign_indices_array2(wo_sign_indices_array, reprs_j[j], reprs_k[k], 8, 2);
           set_w_sign_indices_2(w_sign_indices, reprs_j[j], reprs_k[k], 8, 2);
 
           int num_of_vecs_i = 0;
           int * cached_vec_a = cached_vectors_ptr[a];
-          for (int l = 0; l < num_of_vectors_rk16[a]; l++, cached_vec_a += 8)
+          for (int l = 0; l < num_of_vectors[a]; l++, cached_vec_a += 8)
             {
-              if ((inner_prod_rk16(cached_vec_a, reprs_k[k]) == e) &&
-                  (inner_prod_rk16(cached_vec_a, reprs_j[j]) == f))
+              if ((inner_prod(cached_vec_a, reprs_k[k]) == e) &&
+                  (inner_prod(cached_vec_a, reprs_j[j]) == f))
                 {
                   memcpy(vecs_i[num_of_vecs_i++], cached_vec_a, sizeof(int) * 8);
                 }
@@ -505,12 +505,16 @@ void test_repr_e8_w_indices(int a, int b, int c, int d, int e, int f)
                                                            num_of_classes_i,
                                                            w_sign_indices,
                                                            wo_sign_indices_array);
+
+
           for (int i = 0; i < num_of_reprs_i; i++)
             {
               mpz_add(res, res, one);
             }
         }
     }
+  printf("res: %s\n", mpz_get_str(NULL, 10, res));
+  mpz_clear(res);
 }
 
 int main()
