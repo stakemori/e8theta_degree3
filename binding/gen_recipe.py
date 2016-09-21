@@ -101,6 +101,22 @@ def gen_wt16_16_14():
               is_sparse_mat=True, num_of_procs=8)
 
 
+def gen_wt16_13_7():
+    '''
+    Recipe for weight (16, 13, 7).
+    '''
+    wt = (16, 13, 7)
+    i = QuadraticField(-1, name="i").gen()
+    mat0 = matrix(3, [-3, -i, 2, 4*i, -2, 0, 0, 0, 2, 4*i, -2, -4*i, 5, i,
+                      0, 0, 5, -3*i, 6, -2*i, 1, 7*i, 0, 0])
+    mat1 = matrix(3, [1, 3*i, -2, 0, -2, 0, 0, 0, -7, -5*i, 4, 2*i, 0,
+                      -6*i, 0, 0, 5, 3*i, -1, -3*i, -1, 3*i, 0, 0])
+    _gen_base(wt, [mat0, mat1],
+              [_cython_func_name_default(wt) + "_" + str(a) for a in range(2)],
+              [_c_func_name_default(wt) + "_" + str(a) for a in range(2)],
+              is_sparse_mat=True, num_of_procs=8, separate_code=True)
+
+
 def gen_wt18_13_5():
     '''
     Recipe for weight (18, 13, 5).
