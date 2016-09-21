@@ -123,9 +123,14 @@ def gen_wt18_13_5():
     '''
     wt = (18, 13, 5)
     i = QuadraticField(-1, name="i").gen()
-    mat = matrix(3, [1, 0, 0, i, 0, 0, 0, 0, 0, 1, 0, 0, i, 0, 0, 0, 0, 0, 1, 0, 0, i, 0, 0])
-    _gen_base(wt, [mat], [_cython_func_name_default(wt)], [_c_func_name_default(wt)],
-              is_sparse_mat=True, separate_code=True)
+    mat0 = matrix(3, [-2, 0, 1, 3*i, -2, 0, 0, 0, -3, -2*i, 0, 2*i, 0, i, 0, 0,
+                      -3, -11*i, 7, -3*i, 11, -7*i, 0, 0])
+    mat1 = matrix(3, [-6, -4*i, 5, 7*i, -2, 0, 0, 0, -3, -2*i, -2, 0, 0,
+                      -3*i, 0, 0, -9, -i, -1, 5*i, 5, -9*i, 0, 0])
+    _gen_base(wt, [mat0, mat1],
+              [_cython_func_name_default(wt) + "_" + str(a) for a in range(2)],
+              [_c_func_name_default(wt) + "_" + str(a) for a in range(2)],
+              is_sparse_mat=True, num_of_procs=8, separate_code=True)
 
 
 T0 = matrix([[ZZ(1), ZZ(1) / ZZ(2), ZZ(1) / ZZ(2)],
@@ -134,7 +139,7 @@ T0 = matrix([[ZZ(1), ZZ(1) / ZZ(2), ZZ(1) / ZZ(2)],
 
 T1 = diagonal_matrix([ZZ(1), ZZ(1), ZZ(1)])
 
-Ts = [T0]
+Ts = [T0, T1]
 
 
 def _rank(funcs):
@@ -171,7 +176,7 @@ def _find_mat_wt(wt, mats_base, mats_total, dim,
         print(mat.list())
         wt_str = "_".join([str(a) for a in wt])
         _gen_base(wt, mats_base + [mat], cython_func_names, c_func_names,
-                  is_sparse_mat=is_sparse_mat, separate_code=separate_code)
+                  is_sparse_mat=is_sparse_mat, separate_code=separate_code, num_of_procs=8)
         po = subprocess.Popen("make compile-cython", shell=True, cwd=_recipe_dir(wt))
         po.wait()
         print("Building done.")
