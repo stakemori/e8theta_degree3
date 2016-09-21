@@ -651,6 +651,7 @@ def _sep_code_signature(s_code):
         args_code=", ".join(("mpz_t " + a for a in s_code.args)))
     return code
 
+
 def code_format_theta(func_name, wt, mat, real_part=True, factor_pol=False, sty=None,
                       num_of_procs=1, is_sparse_mat=False, separate_code=False):
     '''
@@ -744,7 +745,7 @@ def code_format_theta(func_name, wt, mat, real_part=True, factor_pol=False, sty=
         separated_codes = []
         alst = []
         for pl, codes in coefs_pol_code_alst1:
-            s_cd, s_fname, s_args = _separated_code(func_name, _vrs, codes)
+            s_cd, s_fname, s_args = _separated_code(func_name, _vrs, codes, pl)
             alst.append((pl, ["%s(%s)" % (s_fname, ", ".join(s_args))]))
             separated_codes.append(SepCCode(s_fname, s_cd, s_args))
         coefs_pol_code_alst1 = alst
@@ -932,12 +933,12 @@ def _used_vars(vrs, codes):
     return res
 
 
-def _separated_code(func_name, vrs, codes):
+def _separated_code(func_name, vrs, codes, pl):
     '''
     Return code, func_name of separated code and args code.
     '''
     svrs = _used_vars(vrs, codes)
-    sfunc_name = _separated_code_func_name(func_name, codes)
+    sfunc_name = _separated_code_func_name(func_name, pl)
     args_code = ", ".join("mpz_t " + str(v) for v in svrs)
     body = "\n".join(c + ";" for c in codes)
     code = '''#include <mpir.h>
@@ -950,10 +951,10 @@ void {func_name}({args_code})
     return (code, sfunc_name, svrs)
 
 
-def _separated_code_func_name(func_name, codes):
+def _separated_code_func_name(func_name, pl):
     '''
     Return a unique name associated with func_name and codes.
     '''
     m = hashlib.sha256()
-    m.update(func_name + ", ".join(codes))
+    m.update(func_name + str(pl))
     return func_name + m.hexdigest()
