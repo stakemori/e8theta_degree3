@@ -563,6 +563,9 @@ class HeckeModule(object):
     def dimension(self):
         return len(self.basis)
 
+    def repn_dimension(self):
+        return self.basis[0].values()[0].dimension()
+
     @property
     def weight(self):
         return self._wt
@@ -577,9 +580,9 @@ class HeckeModule(object):
             _ts = self._lin_indep_ts
         else:
             _ts = itertools.chain(*[d.keys() for d in self.basis])
-        _ts = sorted(_ts, key=lambda x: (x.T[0, 0] + x.T[1, 1] + x.T[2, 2],
+        _ts = sorted(_ts, key=lambda x: (x.T.det(), x.T[0, 0] + x.T[1, 1] + x.T[2, 2],
                                          x.T[0, 0], x.T[1, 1], x.T[2, 2]))
-        ts = [(t, i) for t in _ts for i in range(self.dimension())]
+        ts = [(t, i) for t in _ts for i in range(self.repn_dimension())]
         vecs = [[d[t][i] for d in self.basis] for t, i in ts]
         return [ts[i] for i in find_linearly_indep_indices(vecs, self.dimension())]
 
