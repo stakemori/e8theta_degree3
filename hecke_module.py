@@ -642,12 +642,12 @@ class HeckeModule(object):
         '''
         Return the representation matrix of T(p).
         '''
-        return self.matrix_representaion(lambda f, t: tp_action_fourier_coeff(ZZ(2), t[0], f)[t[1]])
+        return self.matrix_representaion(lambda f, t: tp_action_fourier_coeff(ZZ(p), t[0], f)[t[1]])
 
     @cached_method
     def hecke_matrix_tp2(self, p, i):
         def _lin_op(f, t):
-            return tp2_action_fourier_coeff(ZZ(2), i, t[0], f)[t[1]]
+            return tp2_action_fourier_coeff(ZZ(p), i, t[0], f)[t[1]]
         return self.matrix_representaion(_lin_op)
 
     def hecke_charpoly_tp(self, p, var="x", algorithm="linbox"):
