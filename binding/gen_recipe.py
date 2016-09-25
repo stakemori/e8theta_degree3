@@ -133,6 +133,36 @@ def gen_wt18_13_5():
               is_sparse_mat=True, num_of_procs=8, separate_code=True)
 
 
+def gen_wt16_12_12():
+    '''
+    Recipe for weight (16, 12, 12)
+    '''
+    wt = (16, 12, 12)
+    i = QuadraticField(-1, name="i").gen()
+    mat0 = matrix(3, [-2, 0, 1, 3*i, -2, 0, 0, 0, 6, 8*i, 2, 0, -5, i,
+                      0, 0, 21, 17*i, 7, -13*i, 2, -6*i, 0, 0])
+    mat1 = matrix(3, [2, 4*i, -3, -i, -2, 0, 0, 0, 3, 4*i, -2, 0,
+                      -2, -i, 0, 0, -7, -11*i, 5, -i, 7, i, 0, 0])
+    _gen_base(wt, [mat0, mat1],
+              [_cython_func_name_default(wt) + "_" + str(a) for a in range(2)],
+              [_c_func_name_default(wt) + "_" + str(a) for a in range(2)],
+              is_sparse_mat=True, num_of_procs=8, separate_code=False)
+
+
+def gen_wt18_17_5():
+    i = QuadraticField(-1, name="i").gen()
+    mat0 = matrix(3, [-5, -3*i, 4, 6*i, -2, 0, 0, 0, 3, 5*i, 2, 0, 4, 2*i,
+                      0, 0, 0, 6*i, 3, 3*i, 6, 0, 0, 0])
+    mat1 = matrix(3, [-7, -5*i, 6, 8*i, -2, 0, 0, 0, -8, -6*i, -3, i, 0, 6*i, 0, 0,
+                      -26, -10*i, -25, i, -13, 37*i, 0, 0])
+    mat2 = matrix(3, [-6, -4*i, 5, 7*i, -2, 0, 0, 0, -11, -9*i, 0, 4*i, 1, 5*i, 0, 0,
+                      -27, -43*i, 20, 4*i, 31, -15*i, 0, 0])
+    wt = (18, 17, 5)
+    _gen_base(wt, [mat0, mat1, mat2],
+              [_cython_func_name_default(wt) + "_" + str(a) for a in range(3)],
+              [_c_func_name_default(wt) + "_" + str(a) for a in range(3)],
+              is_sparse_mat=True, num_of_procs=8, separate_code=True)
+
 T0 = matrix([[ZZ(1), ZZ(1) / ZZ(2), ZZ(1) / ZZ(2)],
              [ZZ(1) / ZZ(2), ZZ(1), ZZ(1) / ZZ(2)],
              [ZZ(1) / ZZ(2), ZZ(1) / ZZ(2), ZZ(1)]])
