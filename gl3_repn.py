@@ -9,6 +9,7 @@ from sage.matrix.all import identity_matrix, matrix
 from sage.misc.all import cached_function, cached_method, flatten, mul
 from sage.modules.all import vector
 from sage.rings.all import QQ, PolynomialRing
+from sage.parallel.all import fork
 
 
 @cached_function
@@ -74,6 +75,9 @@ class BiDeterminant(object):
 
     def as_pol(self):
         return mul(a for a in self.determinants())
+
+    def subs_and_compute_pol(self, d):
+        return mul(a.subs(d) for a in self.determinants())
 
     def __hash__(self):
         return hash(('BiDeterminant', self.as_pol()))
@@ -161,7 +165,7 @@ class GL3RepnModule(object):
         where b1, ..., bm are basis as polynomials.
         '''
         d = matrix_var_right_mul_dict(g.transpose())
-        bs_acted = [a.subs(d) for a in self.basis_as_pol()]
+        bs_acted = [a.subs_and_compute_pol(d) for a in self.basis()]
         m = matrix([[a[t] for t in self.linearly_indep_tpls()] for a in bs_acted])
         return m * self._transform_mat_inv()
 
@@ -173,6 +177,14 @@ class GL3RepnModule(object):
         if len(v) != self.dimension():
             raise ValueError
         return GL3RepnElement(v, self.wt)
+
+
+@fork                           # to reduce memory usage
+def matrix_repn(M, g):
+    d = matrix_var_right_mul_dict(g.transpose())
+    bs_acted = [a.subs_and_compute_pol(d) for a in M.basis()]
+    m = matrix([[a[t] for t in M.linearly_indep_tpls()] for a in bs_acted])
+    return m * M._transform_mat_inv()
 
 
 class GL3RepnElement(ReplSpaceElement):
