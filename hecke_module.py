@@ -10,9 +10,9 @@ from sage.misc.all import cached_function, cached_method
 from sage.modules.all import vector
 from sage.quadratic_forms.all import QuadraticForm, least_quadratic_nonresidue
 from sage.rings.all import QQ, ZZ, CyclotomicField, FiniteField, PolynomialRing
+from degree2.utils import find_linearly_indep_indices
 
 from .reduction import _minkowski_reduction_transform_matrix
-from .utils import find_linearly_indep_indices
 
 
 def _index_of_gamma_0_gl_n(alpha, p):
