@@ -335,7 +335,7 @@ def hecke_poly_degree1(f, p, name=None, dl=0):
     return pl.subs({t: ZZ(p)**dl * t})
 
 
-def rankin_convolution_degree1(f, g, p, name=None, base_ring=QQ):
+def rankin_convolution_degree1(f, g, p, name=None, base_ring=QQ, a=0):
     u'''
     f, g: primitive forms of degree 1 and level 1.
     Return p-euler factor of the Rankin convolution of f and g as
@@ -347,9 +347,13 @@ def rankin_convolution_degree1(f, g, p, name=None, base_ring=QQ):
     bp = g[p]
     t = PolynomialRing(base_ring, 1, names='t' if name is None else name,
                        order="neglex").gens()[0]
-    return (1 - ap * bp * t +
-            (ap**2 * p**(k2 - 1) + bp**2 * p**(k1 - 1) - 2 * p**(k1 + k2 - 2)) * t**2 -
-            ap * bp * p**(k1 + k2 - 2) * t**3 + p**(2 * (k1 + k2 - 2)) * t**4)
+    pl = (1 - ap * bp * t +
+          (ap**2 * p**(k2 - 1) + bp**2 * p**(k1 - 1) - 2 * p**(k1 + k2 - 2)) * t**2 -
+          ap * bp * p**(k1 + k2 - 2) * t**3 + p**(2 * (k1 + k2 - 2)) * t**4)
+    if a == 0:
+        return pl
+    else:
+        return pl.subs({t: p**a * t})
 
 
 def _hecke_eigenvalue_base(fc_func, F, T=None):
