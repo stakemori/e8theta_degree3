@@ -3,9 +3,9 @@
 
 #include <mpir.h>
 
-#define MAX_NORM 6
-#define MAX_NM_OF_VECTORS 60480
-#define MAX_NM_REPRS 60480
+#define MAX_NORM 7
+#define MAX_NM_OF_VECTORS 82560
+#define MAX_NM_REPRS 82560
 
 extern int * cached_vectors_ptr[];
 

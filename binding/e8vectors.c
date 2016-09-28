@@ -54,6 +54,7 @@ static int cached_vectors3[6720][8] = {0};
 static int cached_vectors4[17520][8] = {0};
 static int cached_vectors5[30240][8] = {0};
 static int cached_vectors6[60480][8] = {0};
+static int cached_vectors7[82560][8] = {0};
 
 int * cached_vectors_ptr[] = {cached_vectors0[0],
                               cached_vectors1[0],
@@ -61,7 +62,8 @@ int * cached_vectors_ptr[] = {cached_vectors0[0],
                               cached_vectors3[0],
                               cached_vectors4[0],
                               cached_vectors5[0],
-                              cached_vectors6[0]};
+                              cached_vectors6[0],
+                              cached_vectors7[0]};
 static int cached_idx[MAX_NORM + 1] = {0};
 
 static void _cache_vectors(void)
