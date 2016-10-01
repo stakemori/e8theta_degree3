@@ -544,6 +544,9 @@ def pol_to_mpz_codes_and_result_var(pl, name, res_var_name,
     where codes is a list of strings for computing pl and
     tmp_var_names is a list of used temp variable names.
     '''
+    if isinstance(sty, CCodeStyle):
+        if not all(a.abs() < 2**31 for a in pl.coefficients()):
+            raise NotImplementedError
     if not factor_pol:
         return _pol_to_mpz_codes_and_result_var(pl, name,
                                                 res_var_name, sty=sty, algorithm=algorithm)
