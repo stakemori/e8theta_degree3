@@ -18,3 +18,12 @@ def sort_ts(ts):
         T = t.T
         return (T.det(), T[0, 0], T[1, 1], T[2, 2], T[0, 1], T[0, 2], T[1, 2])
     return list(sorted(ts, key=key))
+
+
+def dict_sum(l, dcts):
+    kys = list(dcts[0].keys())
+    res = {k: 0 for k in kys}
+    for k in kys:
+        for a, d in zip(l, dcts):
+            res[k] += a * d[k]
+    return res
