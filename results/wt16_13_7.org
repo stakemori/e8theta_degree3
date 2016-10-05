@@ -490,7 +490,7 @@
 #+end_example
 
 
-* Basis of cusp forms
+* Basis of the space of cusp forms
 
 #+BEGIN_SRC sage :exports none
   dcts16_13_7 = load(os.path.join(data_dir(), "wt16_13_7_dicts.sobj"))
