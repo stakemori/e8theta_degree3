@@ -16,7 +16,7 @@
 
 * Polynomial representation
 The dimension of the polynomial representation of weight =(18, 13, 5)= is =405=.
-We sort SSYT of weight =(13, 8, 0)= as in [[file:wt18_13_5_SSYT.org][this file]].
+We sort SSYT of weight =(13, 8, 0)= as in [[file:SSYT.org][this file]].
 
 
 * Basis of the space of cusp forms
@@ -64,7 +64,7 @@ Let =Theta0= and =Theta1= are theta series of weight =(18, 13, 5)= associated wi
 #+RESULTS:
 : 2^6 * 3^6 * 5^3
 
-Fourier coefficients of =Theta0/(2^6 * 3^6 * 5^3)= are given in [[file:wt18_13_5_theta0.csv][Theta0]].
+Fourier coefficients of =Theta0/(2^6 * 3^6 * 5^3)= are given in [[file:theta0.csv][Theta0]].
 # (progn (re-search-forward "|") (org-table-export "./theta0.csv" "orgtbl-to-csv"))
 #+BEGIN_SRC sage :results table :exports none
   ts18_13_5 = sort_ts(S18_13_5.basis[0].keys())
@@ -89,7 +89,7 @@ Fourier coefficients of =Theta0/(2^6 * 3^6 * 5^3)= are given in [[file:wt18_13_5
 #+RESULTS:
 : 2^6 * 3^4 * 5^3 * 7
 
-Fourier coefficients of =Theta1/(2^6 * 3^4 * 5^3 * 7)= are given in [[file:wt18_13_5_theta1.csv][Theta1]].
+Fourier coefficients of =Theta1/(2^6 * 3^4 * 5^3 * 7)= are given in [[file:theta1.csv][Theta1]].
 # (progn (re-search-forward "|") (org-table-export "./theta1.csv" "orgtbl-to-csv"))
 #+BEGIN_SRC sage :results table :exports none
   [(half_int_mat_to_list(t), S18_13_5.basis[1][t].vector/(2^6 * 3^4 * 5^3 * 7)) for t in ts18_13_5]
