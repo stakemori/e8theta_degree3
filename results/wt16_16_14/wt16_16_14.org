@@ -109,7 +109,7 @@ Let Theta1 be the theta series associated with the following three vectors:
 : [   3  5*i    0 -2*i   -2    0   -4    0    0    0    0    0    0    0    0    0]
 : [  -5 -3*i   -6  8*i    0  2*i    4    0    0    0    0    0    0    0    0    0]
 
-Then Fourier coefficients of Theta1 are given as follows:
+Then Fourier coefficients of Theta1 are given as in [[file:theta1.csv][Theta1]].
 # (progn (re-search-forward "|") (org-table-export "./theta1.csv" "orgtbl-to-csv"))
 #+BEGIN_SRC sage :results table :exports none
   [(half_int_mat_to_list(t), fc_dct2[t]) for t in Himts]
