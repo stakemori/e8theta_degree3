@@ -1349,7 +1349,7 @@ Then =F0= (resp. =F1=) is a Hecke eigenform whose eigenvalue is equal to =20160=
 #+RESULTS:
 
 The euler factors of the spinor L function at 2 are given as follows respectively.
-#+BEGIN_SRC sage
+#+BEGIN_SRC sage :exports results
   spinor_l_euler_factor(2, f18_13_5_0).factor()
   spinor_l_euler_factor(2, f18_13_5_1).factor()
 #+END_SRC
@@ -1359,4 +1359,3 @@ The euler factors of the spinor L function at 2 are given as follows respectivel
 : (1 + 10944*t - 1419640832*t^2 + 11751030521856*t^3 + 1152921504606846976*t^4) * (1 + 20736*t - 316669952*t^2 + 22265110462464*t^3 + 1152921504606846976*t^4)
 
 =F0= satisfies the condition in Conjecture 7.7 (i) at 2 for f of weight =12=, g of weight =20= h of weight =16=.
-
