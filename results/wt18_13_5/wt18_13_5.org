@@ -65,7 +65,7 @@ Let =Theta0= and =Theta1= are theta series of weight =(18, 13, 5)= associated wi
 : 2^6 * 3^6 * 5^3
 
 Fourier coefficients of =Theta0/(2^6 * 3^6 * 5^3)= are given in [[file:wt18_13_5_theta0.csv][Theta0]].
-# (org-table-export "./theta0.csv" "orgtbl-to-csv")
+# (progn (re-search-forward "|") (org-table-export "./theta0.csv" "orgtbl-to-csv"))
 #+BEGIN_SRC sage :results table :exports none
   ts18_13_5 = sort_ts(S18_13_5.basis[0].keys())
   [(half_int_mat_to_list(t), S18_13_5.basis[0][t].vector/(2^6 * 3^6 * 5^3)) for t in ts18_13_5]
@@ -90,7 +90,7 @@ Fourier coefficients of =Theta0/(2^6 * 3^6 * 5^3)= are given in [[file:wt18_13_5
 : 2^6 * 3^4 * 5^3 * 7
 
 Fourier coefficients of =Theta1/(2^6 * 3^4 * 5^3 * 7)= are given in [[file:wt18_13_5_theta1.csv][Theta1]].
-# (org-table-export "./theta1.csv" "orgtbl-to-csv")
+# (progn (re-search-forward "|") (org-table-export "./theta1.csv" "orgtbl-to-csv"))
 #+BEGIN_SRC sage :results table :exports none
   [(half_int_mat_to_list(t), S18_13_5.basis[1][t].vector/(2^6 * 3^4 * 5^3 * 7)) for t in ts18_13_5]
 #+END_SRC

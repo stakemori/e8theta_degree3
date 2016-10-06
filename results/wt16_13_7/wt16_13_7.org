@@ -51,7 +51,7 @@ following matrices respectively.
 Then =Theta0= and =Theta1= span the space of cusp forms of weight =(16, 13, 7)=.
 
 Fourier coefficients of =Theta0/35562240= are given in [[file:theta0.csv][Theta0]].
-# (org-table-export "./theta0.csv" "orgtbl-to-csv")
+# (progn (re-search-forward "|") (org-table-export "./theta0.csv" "orgtbl-to-csv"))
 #+BEGIN_SRC sage :results table  :exports none
   ts16_13_7 = sort_ts(S16_13_7.basis[0].keys())
   [(half_int_mat_to_list(t), S16_13_7.basis[0][t].vector/35562240) for t in ts16_13_7]
@@ -67,7 +67,7 @@ Fourier coefficients of =Theta0/35562240= are given in [[file:theta0.csv][Theta0
 | [2, 2, 2, 0, 0, 0] | (0, -13009191721369856, 0, 0, 0, 13009191721369856, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 15458323062835072, 0, 0, 0, 1641088148931072, -7932076474906304, -12543095374438272, 0, 0, 0, 12543095374438272, 7932076474906304, -1641088148931072, 0, 0, 0, -15458323062835072, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -13009191721369856, 0, 0, 1641088148931072, 9573164623837376, 4962145724305408, 0, 0, 0, 0, 0, -12941567668839936, -12941567668839936, 0, 0, 0, 0, 0, 4962145724305408, 9573164623837376, 1641088148931072, 0, 0, -13009191721369856, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 12543095374438272, 4611018899531968, -4962145724305408, 0, 0, 0, 0, -4962145724305408, 4611018899531968, 12543095374438272, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 13009191721369856, 0, 0, -15458323062835072, -15458323062835072, 0, 0, 13009191721369856, 0, 0, 0, 0)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
 
 Fourier coefficients of =Theta1/206391214080= are given in [[file:theta0.csv][Theta1]].
-# (org-table-export "./theta1.csv" "orgtbl-to-csv")
+# (progn (re-search-forward "|") (org-table-export "./theta1.csv" "orgtbl-to-csv"))
 #+BEGIN_SRC sage :results table  :exports none
   [(half_int_mat_to_list(t), S16_13_7.basis[1][t].vector/206391214080) for t in ts16_13_7]
 #+END_SRC

@@ -80,7 +80,7 @@ and the triple of vectors of length 16 below:
 : [   4  6*i    0 -2*i   -3   -i   -4    0    0    0    0    0    0    0    0    0]
 
 Then Fourier coefficients of Theta0 is given as in [[file:theta0.csv][Theta0]].
-# (org-table-export "./theta0.csv" "orgtbl-to-csv")
+# (progn (re-search-forward "|") (org-table-export "./theta0.csv" "orgtbl-to-csv"))
 #+BEGIN_SRC sage :results table :exports none
   [(half_int_mat_to_list(t), fc_dct1[t]) for t in Himts]
 #+END_SRC

@@ -77,7 +77,7 @@ associated with the following three matrices respectively. Then =Theta0=,
 : 2^20 * 3^5 * 5 * 7
 
 Fourier coefficients of =Theta0/(2^20 * 3^5 * 5 * 7)= are given as in [[file:theta0.csv][Theta0]].
-# (org-table-export "./theta0.csv" "orgtbl-to-csv")
+# (progn (re-search-forward "|") (org-table-export "./theta0.csv" "orgtbl-to-csv"))
 #+BEGIN_SRC sage :results table :exports none
   ts18_17_5 = sort_ts(S18_17_5.basis[0].keys())
   [(half_int_mat_to_list(t), S18_17_5.basis[0][t].vector/(2^20 * 3^5 * 5 * 7)) for t in ts18_17_5]
@@ -100,7 +100,7 @@ Fourier coefficients of =Theta0/(2^20 * 3^5 * 5 * 7)= are given as in [[file:the
 : 2^5 * 3^4 * 5 * 7^2
 
 Fourier coefficients of =Theta1/(2^5 * 3^4 * 5 * 7^2)= are given as in [[file:theta1.csv][Theta1]].
-# (org-table-export "./theta1.csv" "orgtbl-to-csv")
+# (progn (re-search-forward "|") (org-table-export "./theta1.csv" "orgtbl-to-csv"))
 #+BEGIN_SRC sage :results table :exports none
   [(half_int_mat_to_list(t), S18_17_5.basis[1][t].vector/(2^5 * 3^4 * 5 * 7^2)) for t in ts18_17_5]
 #+END_SRC
@@ -122,7 +122,7 @@ Fourier coefficients of =Theta1/(2^5 * 3^4 * 5 * 7^2)= are given as in [[file:th
 : 2^8 * 3^2 * 5^3
 
 Fourier coefficients of =Theta2/(2^8 * 3^2 * 5^3)= are given as in [[file:theta2.csv][Theta2]].
-# (org-table-export "./theta2.csv" "orgtbl-to-csv")
+# (progn (re-search-forward "|") (org-table-export "./theta2.csv" "orgtbl-to-csv"))
 #+BEGIN_SRC sage :results table :exports none
   [(half_int_mat_to_list(t), S18_17_5.basis[2][t].vector/(2^8 * 3^2 * 5^3)) for t in ts18_17_5]
 #+END_SRC

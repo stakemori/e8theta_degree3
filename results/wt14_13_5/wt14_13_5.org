@@ -39,7 +39,7 @@ corresponds to the following half integral matrix.
 
 
 Fourier coefficients of the (normalized) theta series of weight (14, 13, 5) are given as in [[file:theta0.csv][Theta0]].
-# (org-table-export "./theta0.csv" "orgtbl-to-csv")
+# (progn (re-search-forward "|") (org-table-export "./theta0.csv" "orgtbl-to-csv"))
 #+BEGIN_SRC sage :results table :exports none
   [(half_int_mat_to_list(a), v.vector/76175769600) for a, v in _wt_14_13_5_ls()]
 #+END_SRC
