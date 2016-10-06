@@ -134,4 +134,4 @@ The euler factors of the spinor L function at 2 are given as follows respectivel
 : 1 - 20160*t - 66150400*t^2 + 20695367024640*t^3 - 1725163430794493952*t^4 + 22221481137386406543360*t^5 - 76266218698344770201190400*t^6 - 24956871191993266341966344355840*t^7 + 1329227995784915872903807060280344576*t^8
 : (1 + 10944*t - 1419640832*t^2 + 11751030521856*t^3 + 1152921504606846976*t^4) * (1 + 20736*t - 316669952*t^2 + 22265110462464*t^3 + 1152921504606846976*t^4)
 
-=F0= satisfies the condition in Conjecture 7.7 (i) at 2 for f of weight =12=, g of weight =20= h of weight =16=.
+=F1= satisfies the condition in Conjecture 7.7 (i) at 2 for f of weight =12=, g of weight =20= h of weight =16=.
