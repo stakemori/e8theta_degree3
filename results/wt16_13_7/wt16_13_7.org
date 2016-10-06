@@ -68,7 +68,7 @@ Fourier coefficients of =Theta0/35562240= are given in [[file:theta0.csv][Theta0
 
 Fourier coefficients of =Theta1/206391214080= are given in [[file:theta0.csv][Theta1]].
 # (org-table-export "./theta1.csv" "orgtbl-to-csv")
-#+BEGIN_SRC sage :results table  :exports results
+#+BEGIN_SRC sage :results table  :exports none
   [(half_int_mat_to_list(t), S16_13_7.basis[1][t].vector/206391214080) for t in ts16_13_7]
 #+END_SRC
 
