@@ -67,7 +67,7 @@ SSYTs of weight (2, 2, 0) are sorted as follows.
 [3, 3]
 #+end_example
 
-Let Theta1 be the theta series associated with the non-decomposable even unimodular lattice of rank 16
+Let Theta0 be the theta series associated with the non-decomposable even unimodular lattice of rank 16
 and the triple of vectors of length 16 below:
 
 #+BEGIN_SRC sage :exports results
@@ -79,7 +79,7 @@ and the triple of vectors of length 16 below:
 : [   3  5*i    0 -2*i   -2    0   -4    0    0    0    0    0    0    0    0    0]
 : [   4  6*i    0 -2*i   -3   -i   -4    0    0    0    0    0    0    0    0    0]
 
-Then Fourier coefficients of Theta1 is given as in [[file:theta0.csv][Theta0]].
+Then Fourier coefficients of Theta0 is given as in [[file:theta0.csv][Theta0]].
 # (org-table-export "./theta0.csv" "orgtbl-to-csv")
 #+BEGIN_SRC sage :results table :exports none
   [(half_int_mat_to_list(t), fc_dct1[t]) for t in Himts]
@@ -99,7 +99,7 @@ Then Fourier coefficients of Theta1 is given as in [[file:theta0.csv][Theta0]].
 | [2, 2, 4, 0, 0, 0]  | (-203339340542578649569689600, 0, -114419214155749629571891200, 0, 0, -114419214155749629571891200)                                                                        |
 | [3, 3, 3, -2, 2, 2] | (84161577780365946047692800, -42080788890182973023846400, 84161577780365946047692800, -42080788890182973023846400, 42080788890182973023846400, 84161577780365946047692800) |
 
-Let Theta2 be the theta series associated with the following three vectors:
+Let Theta1 be the theta series associated with the following three vectors:
 #+BEGIN_SRC sage :exports results
   matrix(3, [3, 7*i, -3, i, -4, 0, -4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 5*i, 0, -2*i, -2, 0, -4, 0, 0, 0, 0, 0, 0, 0, 0, 0, -5, -3*i, -6, 8*i, 0, 2*i, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0])
 #+END_SRC
@@ -109,8 +109,9 @@ Let Theta2 be the theta series associated with the following three vectors:
 : [   3  5*i    0 -2*i   -2    0   -4    0    0    0    0    0    0    0    0    0]
 : [  -5 -3*i   -6  8*i    0  2*i    4    0    0    0    0    0    0    0    0    0]
 
-Then Fourier coefficients of Theta2 are given as follows:
-#+BEGIN_SRC sage :results table :exports results
+Then Fourier coefficients of Theta1 are given as follows:
+# (progn (re-search-forward "|") (org-table-export "./theta1.csv" "orgtbl-to-csv"))
+#+BEGIN_SRC sage :results table :exports none
   [(half_int_mat_to_list(t), fc_dct2[t]) for t in Himts]
 #+END_SRC
 
@@ -133,7 +134,7 @@ Then Fourier coefficients of Theta2 are given as follows:
 Let =a= be a root of =x^2 - 8640*x - 454569984= and =f30= a primitive form of weight 30, degree 1 and level 1.
 Then =a= is the Hecke eigenvalue of =f30= with respect to =T(2)=.
 
-And =(-3280338755058*a + 321567813112379328) Theta1 - 1900007009496106555 Theta2= is an eigenform.
+And =(-3280338755058*a + 321567813112379328) Theta0 - 1900007009496106555 Theta1= is an eigenform.
 
 Its 2-Euler factor of the spinor L is given as follows.
 #+BEGIN_SRC sage :exports results
