@@ -1,7 +1,8 @@
 from os.path import dirname, join
 import e8theta_degree3
+from sage.rings.all import QQ
 from sage.misc.all import cached_function
-
+from sage.all import gcd
 
 @cached_function
 def data_dir():
@@ -27,3 +28,11 @@ def dict_sum(l, dcts):
         for a, d in zip(l, dcts):
             res[k] += a * d[k]
     return res
+
+
+def modulo_p(alpha, p, a):
+    return QQ(sum(c * a ** i for i, c in enumerate(alpha.list()))) % p
+
+
+def gcd_of_dict_vals(d):
+    return gcd([gcd(d[k].vector) for k in d])
