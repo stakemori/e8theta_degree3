@@ -1,3 +1,5 @@
+#+PROPERTY: header-args:sage :session result
+
 #+BEGIN_SRC sage :exports none
   from e8theta_degree3.hecke_module import (HalfIntMatElement, HeckeModule,
                                             spinor_l_euler_factor, rankin_convolution_degree1)
