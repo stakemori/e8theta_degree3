@@ -8,7 +8,7 @@ SHARED = -shared -fPIC
 CC = gcc
 
 compile-c-lib:
-	$(CC) theta16_16_14_c.c -o $(parent_dir)/lib/libtheta16_16_14_c.so $(PATHOPT) $(OPT) \
+	$(CC) theta16_16_14_c.c  -o $(parent_dir)/lib/libtheta16_16_14_c.so $(PATHOPT) $(OPT) \
 	$(LIBOPTBASE) $(SHARED)
 
 compile-cython: compile-c-lib

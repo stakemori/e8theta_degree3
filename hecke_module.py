@@ -10,9 +10,9 @@ from sage.misc.all import cached_function, cached_method
 from sage.modules.all import vector
 from sage.quadratic_forms.all import QuadraticForm, least_quadratic_nonresidue
 from sage.rings.all import QQ, ZZ, CyclotomicField, FiniteField, PolynomialRing
+from degree2.utils import find_linearly_indep_indices
 
 from .reduction import _minkowski_reduction_transform_matrix
-from .utils import find_linearly_indep_indices
 
 
 def _index_of_gamma_0_gl_n(alpha, p):
@@ -646,12 +646,12 @@ class HeckeModule(object):
         '''
         Return the representation matrix of T(p).
         '''
-        return self.matrix_representaion(lambda f, t: tp_action_fourier_coeff(ZZ(2), t[0], f)[t[1]])
+        return self.matrix_representaion(lambda f, t: tp_action_fourier_coeff(ZZ(p), t[0], f)[t[1]])
 
     @cached_method
     def hecke_matrix_tp2(self, p, i):
         def _lin_op(f, t):
-            return tp2_action_fourier_coeff(ZZ(2), i, t[0], f)[t[1]]
+            return tp2_action_fourier_coeff(ZZ(p), i, t[0], f)[t[1]]
         return self.matrix_representaion(_lin_op)
 
     def hecke_charpoly_tp(self, p, var="x", algorithm="linbox"):

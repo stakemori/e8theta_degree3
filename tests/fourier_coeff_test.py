@@ -17,7 +17,6 @@ class FourierCoeffTest(unittest.TestCase):
             gens = q.automorphism_group().gens()
             for g in gens:
                 g = matrix(3, g.list())
-                print g
                 self.assertEqual(t.right_action(g), t)
                 self.assertEqual(v.left_action(g.transpose()).vector, v.vector)
 
@@ -25,6 +24,26 @@ class FourierCoeffTest(unittest.TestCase):
         l = load(join(data_dir(), "wt14_13_5.sobj"))
         d = dict([(HalfIntMatElement(t), GL3RepnElement(v, (14, 13, 5))) for t, v in l])
         self.assert_unimodular_invariance(d)
+
+    def test_wt16_16_14(self):
+        ds = load(join(data_dir(), "wt16_16_14.sobj"))
+        for d in ds:
+            self.assert_unimodular_invariance(d)
+
+    def test_wt16_13_7(self):
+        ds = load(join(data_dir(), "wt16_13_7_dicts.sobj"))
+        for d in ds:
+            self.assert_unimodular_invariance(d)
+
+    def test_wt18_13_5(self):
+        ds = load(join(data_dir(), "wt18_13_5_dicts.sobj"))
+        for d in ds:
+            self.assert_unimodular_invariance(d)
+
+    def test_wt18_17_5(self):
+        ds = load(join(data_dir(), "wt18_17_5_dicts.sobj"))
+        for d in ds:
+            self.assert_unimodular_invariance(d)
 
 
 suite = unittest.TestLoader().loadTestsFromTestCase(FourierCoeffTest)

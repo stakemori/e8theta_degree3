@@ -542,14 +542,33 @@ int main()
   /* test_repr_rk16_w_idices(1, 3, 3, -2, 2, 2); */
   /* test_repr_rk16_w_idices(1, 1, 2, 0, 0, 0); */
 
-  /* test_set_idices_2(); */
+  /* /\* test_set_idices_2(); *\/ */
+  /* test_repr_e8_w_indices(1, 1, 1, 1, 1, 1); */
+  /* test_repr_e8_w_indices(1, 1, 1, 0, 0, 0); */
+  /* test_repr_e8_w_indices(1, 1, 3, 1, 1, 1); */
+  /* test_repr_e8_w_indices(1, 1, 2, 0, 0, 0); */
+  /* test_repr_e8_w_indices(2, 2, 2, 2, 2, 2); */
+  /* test_repr_e8_w_indices(2, 2, 2, 0, 0, 0); */
+  /* test_repr_e8_w_indices(1, 3, 3, 2, 0, 0); */
+
+
+  /* test_repr_e8_w_indices(1, 1, 2, 0, 0, 0); */
+  /* test_repr_e8_w_indices(3, 3, 3, -2, 2, 2); */
+  /* test_repr_e8_w_indices(1, 4, 4, 0, 0, 0); */
+  /* test_repr_e8_w_indices(2, 2, 4, 0, 0, 0); */
+  /* test_repr_e8_w_indices(1, 3, 3, -2, 2, 2); */
+  /* test_repr_e8_w_indices(1, 1, 2, 0, 0, 0); */
+
+
+  test_repr_e8_w_indices(1, 1, 2, 0, 0, 1);
+  test_repr_e8_w_indices(3, 3, 3, 3, 3, 3);
   test_repr_e8_w_indices(1, 1, 1, 1, 1, 1);
-  test_repr_e8_w_indices(1, 1, 1, 0, 0, 0);
-  test_repr_e8_w_indices(1, 1, 3, 1, 1, 1);
-  test_repr_e8_w_indices(1, 1, 2, 0, 0, 0);
-  test_repr_e8_w_indices(2, 2, 2, 2, 2, 2);
-  test_repr_e8_w_indices(2, 2, 2, 0, 0, 0);
-  test_repr_e8_w_indices(1, 3, 3, 2, 0, 0);
+  test_repr_e8_w_indices(1, 1, 6, 0, 0, 1);
+  test_repr_e8_w_indices(1, 2, 3, 2, 1, 0);
+  test_repr_e8_w_indices(1, 1, 5, 1, 1, 0);
+  test_repr_e8_w_indices(1, 7, 7, -4, 1, 1);
+  test_repr_e8_w_indices(3, 3, 6, 0, 0, 3);
+  test_repr_e8_w_indices(2, 5, 5, 1, 2, 2);
   /* test_repr_modulo_autom(); */
   return 0;
 }
