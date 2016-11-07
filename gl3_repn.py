@@ -89,6 +89,17 @@ class BiDeterminant(object):
             return False
 
 
+class BiDetAsstoSSYT(BiDeterminant):
+
+    def __init__(self, b, wt):
+        t = _t_lambda(wt)
+        super(BiDetAsstoSSYT, self).__init__(t, b)
+
+    def element_weight(self):
+        d = {i + 1: v for i, v in enumerate(identity_matrix(QQ, 3).columns())}
+        return tuple(sum(d[a] for a in flatten(self.right_tableau.col_numbers)))
+
+
 def _t_lambda(wt):
     return YoungTableu(n=3, row_numbers=[[i + 1 for _ in range(a)]
                                          for i, a in enumerate(wt)])
@@ -119,7 +130,6 @@ class GL3RepnModule(object):
 
     @cached_method
     def basis(self):
-        t = _t_lambda(self.wt)
         d = {i + 1: v for i, v in enumerate(identity_matrix(QQ, 3).columns())}
         ssyt = list(semistandard_young_tableaux(3, self.wt))
         if self.wt[0] != 0:
@@ -127,7 +137,7 @@ class GL3RepnModule(object):
                 sorted(ssyt,
                        key=lambda x: (list(sum(d[a] for a in flatten(x.col_numbers))) +
                                       sum([a[self.wt[-1]:] for a in x.row_numbers], [])))))
-        return [BiDeterminant(t, a) for a in ssyt]
+        return [BiDetAsstoSSYT(a, self.wt) for a in ssyt]
 
     @cached_method
     def linearly_indep_tpls(self):
