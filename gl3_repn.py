@@ -77,7 +77,7 @@ class BiDeterminant(object):
         return mul(a for a in self.determinants())
 
     def subs_and_compute_pol(self, d):
-        return mul(a.subs(d) for a in self.determinants())
+        return mul([a.subs(d) for a in self.determinants()], matrix_var().base_ring()(1))
 
     def __hash__(self):
         return hash(('BiDeterminant', self.as_pol()))
