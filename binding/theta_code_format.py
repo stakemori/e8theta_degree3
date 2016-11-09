@@ -283,7 +283,7 @@ def _bideterminant_prime_factors_dict(mat, wt):
     where a is a prime factor of polynomial basis
     '''
     vec_len = mat.ncols()
-    R = _s_t_u_ring(vec_len=vec_len)
+    R = _s_t_u_ring(vec_len=vec_len, base_ring=mat.base_ring())
     stu_mt = matrix(R, 3, R.gens()).transpose()
     subs_dct = dict(zip(matrix_var().list(), (mat * stu_mt).list()))
     _, l = _pol_basis_factor_dct_and_ls(wt)
