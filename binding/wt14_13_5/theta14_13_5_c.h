@@ -2,7 +2,7 @@
 #define _THETA14_13_5_C_H_
 
 
-char * theta_c_14_13_5(int i_red, int a, int b, int c, int d, int e, int f);
+char * theta_c_14_13_5_0(int i_red, int a, int b, int c, int d, int e, int f);
 
 
 #endif /* _THETA14_13_5_C_H_ */
