@@ -78,9 +78,11 @@ def gen_wt14_13_5():
     '''
     wt = (14, 13, 5)
     i = QuadraticField(-1, name="i").gen()
-    mat = matrix(3, [2, 3 * i, -2, -i, -1, 0, -1, 0, -2, -i, 0,
-                     -i, -1, 0, -1, -2 * i, -1, 0, -1, 0, 0, i, 0, -i])
-    _gen_base(wt, [mat], [_cython_func_name_default(wt)], [_c_func_name_default(wt)])
+    mat = matrix(3, [-7, -5*i, 6, 8*i, -2, 0, 0, 0,
+                     5, 7*i, 4, 2*i, 4, -2*i, 0, 0,
+                     -5, -7*i, -2, 0, -6, 4*i, 0, 0])
+    _gen_base(wt, [mat], [_cython_func_name_default(wt)], [_c_func_name_default(wt)],
+              is_sparse_mat=True, num_of_procs=8)
 
 
 def gen_wt16_16_14():
