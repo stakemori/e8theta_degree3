@@ -2,7 +2,7 @@
 import itertools
 from itertools import groupby
 
-from sage.all import mul
+from sage.all import mul, factor
 from sage.arith.all import kronecker_symbol
 from sage.matrix.all import (block_diagonal_matrix, block_matrix,
                              diagonal_matrix, identity_matrix, matrix)
@@ -326,6 +326,20 @@ def spinor_l_euler_factor(p, F, t=None, T=None):
     c[7] = p**18 * tpp3 ** 3 * c[1]
     c[8] = p**24 * tpp3 ** 4
     return sum((-1)**k * v * t**k for k, v in c.items())
+
+
+def from_spinor_to_standard_l(f, p=2):
+    x = f.parent().gen()
+    a = f[8]
+    e = factor(a)[0][1] // 8
+    f = f.subs({x: x * ZZ(p)**(-e)})
+    b1 = - f[1]
+    b2 = f[2]
+    b3 = -f[3]
+    c1 = b3 / b1 - 1
+    c2 = b2 - (1 + 2 * c1)
+    c3 = b1**2 - (2 + 2 * c1 + 2 * c2)
+    return (1 - c1 * x + c2 * x ** 2 - c3 * x ** 3 + c2 * x ** 4 - c1 * x ** 5 + x ** 6) * (1 - x)
 
 
 def hecke_poly_degree1(f, p, name=None, dl=0):
