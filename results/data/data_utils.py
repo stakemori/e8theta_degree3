@@ -2,7 +2,9 @@ from os.path import dirname, join
 import e8theta_degree3
 from sage.rings.all import QQ
 from sage.misc.all import cached_function
-from sage.all import gcd
+from sage.all import gcd, latex
+from sage.structure.factorization import Factorization
+
 
 @cached_function
 def data_dir():
@@ -36,3 +38,52 @@ def modulo_p(alpha, p, a):
 
 def gcd_of_dict_vals(d):
     return gcd([gcd(d[k].vector) for k in d])
+
+
+def factorization_normalized(pl):
+    '''
+    Assume f[0] == 1
+    '''
+    assert pl[0] == 1
+    return Factorization([(a/a[0], b) for a, b in pl.factor()])
+
+
+def _latex_pol(pl):
+    x = pl.parent().gens()[0]
+
+    def _e(v, k):
+        if k == 0:
+            return ""
+        elif v < 0:
+            return "-"
+        else:
+            return "+"
+
+    def _term(v, k):
+        if k > 0:
+            if v.abs() == 1:
+                coeff = ""
+            else:
+                coeff = latex(v.abs().factor())
+            return "%s %s %s" % (_e(v, k), coeff, latex(x**k))
+        else:
+            return "1"
+
+    return " ".join([_term(v, k) for (k, ), v in sorted(list(pl.dict().items()),
+                                                        key=lambda x: x[0][0])])
+
+
+def _latex_expt(a, b):
+    if b == 1:
+        return r"\left(%s\right)" % a
+    else:
+        return r"\left(%s\right)^{%s}" % (a, b)
+
+
+def factor_latex(pl):
+    '''
+    Assume f[0] == 1
+    '''
+    assert pl[0] == 1
+    l = [(a/a[0], b) for a, b in pl.factor()]
+    return "".join([_latex_expt(_latex_pol(a), b) for a, b in l])
