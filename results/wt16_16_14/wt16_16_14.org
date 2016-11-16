@@ -3,10 +3,12 @@
 
 #+BEGIN_SRC sage :exports none
   from e8theta_degree3.hecke_module import (HalfIntMatElement, spinor_l_euler_factor,
-                                            rankin_convolution_degree1, hecke_poly_degree1)
+                                            rankin_convolution_degree1, hecke_poly_degree1,
+                                            from_spinor_to_standard_l)
   from e8theta_degree3.gl3_repn import gl3_repn_module
   from e8theta_degree3.young_tableau import YoungTableu
-  from e8theta_degree3.results.data.data_utils import data_dir, half_int_mat_to_list, sort_ts
+  from e8theta_degree3.results.data.data_utils import (data_dir, half_int_mat_to_list, sort_ts,
+                                                       factorization_normalized, factor_latex)
 
   @cached_function
   def wt_16_16_14_ls():
@@ -79,6 +81,18 @@ and the triple of vectors of length 16 below:
 : [   3  5*i    0 -2*i   -2    0   -4    0    0    0    0    0    0    0    0    0]
 : [   4  6*i    0 -2*i   -3   -i   -4    0    0    0    0    0    0    0    0    0]
 
+#+BEGIN_SRC sage :exports none
+  print latex(matrix(3, [-5, -i, 5, 9*i, -4, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 5*i, 0, -2*i, -2, 0, -4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 6*i, 0, -2*i, -3, -i, -4, 0, 0, 0, 0, 0, 0, 0, 0, 0]))
+#+END_SRC
+
+#+RESULTS:
+: \left(\begin{array}{rrrrrrrrrrrrrrrr}
+: -5 & -\sqrt{-1} & 5 & 9 \sqrt{-1} & -4 & 0 & 4 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
+: 3 & 5 \sqrt{-1} & 0 & -2 \sqrt{-1} & -2 & 0 & -4 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
+: 4 & 6 \sqrt{-1} & 0 & -2 \sqrt{-1} & -3 & -\sqrt{-1} & -4 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0
+: \end{array}\right)
+
+
 Then Fourier coefficients of Theta0 is given as in [[file:theta0.csv][Theta0]].
 # (progn (re-search-forward "|") (org-table-export "./theta0.csv" "orgtbl-to-csv"))
 #+BEGIN_SRC sage :results table :exports none
@@ -108,6 +122,18 @@ Let Theta1 be the theta series associated with the following three vectors:
 : [   3  7*i   -3    i   -4    0   -4    0    0    0    0    0    0    0    0    0]
 : [   3  5*i    0 -2*i   -2    0   -4    0    0    0    0    0    0    0    0    0]
 : [  -5 -3*i   -6  8*i    0  2*i    4    0    0    0    0    0    0    0    0    0]
+
+#+BEGIN_SRC sage :exports none
+  print latex(matrix(3, [3, 7*i, -3, i, -4, 0, -4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 5*i, 0, -2*i, -2, 0, -4, 0, 0, 0, 0, 0, 0, 0, 0, 0, -5, -3*i, -6, 8*i, 0, 2*i, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0]))
+#+END_SRC
+
+#+RESULTS:
+: \left(\begin{array}{rrrrrrrrrrrrrrrr}
+: 3 & 7 \sqrt{-1} & -3 & \sqrt{-1} & -4 & 0 & -4 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
+: 3 & 5 \sqrt{-1} & 0 & -2 \sqrt{-1} & -2 & 0 & -4 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
+: -5 & -3 \sqrt{-1} & -6 & 8 \sqrt{-1} & 0 & 2 \sqrt{-1} & 4 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0
+: \end{array}\right)
+
 
 Then Fourier coefficients of Theta1 are given as in [[file:theta1.csv][Theta1]].
 # (progn (re-search-forward "|") (org-table-export "./theta1.csv" "orgtbl-to-csv"))
@@ -140,10 +166,46 @@ Its 2-Euler factor of the spinor L is given as follows.
 #+BEGIN_SRC sage :exports results
   K.<a> = NumberField(x^2 - 8640*x - 454569984)
   F = {k: (-3280338755058*a + 321567813112379328) * fc_dct1[k] - 1900007009496106555 * fc_dct2[k] for k in fc_dct1}
-  spinor_l_euler_factor(2, F).factor()
+  spl2_16_16_14 = spinor_l_euler_factor(2, F)
+  spl2_16_16_14.factor()
 #+END_SRC
 
 #+RESULTS:
 : (1 + 393216*t + 549755813888*t^2) * (1 + 786432*t + 2199023255552*t^2) * (1 + (24*a)*t + (17694720*a - 958826283008)*t^2 + (26388279066624*a)*t^3 + 1208925819614629174706176*t^4)
 
 This satisfies conjecture 7.7 (iii) for =a = 12=, =c = 10= and =p = 2=.
+
+#+BEGIN_SRC sage :exports none
+_R.<t> = ZZ[]
+spl2_16_16_14.factor()
+from_spinor_to_standard_l(spl2_16_16_14).factor()
+#+END_SRC
+
+#+RESULTS:
+: (1 + 393216*t + 549755813888*t^2) * (1 + 786432*t + 2199023255552*t^2) * (1 + (24*a)*t + (17694720*a - 958826283008)*t^2 + (26388279066624*a)*t^3 + 1208925819614629174706176*t^4)
+: (1 - t) * (1 + 55/32*t + t^2) * (1 + (-1/32768*a)*t + 1/2*t^2) * (1 + (-1/16384*a)*t + 2*t^2)
+
+#+BEGIN_SRC sage :exports none
+  print factor_latex((1 + 393216*t + 549755813888*t^2) * (1 + 786432*t + 2199023255552*t^2))
+  print factor(1208925819614629174706176)
+#+END_SRC
+
+#+RESULTS:
+: \left(1 + 2^{17} \cdot 3 t + 2^{39} t^{2}\right)\left(1 + 2^{18} \cdot 3 t + 2^{41} t^{2}\right)
+: 2^80
+
+#+BEGIN_SRC sage :exports none
+  print factor_latex((1 - t) * (1 + 55/32*t + t^2) )
+#+END_SRC
+
+#+RESULTS:
+: \left(1 -  t\right)\left(1 + 2^{-5} \cdot 5 \cdot 11 t +  t^{2}\right)
+
+#+BEGIN_SRC sage :exports none
+  f30 = CuspForms(1, 30).newforms("a")[0]
+  f12 = CuspForms(1, 12).basis()[0]
+  rankin_convolution_degree1(f30, f12, 2)
+#+END_SRC
+
+#+RESULTS:
+: 1208925819614629174706176*t^4 + 26388279066624*a0*t^3 + (17694720*a0 - 958826283008)*t^2 + 24*a0*t + 1

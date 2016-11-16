@@ -2,7 +2,7 @@ from os.path import dirname, join
 import e8theta_degree3
 from sage.rings.all import QQ
 from sage.misc.all import cached_function
-from sage.all import gcd, latex
+from sage.all import gcd, latex, ZZ
 from sage.structure.factorization import Factorization
 
 
@@ -69,8 +69,16 @@ def _latex_pol(pl):
         else:
             return "1"
 
-    return " ".join([_term(v, k) for (k, ), v in sorted(list(pl.dict().items()),
-                                                        key=lambda x: x[0][0])])
+    def _key(x):
+        k = x[0]
+        if k in ZZ:
+            return k
+        else:
+            return k[0]
+
+    return " ".join([_term(v, k if k in ZZ else k[0])
+                     for k, v in sorted(list(pl.dict().items()),
+                                        key=_key)])
 
 
 def _latex_expt(a, b):
@@ -87,3 +95,14 @@ def factor_latex(pl):
     assert pl[0] == 1
     l = [(a/a[0], b) for a, b in pl.factor()]
     return "".join([_latex_expt(_latex_pol(a), b) for a, b in l])
+
+
+def _to_allow_break(v):
+    return str(v).replace(",", r", \allowbreak")
+
+
+def _print_dmath(alst, name):
+    for a, b in alst:
+        print r"\begin{dmath*}"
+        print "  b(%s, %s) = %s," % (a, name, _to_allow_break(b))
+        print r"\end{dmath*}"
