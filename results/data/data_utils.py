@@ -54,20 +54,23 @@ def _latex_pol(pl):
     def _e(v, k):
         if k == 0:
             return ""
-        elif v < 0:
+        elif v in ZZ and v < 0:
             return "-"
         else:
             return "+"
 
     def _term(v, k):
         if k > 0:
-            if v.abs() == 1:
-                coeff = ""
+            if v in QQ:
+                if v.abs() == 1:
+                    coeff = ""
+                else:
+                    coeff = latex(v.abs().factor())
             else:
-                coeff = latex(v.abs().factor())
+                coeff = _latex_pol(v)
             return "%s %s %s" % (_e(v, k), coeff, latex(x**k))
         else:
-            return "1"
+            return latex(v.factor())
 
     def _key(x):
         k = x[0]
