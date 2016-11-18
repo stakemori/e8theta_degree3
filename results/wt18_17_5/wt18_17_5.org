@@ -219,6 +219,15 @@ The euler factor of the spinor L function at =2= is given as follows.
 #+RESULTS:
 : (1 - 131072*t)^2 * (1 + (-a + 262144)*t + (-36352*a + 24053547008)*t^2 + (8824815616*a + 1010090408673280)*t^3 + (-624522604576768*a + 413236791008634601472)*t^4 + (-295147905179352825856*a + 77371252455336267181195264)*t^5 + 5070602400912917605986812821504*t^6)
 
+#+BEGIN_SRC sage :exports none
+  factorization_normalized(from_spinor_to_standard_l(spl2_18_17_5_0))
+  factorization_normalized(from_spinor_to_standard_l(spl2_18_17_5_1))
+#+END_SRC
+
+#+RESULTS:
+: (1 - t) * (1 + 295/512*t + t^2) * (1 - 1539/2048*t - 1471/8192*t^2 - 1539/2048*t^3 + t^4)
+: (1 - t) * (1 + (-1/131072*a + 2)*t + (-71/33554432*a + 91757/65536)*t^2 + (263/67108864*a + 58795/131072)*t^3 + (-71/33554432*a + 91757/65536)*t^4 + (-1/131072*a + 2)*t^5 + t^6)
+
 
 #+BEGIN_SRC sage :exports none
   print factor_latex(spl2_18_17_5_0)
