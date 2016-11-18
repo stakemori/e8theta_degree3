@@ -45,7 +45,7 @@ def factorization_normalized(pl):
     Assume f[0] == 1
     '''
     assert pl[0] == 1
-    return Factorization([(a/a[0], b) for a, b in pl.factor()])
+    return Factorization([(a / a[0], b) for a, b in pl.factor()])
 
 
 def _latex_pol(pl):
@@ -54,20 +54,17 @@ def _latex_pol(pl):
     def _e(v, k):
         if k == 0:
             return ""
-        elif v in ZZ and v < 0:
+        elif v < 0:
             return "-"
         else:
             return "+"
 
     def _term(v, k):
         if k > 0:
-            if v in QQ:
-                if v.abs() == 1:
-                    coeff = ""
-                else:
-                    coeff = latex(v.abs().factor())
+            if v.abs() == 1:
+                coeff = ""
             else:
-                coeff = _latex_pol(v)
+                coeff = latex(v.abs().factor())
             return "%s %s %s" % (_e(v, k), coeff, latex(x**k))
         else:
             return latex(v.factor())
@@ -96,7 +93,7 @@ def factor_latex(pl):
     Assume f[0] == 1
     '''
     assert pl[0] == 1
-    l = [(a/a[0], b) for a, b in pl.factor()]
+    l = [(a / a[0], b) for a, b in pl.factor()]
     return "".join([_latex_expt(_latex_pol(a), b) for a, b in l])
 
 
