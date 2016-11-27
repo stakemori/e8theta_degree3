@@ -1,8 +1,11 @@
 from os.path import dirname, join
+from itertools import groupby
+
 import e8theta_degree3
-from sage.rings.all import QQ
+from e8theta_degree3.gl3_repn import gl3_repn_module
+from sage.all import ZZ, gcd, latex, block_diagonal_matrix
 from sage.misc.all import cached_function
-from sage.all import gcd, latex, ZZ
+from sage.rings.all import QQ
 from sage.structure.factorization import Factorization
 
 
@@ -106,3 +109,18 @@ def _print_dmath(alst, name):
         print r"\begin{dmath*}"
         print "  b(%s, %s) = %s," % (a, name, _to_allow_break(b))
         print r"\end{dmath*}"
+
+
+def _to_diag_mats(wt, A):
+    min_a = wt[-1]
+    wt = tuple([a - min_a for a in wt])
+    M = gl3_repn_module(wt)
+    l = groupby([b.element_weight() for b in M.basis()])
+    l = [(k, len(list(v))) for k, v in l]
+    res = []
+    idx = 0
+    for _, a in l:
+        res.append(A.submatrix(row=idx, col=idx, ncols=a, nrows=a))
+        idx += a
+    assert block_diagonal_matrix(res) == A
+    return res
