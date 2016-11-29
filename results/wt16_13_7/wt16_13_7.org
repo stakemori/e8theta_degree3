@@ -169,3 +169,9 @@ The euler factors of spinor L function at =2= are given as follows.
 
 * Congruence
 Fourier coefficients and Hecke eigenvalues of =F0= and =15*F1= are congruent modulo =37=.
+#+BEGIN_SRC sage :exports none
+  f16_13_7_0[T0].vector.change_ring(FiniteField(37))
+#+END_SRC
+
+#+RESULTS:
+: (0, 0, 33, 0, 4, 0, 0, 0, 0, 0, 0, 35, 35, 0, 0, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 19, 0, 0, 18, 10, 36, 0, 1, 27, 19, 0, 0, 18, 0, 0, 0, 0, 0, 0, 0, 0, 19, 1, 0, 19, 19, 15, 0, 0, 5, 19, 18, 32, 0, 0, 22, 18, 18, 0, 36, 18, 0, 0, 0, 0, 0, 0, 2, 0, 19, 11, 0, 0, 5, 33, 0, 9, 9, 0, 33, 5, 0, 0, 11, 19, 0, 2, 0, 0, 4, 2, 2, 1, 1, 0, 19, 14, 9, 4, 33, 28, 23, 18, 0, 36, 36, 35, 35, 33, 0, 0, 35, 27, 8, 26, 22, 4, 4, 22, 26, 8, 27, 35, 0, 0, 33, 35, 35, 0, 18, 36, 1, 19, 0, 2, 2, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
