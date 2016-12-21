@@ -203,7 +203,7 @@ int repr_modulo_autom_rk16(int n, int reprs[MAX_NM_REPRS_RK16][16],
    do not change the first 7 entries and -1.
    reprs: an array
    Set reprs the set of representatives cached_vectors_rk16[n]/G.
-   Set num_of_repres so that ith element of num_of_repres is the number of
+   Set num_of_classes so that ith element of num_of_classes is the number of
    vectors in L L equivalent to the ith element of reprs.
    Finally, return the number of representatives.
 */
