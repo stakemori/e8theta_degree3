@@ -9,10 +9,10 @@ from e8theta_degree3.gl3_repn import GL3RepnElement
 include "cysignals/signals.pxi"
 
 cdef extern from "theta14_13_5_c.h":
-    cpdef char * theta_c_14_13_5_0(int, int, int, int, int, int, int)
+    cpdef char * theta_c_14_13_5(int, int, int, int, int, int, int)
 
 
-def _theta14_13_5_cython_0_part(i_red_m):
+def _theta14_13_5_cython_part(i_red_m):
     i_red, m = i_red_m
 
     if not (m in MatrixSpace(QQ, 3) and (2 * m in MatrixSpace(ZZ, 3)) and
@@ -23,7 +23,7 @@ def _theta14_13_5_cython_0_part(i_red_m):
     if max([a, b, c]) > 7:
         raise ValueError("Diagonal elements are too large.")
     sig_on()
-    cdef char* c_str = theta_c_14_13_5_0(i_red, a, b, c, d, e, f)
+    cdef char* c_str = theta_c_14_13_5(i_red, a, b, c, d, e, f)
     cdef bytes py_str
     try:
         py_str = c_str
@@ -40,10 +40,10 @@ def _theta14_13_5_cython_0_part(i_red_m):
 
 
 @cached_function
-def theta14_13_5_cython_0(m):
+def theta14_13_5_cython(m):
     p = Pool(processes=8)
     try:
-        res = sum(p.map(_theta14_13_5_cython_0_part, zip(range(8), itertools.repeat(m, 8))))
+        res = sum(p.map(_theta14_13_5_cython_part, zip(range(8), itertools.repeat(m, 8))))
     except KeyboardInterrupt:
         p.terminate()
         p.join()

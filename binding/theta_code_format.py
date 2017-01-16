@@ -715,7 +715,7 @@ def code_format_theta(func_name, wt, mat, real_part=True, factor_pol=False, sty=
     coefs_pol_code_alst = [(pl, pol_to_mpz_codes_and_result_var(pl, tmp_var_name,
                                                                 sum_tmp_var_name,
                                                                 factor_pol=factor_pol,
-                                                                algorithm="horner",
+                                                                algorithm=None,
                                                                 sty=sty))
                            for pl in coef_pols]
 
