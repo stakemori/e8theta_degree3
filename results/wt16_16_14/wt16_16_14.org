@@ -163,15 +163,20 @@ Then =a= is the Hecke eigenvalue of =f30= with respect to =T(2)=.
 And =(-3280338755058*a + 321567813112379328) Theta0 - 1900007009496106555 Theta1= is an eigenform.
 
 Its 2-Euler factor of the spinor L is given as follows.
+#+BEGIN_SRC sage :exports none
+  K.<omega> = NumberField(x^2 - 8640*x - 454569984)
+  F = {k: (-3280338755058*omega + 321567813112379328) * fc_dct1[k] - 1900007009496106555 * fc_dct2[k] for k in fc_dct1}
+#+END_SRC
+
+#+RESULTS:
+
 #+BEGIN_SRC sage :exports results
-  K.<a> = NumberField(x^2 - 8640*x - 454569984)
-  F = {k: (-3280338755058*a + 321567813112379328) * fc_dct1[k] - 1900007009496106555 * fc_dct2[k] for k in fc_dct1}
   spl2_16_16_14 = spinor_l_euler_factor(2, F)
   spl2_16_16_14.factor()
 #+END_SRC
 
 #+RESULTS:
-: (1 + 393216*t + 549755813888*t^2) * (1 + 786432*t + 2199023255552*t^2) * (1 + (24*a)*t + (17694720*a - 958826283008)*t^2 + (26388279066624*a)*t^3 + 1208925819614629174706176*t^4)
+: (1 + 393216*t + 549755813888*t^2) * (1 + 786432*t + 2199023255552*t^2) * (1 + (24*omega)*t + (17694720*omega - 958826283008)*t^2 + (26388279066624*omega)*t^3 + 1208925819614629174706176*t^4)
 
 This satisfies conjecture 7.7 (iii) for =a = 12=, =c = 10= and =p = 2=.
 
@@ -182,8 +187,8 @@ from_spinor_to_standard_l(spl2_16_16_14).factor()
 #+END_SRC
 
 #+RESULTS:
-: (1 + 393216*t + 549755813888*t^2) * (1 + 786432*t + 2199023255552*t^2) * (1 + (24*a)*t + (17694720*a - 958826283008)*t^2 + (26388279066624*a)*t^3 + 1208925819614629174706176*t^4)
-: (1 - t) * (1 + 55/32*t + t^2) * (1 + (-1/32768*a)*t + 1/2*t^2) * (1 + (-1/16384*a)*t + 2*t^2)
+: (1 + 393216*t + 549755813888*t^2) * (1 + 786432*t + 2199023255552*t^2) * (1 + (24*omega)*t + (17694720*omega - 958826283008)*t^2 + (26388279066624*omega)*t^3 + 1208925819614629174706176*t^4)
+: (1 - t) * (1 + 55/32*t + t^2) * (1 + (-1/32768*omega)*t + 1/2*t^2) * (1 + (-1/16384*omega)*t + 2*t^2)
 
 #+BEGIN_SRC sage :exports none
   print factor_latex((1 + 393216*t + 549755813888*t^2) * (1 + 786432*t + 2199023255552*t^2))
@@ -192,6 +197,20 @@ from_spinor_to_standard_l(spl2_16_16_14).factor()
 
 #+RESULTS:
 : \left(1 + 2^{17} \cdot 3 t + 2^{39} t^{2}\right)\left(1 + 2^{18} \cdot 3 t + 2^{41} t^{2}\right)
+: 2^80
+
+#+BEGIN_SRC sage :exports none
+  _R1.<omega> = ZZ[]
+  print factor(24*omega)
+  print factor(17694720*omega - 958826283008)
+  print factor(26388279066624*omega)
+  print factor(1208925819614629174706176)
+#+END_SRC
+
+#+RESULTS:
+: 3 * 2^3 * omega
+: 2^17 * (135*omega - 7315264)
+: 3 * 2^43 * omega
 : 2^80
 
 #+BEGIN_SRC sage :exports none
