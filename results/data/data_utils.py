@@ -124,3 +124,18 @@ def _to_diag_mats(wt, A):
         idx += a
     assert block_diagonal_matrix(res) == A
     return res
+
+
+def _gcd(iterable):
+    if all(a in QQ for a in iterable):
+        return gcd(list(iterable))
+    else:
+        return gcd([gcd(a.list()) for a in iterable])
+
+
+def vec_dict_gcd(d):
+    '''
+    d: vector valued dict
+    Return gcd of values of entries.
+    '''
+    return gcd([_gcd(v.vector) for _, v in d.items()])
