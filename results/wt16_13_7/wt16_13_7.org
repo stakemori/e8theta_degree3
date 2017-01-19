@@ -180,6 +180,18 @@ The euler factors of spinor L function at =2= are given as follows.
 =F0= is a conjectural lift of Conjecture 7.7 (i) for =f= of weight 12, =g= of weight 20 and =h= of weight 12.
 
 #+BEGIN_SRC sage :exports none
+  f12 = CuspForms(1, 12).basis()[0]
+  f20 = CuspForms(1, 20).basis()[0]
+  rankin_convolution_degree1(f12, f20, 2).factor()
+  rankin_convolution_degree1(f12, f12, 2, a=4).factor()
+#+END_SRC
+
+#+RESULTS:
+: 1 + 10944*t - 1419640832*t^2 + 11751030521856*t^3 + 1152921504606846976*t^4
+: (-1 + 32768*t)^2 * (1 + 56320*t + 1073741824*t^2)
+
+
+#+BEGIN_SRC sage :exports none
   print factor_latex(spl2_16_13_7_0)
   print factor_latex(spl2_16_13_7_1)
 #+END_SRC

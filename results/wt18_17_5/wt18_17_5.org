@@ -221,6 +221,18 @@ The euler factor of the spinor L function at =2= is given as follows.
 : (1 - 131072*t)^2 * (1 + (-a + 262144)*t + (-36352*a + 24053547008)*t^2 + (8824815616*a + 1010090408673280)*t^3 + (-624522604576768*a + 413236791008634601472)*t^4 + (-295147905179352825856*a + 77371252455336267181195264)*t^5 + 5070602400912917605986812821504*t^6)
 
 #+BEGIN_SRC sage :exports none
+  f12 = CuspForms(1, 12).basis()[0]
+  f16 = CuspForms(1, 16).basis()[0]
+  f20 = CuspForms(1, 20).basis()[0]
+  rankin_convolution_degree1(f16, f20, 2).factor()
+  rankin_convolution_degree1(f16, f16, 2, a=2).factor()
+#+END_SRC
+
+#+RESULTS:
+: 1 - 98496*t - 3084910592*t^2 - 1692148395147264*t^3 + 295147905179352825856*t^4
+: (-1 + 131072*t)^2 * (1 + 75520*t + 17179869184*t^2)
+
+#+BEGIN_SRC sage :exports none
   factorization_normalized(from_spinor_to_standard_l(spl2_18_17_5_0))
   factorization_normalized(from_spinor_to_standard_l(spl2_18_17_5_1))
 #+END_SRC
