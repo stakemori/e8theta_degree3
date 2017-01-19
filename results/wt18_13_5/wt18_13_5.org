@@ -144,18 +144,18 @@ The characteristic polynomial of =T(2)= is given as follows.
 #+RESULTS:
 : (x - 20160) * (x + 31680)
 
-Let =F0 = 10149020898562*Theta0 -390753 * Theta1= and =F1 = 30563021287421*Theta0 + 321984*Theta1=.
-Then =F0= (resp. =F1=) is a Hecke eigenform whose eigenvalue is equal to =20160= (resp. =-31680=).
+Let =G2 = 10149020898562*Theta0 -390753 * Theta1= and =F1 = 30563021287421*Theta0 + 321984*Theta1=.
+Then =G2= (resp. =G1=) is a Hecke eigenform whose eigenvalue is equal to =20160= (resp. =-31680=).
 #+BEGIN_SRC sage :exports none
-  f18_13_5_0 = dict_sum((10149020898562, -390753), S18_13_5.basis)
-  f18_13_5_1 = dict_sum((30563021287421, 321984), S18_13_5.basis)
+  f18_13_5_1 = dict_sum((10149020898562, -390753), S18_13_5.basis)
+  f18_13_5_0 = dict_sum((30563021287421, 321984), S18_13_5.basis)
 #+END_SRC
 
 #+RESULTS:
 
 #+BEGIN_SRC sage
-  vec_dict_gcd(f18_13_5_0).factor()
   vec_dict_gcd(f18_13_5_1).factor()
+  vec_dict_gcd(f18_13_5_0).factor()
 #+END_SRC
 
 #+RESULTS:
@@ -164,23 +164,23 @@ Then =F0= (resp. =F1=) is a Hecke eigenform whose eigenvalue is equal to =20160=
 
 The euler factors of the spinor L function at 2 are given as follows respectively.
 #+BEGIN_SRC sage :exports results
-  spl2_18_13_5_0 = spinor_l_euler_factor(2, f18_13_5_0)
   spl2_18_13_5_1 = spinor_l_euler_factor(2, f18_13_5_1)
-  spl2_18_13_5_0.factor()
+  spl2_18_13_5_0 = spinor_l_euler_factor(2, f18_13_5_0)
   spl2_18_13_5_1.factor()
+  spl2_18_13_5_0.factor()
 #+END_SRC
 
 #+RESULTS:
 : 1 - 20160*t - 66150400*t^2 + 20695367024640*t^3 - 1725163430794493952*t^4 + 22221481137386406543360*t^5 - 76266218698344770201190400*t^6 - 24956871191993266341966344355840*t^7 + 1329227995784915872903807060280344576*t^8
 : (1 + 10944*t - 1419640832*t^2 + 11751030521856*t^3 + 1152921504606846976*t^4) * (1 + 20736*t - 316669952*t^2 + 22265110462464*t^3 + 1152921504606846976*t^4)
 
-=F1= satisfies the condition in Conjecture 7.7 (i) at 2 for f of weight =12=, g of weight =20= h of weight =16=.
+=G1= satisfies the condition in Conjecture 7.7 (i) at 2 for f of weight =12=, g of weight =20= h of weight =16=.
 
 #+BEGIN_SRC sage :exports none
   f12 = CuspForms(1, 12).basis()[0]
   f16 = CuspForms(1, 16).basis()[0]
   f20 = CuspForms(1, 20).basis()[0]
-  rankin_convolution_degree1(f12, f20, 2) * rankin_convolution_degree1(f12, f16, 2, a=2) - spl2_18_13_5_1
+  rankin_convolution_degree1(f12, f20, 2) * rankin_convolution_degree1(f12, f16, 2, a=2) - spl2_18_13_5_0
 #+END_SRC
 
 #+RESULTS:
@@ -188,10 +188,10 @@ The euler factors of the spinor L function at 2 are given as follows respectivel
 
 
 #+BEGIN_SRC sage :exports none
-  print factor_latex(spl2_18_13_5_0)
   print factor_latex(spl2_18_13_5_1)
-  print factor_latex(from_spinor_to_standard_l(spl2_18_13_5_0))
+  print factor_latex(spl2_18_13_5_0)
   print factor_latex(from_spinor_to_standard_l(spl2_18_13_5_1))
+  print factor_latex(from_spinor_to_standard_l(spl2_18_13_5_0))
 #+END_SRC
 
 #+RESULTS:
