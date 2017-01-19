@@ -170,6 +170,40 @@ Its 2-Euler factor of the spinor L is given as follows.
 
 #+RESULTS:
 
+#+BEGIN_SRC sage :exports none
+  L_16_16_14_sqrt = QuadraticField(51349, name="alphpa")
+  alpha = L_16_16_14_sqrt.gen()
+  hom_16_16_14 = K.hom([96*alpha + 4320], L_16_16_14_sqrt)
+
+  def _hom_vec(v):
+      return [hom_16_16_14(a) for a in v]
+
+  normalizing_num_K = 2010864448178284916318021222400*omega + 35057135523914764908674699545804800
+#+END_SRC
+
+#+RESULTS:
+
+# (progn (re-search-forward "|") (org-table-export "./eigenform0.csv" "orgtbl-to-csv"))
+#+BEGIN_SRC sage :results table
+  f16_16_14_normzlied_eigen = [(half_int_mat_to_list(t), str(_hom_vec(F[t].vector/normalizing_num_K))) for t in Himts]
+  f16_16_14_normzlied_eigen
+#+END_SRC
+
+#+RESULTS:
+| [1, 1, 1, 1, 1, 1]  | [-189*alphpa + 42828, -63*alphpa + 14276, -189*alphpa + 42828, 63*alphpa - 14276, -63*alphpa + 14276, -189*alphpa + 42828]                                                                                                             |
+| [1, 1, 1, 0, 0, 0]  | [3952*alphpa - 895536, 0, 3952*alphpa - 895536, 0, 0, 3952*alphpa - 895536]                                                                                                                                                            |
+| [1, 1, 2, 0, 0, 0]  | [1055808*alphpa - 239249472, 0, -147168*alphpa + 33348768, 0, 0, -147168*alphpa + 33348768]                                                                                                                                            |
+| [1, 1, 3, 1, 1, 1]  | [43848*alphpa - 9936096, 14616*alphpa - 3312032, 2764872*alphpa - 626528800, -14616*alphpa + 3312032, 1375128*alphpa - 311608384, 2764872*alphpa - 626528800]                                                                          |
+| [1, 1, 4, 0, 0, 0]  | [-23501056*alphpa + 5325412608, 0, -134634112*alphpa + 30508511616, 0, 0, -134634112*alphpa + 30508511616]                                                                                                                             |
+| [1, 2, 2, 0, 0, 0]  | [26919232*alphpa - 6099984576, 0, 26919232*alphpa - 6099984576, 0, 0, -203634688*alphpa + 46144272384]                                                                                                                                 |
+| [2, 2, 2, 2, 2, 2]  | [119592192*alphpa - 27099968256, 39864064*alphpa - 9033322752, 119592192*alphpa - 27099968256, -39864064*alphpa + 9033322752, 39864064*alphpa - 9033322752, 119592192*alphpa - 27099968256]                                            |
+| [1, 3, 3, 2, 0, 0]  | [-8277292800*alphpa + 1875660824832, 636440832*alphpa - 144219311872, -8277292800*alphpa + 1875660824832, 0, 0, -16648731648*alphpa + 3772655420416]                                                                                   |
+| [2, 2, 2, 0, 0, 0]  | [-1996259328*alphpa + 452359110656, 0, -1996259328*alphpa + 452359110656, 0, 0, -1996259328*alphpa + 452359110656]                                                                                                                     |
+| [1, 4, 4, 0, 0, 0]  | [363390648320*alphpa - 82345507061760, 0, 363390648320*alphpa - 82345507061760, 0, 0, 4052112957440*alphpa - 918221710417920]                                                                                                          |
+| [2, 2, 4, 0, 0, 0]  | [-653326221312*alphpa + 148045844054016, 0, -475378827264*alphpa + 107722331799552, 0, 0, -475378827264*alphpa + 107722331799552]                                                                                                      |
+| [3, 3, 3, -2, 2, 2] | [383150166016*alphpa - 86823015026688, -191575083008*alphpa + 43411507513344, 383150166016*alphpa - 86823015026688, -191575083008*alphpa + 43411507513344, 191575083008*alphpa - 43411507513344, 383150166016*alphpa - 86823015026688] |
+
+
 #+BEGIN_SRC sage :exports results
   spl2_16_16_14 = spinor_l_euler_factor(2, F)
   spl2_16_16_14.factor()

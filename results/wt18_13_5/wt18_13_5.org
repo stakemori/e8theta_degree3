@@ -7,7 +7,8 @@
   from e8theta_degree3.gl3_repn import gl3_repn_module
   from e8theta_degree3.results.data.data_utils import (data_dir, half_int_mat_to_list, sort_ts,
                                                        dict_sum, gcd_of_dict_vals,
-                                                       factor_latex, factorization_normalized, _to_diag_mats)
+                                                       factor_latex, factorization_normalized, _to_diag_mats,
+                                                       vec_dict_gcd)
 
   T0 = HalfIntMatElement(matrix([[1, 1 / 2, 1 / 2], [1 / 2, 1, 1 / 2], [1 / 2, 1 / 2, 1]]))
   T1 = HalfIntMatElement(diagonal_matrix([1, 1, 1]))
@@ -26,6 +27,7 @@ We sort SSYT of weight =(13, 8, 0)= as in [[file:SSYT.org][this file]].
 
 #+BEGIN_SRC sage :exports none
   S18_13_5 = HeckeModule(load(os.path.join(data_dir(), "wt18_13_5_dicts.sobj")), lin_indep_ts=[T0])
+  ts18_13_5 = sort_ts(S18_13_5.basis[0].keys())
 #+END_SRC
 
 #+RESULTS:
@@ -94,7 +96,6 @@ Let =Theta0= and =Theta1= are theta series of weight =(18, 13, 5)= associated wi
 Fourier coefficients of =Theta0/(2^6 * 3^6 * 5^3)= are given in [[file:theta0.csv][Theta0]].
 # (progn (re-search-forward "|") (org-table-export "./theta0.csv" "orgtbl-to-csv"))
 #+BEGIN_SRC sage :results table :exports none
-  ts18_13_5 = sort_ts(S18_13_5.basis[0].keys())
   [(half_int_mat_to_list(t), S18_13_5.basis[0][t].vector/(2^6 * 3^6 * 5^3)) for t in ts18_13_5]
 #+END_SRC
 
@@ -151,6 +152,15 @@ Then =F0= (resp. =F1=) is a Hecke eigenform whose eigenvalue is equal to =20160=
 #+END_SRC
 
 #+RESULTS:
+
+#+BEGIN_SRC sage
+  vec_dict_gcd(f18_13_5_0).factor()
+  vec_dict_gcd(f18_13_5_1).factor()
+#+END_SRC
+
+#+RESULTS:
+: 2^6 * 3^7 * 5^3 * 7 * 122443 * 205063 * 1068407
+: 2^6 * 3^7 * 5^3 * 7 * 11 * 122443 * 205063 * 1068407
 
 The euler factors of the spinor L function at 2 are given as follows respectively.
 #+BEGIN_SRC sage :exports results
