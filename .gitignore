@@ -72,10 +72,5 @@ TAGS
 /binding/lib/*.so
 /binding/wt*/theta*cython.c
 /results/wt*.html
-/binding/wt12_12_12/Makefile
-/binding/wt12_12_12/setup.py
-/binding/wt12_12_12/theta12_12_12_c.c
-/binding/wt12_12_12/theta12_12_12_c.h
-/binding/wt12_12_12/theta12_12_12_cython.pyx
 /binding/tests/test*.o
 .vscode
