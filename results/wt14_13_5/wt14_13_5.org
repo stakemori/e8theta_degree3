@@ -83,14 +83,14 @@ Here SSYT of weight (9, 8, 0) are sorted as in [[file:SSYT.org][this file]].
 : \left(1 - 2^{13} t\right)^{2}\left(1 + 2^{8} \cdot 5 \cdot 11 t + 2^{26} t^{2}\right)\left(1 + 2^{6} \cdot 3^{4} t - 2^{17} \cdot 151 t^{2} + 2^{32} \cdot 3^{4} t^{3} + 2^{52} t^{4}\right)
 
 
-#+BEGIN_SRC sage
+#+BEGIN_SRC sage :exports none
   factorization_normalized(from_spinor_to_standard_l(spl2, 2))
 #+END_SRC
 
 #+RESULTS:
 : (1 - t) * (1 + 55/32*t + t^2) * (1 + 81/128*t - 151/512*t^2 + 81/128*t^3 + t^4)
 
-#+BEGIN_SRC sage :rexports none
+#+BEGIN_SRC sage :exports none
   print factor_latex(from_spinor_to_standard_l(spl2, 2))
 #+END_SRC
 

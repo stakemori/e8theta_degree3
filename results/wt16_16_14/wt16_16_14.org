@@ -184,7 +184,7 @@ Its 2-Euler factor of the spinor L is given as follows.
 #+RESULTS:
 
 # (progn (re-search-forward "|") (org-table-export "./eigenform0.csv" "orgtbl-to-csv"))
-#+BEGIN_SRC sage :results table
+#+BEGIN_SRC sage :results table :exports none
   f16_16_14_normzlied_eigen = [(half_int_mat_to_list(t), str(_hom_vec(F[t].vector/normalizing_num_K))) for t in Himts]
   f16_16_14_normzlied_eigen
 #+END_SRC
