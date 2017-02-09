@@ -75,7 +75,7 @@ Here SSYT of weight (9, 8, 0) are sorted as in [[file:SSYT.org][this file]].
 #+RESULTS:
 : (1 - 8192*t)^2 * (1 + 14080*t + 67108864*t^2) * (1 + 5184*t - 19791872*t^2 + 347892350976*t^3 + 4503599627370496*t^4)
 
-#+BEGIN_SRC sage :rexports none
+#+BEGIN_SRC sage :exports none
   print factor_latex(spl2)
 #+END_SRC
 
