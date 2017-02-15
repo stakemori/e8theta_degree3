@@ -221,9 +221,6 @@ Then =G2= is an eigenform whose eigenvalue is equal to =a=.
 : 2^24 * 3^8 * 5^3 * 7^3 * 13 * 19 * 61 * 4723 * 53368181 * 30285838023276412271060640124610423
 : 2^26 * 3^8 * 5^2 * 7^3 * 19 * 61 * 4723 * 53368181 * 30285838023276412271060640124610423
 
-Fourier coefficients of =G1/(2^24 * 3^8 * 5^3 * 7^3 * 13 * 19 * 61 * 4723 * 53368181 * 30285838023276412271060640124610423)= is given in [[file:G1.csv]].
-Fourier coefficients of =G2/(2^26 * 3^8 * 5^2 * 7^3 * 19 * 61 * 4723 * 53368181 * 30285838023276412271060640124610423)= is given in [[file:G2.csv]].
-
 # (progn (re-search-forward "|") (org-table-export "./G1.csv" "orgtbl-to-csv"))
 #+BEGIN_SRC sage :results table :exports none
   [(half_int_mat_to_list(t), f18_17_5_0[t].vector/c18_17_5_0) for t in ts18_17_5]
@@ -263,6 +260,9 @@ The euler factor of the spinor L function at =2= is given as follows.
 
 #+RESULTS:
 : (1 - 131072*t)^2 * (1 + (-a + 262144)*t + (-36352*a + 24053547008)*t^2 + (8824815616*a + 1010090408673280)*t^3 + (-624522604576768*a + 413236791008634601472)*t^4 + (-295147905179352825856*a + 77371252455336267181195264)*t^5 + 5070602400912917605986812821504*t^6)
+
+Fourier coefficients of =G1/(2^24 * 3^8 * 5^3 * 7^3 * 13 * 19 * 61 * 4723 * 53368181 * 30285838023276412271060640124610423)= is given in [[file:G1.csv]].
+Fourier coefficients of =G2/(2^26 * 3^8 * 5^2 * 7^3 * 19 * 61 * 4723 * 53368181 * 30285838023276412271060640124610423)= is given in [[file:G2.csv]].
 
 #+BEGIN_SRC sage :exports none
   f12 = CuspForms(1, 12).basis()[0]
