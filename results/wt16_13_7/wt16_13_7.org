@@ -224,7 +224,7 @@ The euler factors of spinor L function at =2= are given as follows.
 
 
 * Congruence
-Fourier coefficients and Hecke eigenvalues of =G1= and =15*G2= are congruent modulo =37=.
+Fourier coefficients and Hecke eigenvalues of =G1= and =(105/2)*G2= are congruent modulo =37=.
 #+BEGIN_SRC sage :exports none
   f16_13_7_0[T0].vector.change_ring(FiniteField(37))
 #+END_SRC
