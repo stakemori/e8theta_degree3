@@ -363,6 +363,14 @@ Fourier coefficients and Hecke eigenvalues of =G1= and =670 * G2= are congruent 
 #+RESULTS:
 : True
 
+#+BEGIN_SRC sage
+  trans_mats = load(os.path.join(data_dir(), "trans_mats.sobj"))
+  trans_mats[(18, 17, 5)].change_ring(FiniteField(757)).det() != 0
+#+END_SRC
+
+#+RESULTS:
+: True
+
 #+BEGIN_SRC sage :exports none
   f18_17_5_0[T0].vector.change_ring(FiniteField(757))
 #+END_SRC
